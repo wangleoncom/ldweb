@@ -2,10 +2,16 @@
 <html lang="zh-TW" class="">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>鹿🦌的 QA 檔案室</title>
-    <link rel="icon" href="./icon.png" type="image/jpeg">
+    <link rel="icon" href="./icon.jpg" type="image/jpeg">
     
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#fdf2f8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="./icon.jpg">
+
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Rounded+Mplus+1c:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -28,11 +34,16 @@
                     },
                     animation: {
                         'wiggle': 'wiggle 0.2s ease-in-out infinite',
+                        'float': 'float 3s ease-in-out infinite',
                     },
                     keyframes: {
                         wiggle: {
                             '0%, 100%': { transform: 'rotate(-3deg)' },
                             '50%': { transform: 'rotate(3deg)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
                         }
                     }
                 }
@@ -64,13 +75,13 @@
     <nav class="fixed top-0 w-full z-50 glass shadow-sm transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
             <div class="flex items-center cursor-pointer" @click="changeTab('home')">
-                <img src="./icon.png" class="w-8 h-8 rounded-full mr-2 border border-deer-300 object-cover" @click.stop="triggerEasterEgg('icon')">
+                <img src="./icon.jpg" class="w-8 h-8 rounded-full mr-2 border border-deer-300 object-cover" @click.stop="triggerEasterEgg('icon')">
                 <span class="font-bold text-xl text-deer-600 dark:text-deer-300 hidden sm:block">鹿的 QA 檔案室</span>
             </div>
             <div class="flex space-x-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-full">
                 <button @click="changeTab('home')" :class="tabClass('home')">首頁</button>
                 <button @click="changeTab('ai')" :class="tabClass('ai')">AI 麋鹿</button>
-                <button @click="startQuizMode()" :class="tabClass('quiz')">測驗 2.0</button>
+                <button @click="startQuizMode()" :class="tabClass('quiz')">測驗</button>
             </div>
             <button @click="toggleDarkMode" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
                 <span x-text="isDark ? '☀️' : '🌙'"></span>
@@ -81,14 +92,12 @@
     <main class="pt-24 pb-12 px-4 max-w-7xl mx-auto min-h-[80vh]">
         
         <div x-show="currentTab === 'home'" x-transition.opacity>
-            
             <div class="glass rounded-2xl p-6 mb-8 border-l-4 border-deer-400 flex flex-col md:flex-row items-center gap-6 shadow-lg transform transition hover:scale-[1.01]">
-                <img src="./icon.png" alt="鹿" 
+                <img src="./icon.jpg" alt="鹿" 
                      class="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover shadow-md border-4 border-white dark:border-gray-700 cursor-pointer hover:rotate-12 transition-transform"
                      @click="triggerEasterEgg('profile')">
-                
                 <div class="flex-1 text-center md:text-left">
-                    <h2 class="text-2xl font-bold">鹿🦌</h2>
+                    <h2 class="text-2xl font-bold">鹿 (Walking Deer)</h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
                         🎂 10/03 天秤座 | 📏 170cm | ⚖️ 42kg<br>
                         🐈 貓咪：哺嚕 (英短)
@@ -98,6 +107,19 @@
                         <a href="https://www.instagram.com/ld.1003_/" target="_blank" class="px-4 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full text-sm font-medium hover:opacity-80 transition">Instagram</a>
                     </div>
                 </div>
+            </div>
+
+            <div x-show="installPrompt" class="mb-6 mx-auto max-w-lg glass p-4 rounded-xl flex items-center justify-between animate-float border border-deer-200">
+                <div class="flex items-center">
+                    <span class="text-2xl mr-3">📲</span>
+                    <div>
+                        <div class="font-bold text-deer-700 dark:text-deer-300">下載 App 版本</div>
+                        <div class="text-xs text-gray-500">安裝到桌面，離線也能用！</div>
+                    </div>
+                </div>
+                <button @click="installPWA" class="px-4 py-2 bg-deer-500 text-white rounded-full text-sm font-bold shadow-md hover:bg-deer-600 transition">
+                    安裝
+                </button>
             </div>
 
             <div class="sticky top-20 z-40 mb-8">
@@ -121,7 +143,6 @@
                     <div class="group h-64 perspective-1000 cursor-pointer" @click="toggleCard(item.id)">
                         <div class="relative w-full h-full transform-style-3d transition-transform duration-700 shadow-xl rounded-2xl"
                              :class="{ 'rotate-y-180': flippedCards.includes(item.id) }">
-                            
                             <div class="absolute w-full h-full glass rounded-2xl p-6 flex flex-col justify-between backface-hidden border-t-4 border-deer-300">
                                 <div>
                                     <span class="text-xs font-bold text-deer-500 bg-deer-100 dark:bg-deer-900 px-2 py-1 rounded">Q.<span x-text="item.id"></span></span>
@@ -132,7 +153,6 @@
                                 </div>
                                 <div class="text-right text-sm text-gray-400">點擊看答案 👉</div>
                             </div>
-
                             <div class="absolute w-full h-full glass rounded-2xl p-6 flex flex-col backface-hidden rotate-y-180 bg-white dark:bg-gray-800 border-b-4 border-purple-400 overflow-y-auto">
                                 <p class="text-lg font-medium flex-1" x-text="item.a"></p>
                                 <button @click.stop="shareItem(item)" class="self-end mt-2 flex items-center gap-1 text-xs text-deer-500 hover:text-deer-700 bg-deer-50 px-3 py-1 rounded-full">
@@ -147,29 +167,18 @@
 
             <div class="flex flex-wrap justify-center items-center mt-10 gap-3 pb-8" x-show="totalPages > 1">
                 <button @click="goToPage(1)" :disabled="currentPage === 1" 
-                        class="px-4 py-2 rounded-full glass hover:bg-deer-100 disabled:opacity-30 disabled:cursor-not-allowed transition text-sm">
-                    |◀ 首頁
-                </button>
+                        class="px-4 py-2 rounded-full glass hover:bg-deer-100 disabled:opacity-30 disabled:cursor-not-allowed transition text-sm">|◀ 首頁</button>
                 <button @click="prevPage" :disabled="currentPage === 1" 
-                        class="px-4 py-2 rounded-full glass hover:bg-deer-100 disabled:opacity-30 disabled:cursor-not-allowed transition">
-                    ◀ 上一頁
-                </button>
-                <span class="font-bold text-deer-600 dark:text-deer-300 px-2">
-                    <span x-text="currentPage"></span> / <span x-text="totalPages"></span>
-                </span>
+                        class="px-4 py-2 rounded-full glass hover:bg-deer-100 disabled:opacity-30 disabled:cursor-not-allowed transition">◀ 上一頁</button>
+                <span class="font-bold text-deer-600 dark:text-deer-300 px-2"><span x-text="currentPage"></span> / <span x-text="totalPages"></span></span>
                 <button @click="nextPage" :disabled="currentPage === totalPages" 
-                        class="px-4 py-2 rounded-full glass hover:bg-deer-100 disabled:opacity-30 disabled:cursor-not-allowed transition">
-                    下一頁 ▶
-                </button>
+                        class="px-4 py-2 rounded-full glass hover:bg-deer-100 disabled:opacity-30 disabled:cursor-not-allowed transition">下一頁 ▶</button>
                 <button @click="goToPage(totalPages)" :disabled="currentPage === totalPages" 
-                        class="px-4 py-2 rounded-full glass hover:bg-deer-100 disabled:opacity-30 disabled:cursor-not-allowed transition text-sm">
-                    末頁 ▶|
-                </button>
+                        class="px-4 py-2 rounded-full glass hover:bg-deer-100 disabled:opacity-30 disabled:cursor-not-allowed transition text-sm">末頁 ▶|</button>
             </div>
         </div>
 
         <div x-show="currentTab === 'ai'" x-cloak class="max-w-2xl mx-auto h-[75vh] flex flex-col glass rounded-2xl overflow-hidden shadow-2xl relative">
-            
             <div x-show="aiStatus !== 'online'" class="absolute inset-0 z-20 bg-white/95 dark:bg-gray-900/95 flex flex-col items-center justify-center text-center p-6 transition-opacity duration-500">
                 <div class="relative group cursor-pointer" @click="wakeUpAI">
                     <img src="./AI.png" alt="Sleeping AI" 
@@ -179,15 +188,12 @@
                         點擊叫醒我！
                     </div>
                 </div>
-                
                 <h3 class="text-2xl font-bold mb-2 text-gray-800 dark:text-white">AI 小麋鹿目前...</h3>
                 <p class="text-deer-600 text-lg font-medium mb-4" x-text="aiStatusText"></p>
-                
                 <p class="text-sm text-gray-400" x-show="wakeUpCount > 0">
                     再點 <span class="text-red-500 font-bold text-lg" x-text="5 - wakeUpCount"></span> 下叫他！
                 </p>
             </div>
-
             <div class="bg-deer-100 dark:bg-deer-900 p-4 flex items-center border-b border-deer-200 dark:border-deer-800">
                 <img src="./AI.png" alt="AI" class="w-10 h-10 rounded-full object-cover mr-3 bg-white p-1 shadow-sm">
                 <div>
@@ -199,7 +205,6 @@
                     </div>
                 </div>
             </div>
-            
             <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-white/30 dark:bg-black/20" id="chatContainer">
                 <template x-for="msg in chatHistory" :key="msg.id">
                     <div class="flex w-full msg-pop" :class="msg.isUser ? 'justify-end' : 'justify-start'">
@@ -218,7 +223,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
                 <form @submit.prevent="sendMessage" class="flex gap-2">
                     <input type="text" x-model="chatInput" :disabled="aiStatus !== 'online'" 
@@ -243,17 +247,14 @@
                     挑戰開始
                 </button>
             </div>
-
             <div x-show="quizStarted && !quizEnded">
                 <div class="flex justify-between items-center mb-6">
                     <span class="font-bold text-deer-500">Question <span x-text="currentQuizIndex + 1"></span>/5</span>
                     <span class="text-sm bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-full">分數: <span x-text="quizScore"></span></span>
                 </div>
-                
                 <div class="glass rounded-2xl p-8 mb-6 border-2 border-deer-200 dark:border-gray-700 min-h-[150px] flex items-center justify-center">
                     <h3 class="text-2xl font-bold text-center leading-relaxed" x-text="currentQuestion?.q || '讀取中...'"></h3>
                 </div>
-
                 <div class="grid grid-cols-1 gap-4">
                     <template x-for="(opt, idx) in currentOptions" :key="idx">
                         <button @click="checkAnswer(opt)" 
@@ -271,18 +272,15 @@
                     <span x-text="currentQuizIndex < 4 ? '下一題 ➜' : '看結果 🏆'"></span>
                 </button>
             </div>
-
             <div x-show="quizEnded" class="text-center py-10 glass rounded-3xl p-10 shadow-2xl relative overflow-hidden">
                 <div x-show="quizScore === 5" class="mb-4 relative z-10">
                     <img src="./金牌.png" alt="金牌" class="w-48 h-48 mx-auto object-contain animate-bounce medal-glow">
                     <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-yellow-400 opacity-20 blur-3xl rounded-full -z-10 animate-pulse"></div>
                     <div class="text-2xl font-bold text-yellow-600 mt-6">恭喜獲得「金牌麋鹿勳章」</div>
                 </div>
-
                 <div x-show="quizScore < 5" class="text-6xl mb-4">
                     <span x-text="quizScore >= 3 ? '🥈' : '🤡'"></span>
                 </div>
-                
                 <h2 class="text-4xl font-black text-gray-800 dark:text-white mb-2">
                     得分：<span x-text="quizScore * 20"></span> 分
                 </h2>
@@ -293,9 +291,34 @@
             </div>
         </div>
 
+        <div x-show="showVersionModal" x-transition class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4" x-cloak>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative border-4 border-deer-200">
+                <div class="absolute -top-10 -right-10 text-6xl animate-bounce hidden md:block">🎉</div>
+                <h2 class="text-2xl font-bold mb-4 text-deer-600 dark:text-deer-300">
+                    ✨ 檔案室升級啦！ (v<span x-text="appVersion"></span>)
+                </h2>
+                <ul class="space-y-2 text-gray-600 dark:text-gray-300 mb-6 text-sm">
+                    <template x-for="update in updateLogs" :key="update">
+                        <li class="flex items-start">
+                            <span class="mr-2 text-deer-500">➤</span>
+                            <span x-text="update"></span>
+                        </li>
+                    </template>
+                </ul>
+                <button @click="closeVersionModal" class="w-full py-3 bg-deer-500 text-white rounded-full font-bold shadow hover:bg-deer-600 transition">
+                    我知道了！開始探索
+                </button>
+            </div>
+        </div>
+
         <div x-show="showToast" x-transition class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-6 py-3 rounded-full text-sm z-50 shadow-lg">
             <span x-text="toastMessage"></span>
         </div>
+
+        <button x-show="showScrollTop" @click="window.scrollTo({top: 0, behavior: 'smooth'})" 
+                x-transition class="fixed bottom-6 right-6 p-4 bg-deer-500 text-white rounded-full shadow-lg z-40 hover:bg-deer-600 transition-all hover:scale-110">
+            ⬆
+        </button>
 
     </main>
 
@@ -304,6 +327,15 @@
     </footer>
 
     <script>
+        // 註冊 Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW registered!', reg))
+                    .catch(err => console.log('SW registration failed', err));
+            });
+        }
+
         function deerApp() {
             return {
                 allData: window.DEER_QA || [],
@@ -314,6 +346,20 @@
                 showToast: false,
                 toastMessage: '',
                 
+                // PWA & Scroll
+                installPrompt: null,
+                showScrollTop: false,
+
+                // Version Control
+                appVersion: '2.0.0', // 每次更新改這裡
+                showVersionModal: false,
+                updateLogs: [
+                    "新增「App 安裝模式」！可以放在手機桌面囉 📲",
+                    "搜尋演算法升級：打關鍵字更準確 ✅",
+                    "AI 小麋鹿變得更人性化 (會睡覺、會練舞) 🤖",
+                    "新增「回到頂部」按鈕，長文不用滑太久 ⬆️"
+                ],
+
                 currentPage: 1,
                 itemsPerPage: 30,
 
@@ -324,6 +370,38 @@
                 initApp() {
                     if (!this.allData || this.allData.length === 0) console.error("Error: DB not found");
                     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) this.toggleDarkMode();
+                    
+                    // 檢查版本
+                    const savedVersion = localStorage.getItem('deer_app_version');
+                    if (savedVersion !== this.appVersion) {
+                        this.showVersionModal = true;
+                    }
+
+                    // 監聽 PWA 安裝事件
+                    window.addEventListener('beforeinstallprompt', (e) => {
+                        e.preventDefault();
+                        this.installPrompt = e;
+                    });
+
+                    // 監聽滾動
+                    window.addEventListener('scroll', () => {
+                        this.showScrollTop = window.scrollY > 300;
+                    });
+                },
+
+                closeVersionModal() {
+                    this.showVersionModal = false;
+                    localStorage.setItem('deer_app_version', this.appVersion);
+                },
+
+                async installPWA() {
+                    if (this.installPrompt) {
+                        this.installPrompt.prompt();
+                        const { outcome } = await this.installPrompt.userChoice;
+                        if (outcome === 'accepted') {
+                            this.installPrompt = null;
+                        }
+                    }
                 },
 
                 get filteredQuestions() {
@@ -353,19 +431,13 @@
                 changeTab(tab) {
                     this.currentTab = tab;
                     window.scrollTo({top: 0, behavior: 'smooth'});
-                    
                     if(tab === 'ai') {
                         this.wakeUpCount = 0;
                         if (Math.random() > 0.3) { 
                             this.aiStatus = 'offline';
-                            // 這裡新增了直播、睡覺等狀態
                             const statuses = [
-                                '呼呼大睡中... 😴',
-                                '正在直播！快來看 🎥',
-                                '正在打傳說 (璀璨場勿擾) 🎮',
-                                '去吃三色豆花布丁了 🍮',
-                                '被哺嚕踩在鍵盤上 🐈',
-                                '正在練 BLACKPINK 的舞 💃'
+                                '呼呼大睡中... 😴', '正在直播！快來看 🎥', '正在打傳說 (璀璨場勿擾) 🎮',
+                                '去吃三色豆花布丁了 🍮', '被哺嚕踩在鍵盤上 🐈', '正在練 BLACKPINK 的舞 💃'
                             ];
                             this.aiStatusText = statuses[Math.floor(Math.random() * statuses.length)];
                         } else {
@@ -379,7 +451,7 @@
                     this.wakeUpCount++;
                     if (this.wakeUpCount >= 5) {
                         this.aiStatus = 'online';
-                        this.addBotMessage("好啦好啦！被你吵醒了！ 😉說吧想問我什麼問題？");
+                        this.addBotMessage("好啦好啦！被你吵醒了！😠 說吧！");
                         this.wakeUpCount = 0;
                         confetti({ particleCount: 30, spread: 50, origin: { y: 0.5 } });
                     }
@@ -387,7 +459,7 @@
 
                 eggCount: 0,
                 triggerEasterEgg(type) {
-                    if (type === 'icon') this.showNotification("這是秘密通道嗎？");
+                    if (type === 'icon') this.showNotification("🌈 這是秘密通道嗎？");
                     if (type === 'profile') {
                         this.eggCount++;
                         if (this.eggCount === 5) {
@@ -432,7 +504,6 @@
                     }).sort((a, b) => b.score - a.score);
 
                     const bestMatch = candidates[0];
-
                     if (text.includes("你好") || text.includes("嗨")) return "你好呀！我是最聰明的 AI 小麋鹿，有問題都可以問我！";
                     if (text.includes("笨")) return "我才不笨！我可是記得 100 多條鹿的資料呢😤";
                     if (text.includes("彩蛋")) return "彩蛋藏在... 頭像裡？試著點點看？🤫";
@@ -480,22 +551,31 @@
                 prepareQuestion() {
                     this.hasAnswered = false; this.selectedOption = null;
                     const correctParams = this.currentQuestion.a;
-                    const wrongPool = this.allData.filter(i => i.id !== this.currentQuestion.id).map(i => i.a);
+                    // 使用 short 欄位作為選項，若沒有 short 則退回使用 a
+                    const correctOption = this.currentQuestion.short || this.currentQuestion.a;
+                    
+                    const wrongPool = this.allData
+                        .filter(i => i.id !== this.currentQuestion.id)
+                        .map(i => i.short || i.a);
+                    
                     const wrongOptions = wrongPool.sort(() => 0.5 - Math.random()).slice(0, 3);
-                    this.currentOptions = [correctParams, ...wrongOptions].sort(() => 0.5 - Math.random());
+                    this.currentOptions = [correctOption, ...wrongOptions].sort(() => 0.5 - Math.random());
+                    
+                    // 暫存正確答案文字以便比對
+                    this.currentCorrectText = correctOption;
                 },
                 checkAnswer(option) {
                     if (this.hasAnswered) return;
                     this.hasAnswered = true;
                     this.selectedOption = option;
-                    if (option === this.currentQuestion.a) {
+                    if (option === this.currentCorrectText) {
                         this.quizScore++;
                         confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 }, colors: ['#ec4899', '#db2777'] });
                     }
                 },
                 getOptionClass(option) {
                     if (!this.hasAnswered) return "bg-white dark:bg-gray-800 hover:bg-deer-50 border-transparent";
-                    if (option === this.currentQuestion.a) return "bg-green-100 border-green-500 text-green-800"; 
+                    if (option === this.currentCorrectText) return "bg-green-100 border-green-500 text-green-800"; 
                     if (option === this.selectedOption) return "bg-red-100 border-red-500 text-red-800"; 
                     return "bg-gray-100 opacity-50 border-transparent"; 
                 },
