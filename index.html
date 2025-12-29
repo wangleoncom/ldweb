@@ -8,7 +8,7 @@
     
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#fdf2f8">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="./icon.png">
 
@@ -375,11 +375,11 @@
                 flippedCards: [],
                 showToast: false,
                 toastMessage: '',
-                scrollY: 0, // 新增：滾動偵測
+                scrollY: 0, 
                 
                 installPrompt: null,
                 showScrollTop: false,
-                appVersion: '3.1.0', // 更新版本號：iOS 風格大改版
+                appVersion: '3.1.0', 
                 showVersionModal: false,
                 updateLogs: ["UI 全面升級：iOS 風格果凍動畫與毛玻璃特效 🍎", "新增動態搜尋欄：滾動時會自動變形吸附 🔍", "新增滾動視差：個人檔案卡片更有層次感 ✨", "優化觸控回饋：點擊按鈕有物理回彈感 👆"],
 
@@ -405,11 +405,35 @@
                     this.showScrollTop = this.scrollY > 300;
                 },
 
-                // (其餘邏輯保持不變，為了節省空間略過，請直接使用原有邏輯)
                 checkKonamiCode(e) { if (e.key === this.konamiCode[this.konamiIndex]) { this.konamiIndex++; if (this.konamiIndex === this.konamiCode.length) { this.activateGodMode(); this.konamiIndex = 0; } } else { this.konamiIndex = 0; } },
                 activateGodMode() { this.godMode = !this.godMode; this.showNotification(this.godMode ? "🤫 上帝模式已開啟！" : "上帝模式已關閉"); confetti({ particleCount: 200, spread: 180 }); },
                 checkBirthday() { const today = new Date(); const currentYear = today.getFullYear(); let target = new Date(`${currentYear}-10-03`); if (today > target) target = new Date(`${currentYear + 1}-10-03`); const diff = target - today; const days = Math.ceil(diff / (1000 * 60 * 60 * 24)); if (days <= 30 && days >= 0) { this.showBirthdayCountdown = true; this.birthdayDaysLeft = days; } },
-                openShareModal(item) { document.getElementById('shareCardId').innerText = item.id; document.getElementById('shareCardQ').innerText = item.q; document.getElementById('shareCardA').innerText = item.short || item.a; const el = document.getElementById('shareCardTemplate'); html2canvas(el, { backgroundColor: null }).then(canvas => { const container = document.getElementById('shareResultContainer'); container.innerHTML = ''; canvas.style.width = '100%'; canvas.style.height = 'auto'; container.appendChild(canvas); this.showShareModal = true; }); },
+                openShareModal(item) { 
+                    // 先清空，避免重複
+                    const container = document.getElementById('shareResultContainer');
+                    container.innerHTML = '<div class="p-4 text-center text-gray-500">生成中...</div>';
+                    this.showShareModal = true;
+
+                    // 填入資料
+                    document.getElementById('shareCardId').innerText = item.id; 
+                    document.getElementById('shareCardQ').innerText = item.q; 
+                    document.getElementById('shareCardA').innerText = item.short || item.a; 
+                    
+                    const el = document.getElementById('shareCardTemplate'); 
+                    
+                    // 確保圖片載入後再截圖，避免空白
+                    setTimeout(() => {
+                        html2canvas(el, { backgroundColor: null, useCORS: true }).then(canvas => { 
+                            container.innerHTML = ''; 
+                            canvas.style.width = '100%'; 
+                            canvas.style.height = 'auto'; 
+                            container.appendChild(canvas); 
+                        }).catch(err => {
+                            console.error(err);
+                            container.innerHTML = '<div class="p-4 text-center text-red-500">圖片生成失敗，請檢查網路或圖片路徑</div>';
+                        }); 
+                    }, 500); // 延遲 500ms 確保 DOM 渲染完畢
+                },
                 closeVersionModal() { this.showVersionModal = false; localStorage.setItem('deer_app_version', this.appVersion); },
                 async installPWA() { if (this.installPrompt) { this.installPrompt.prompt(); const { outcome } = await this.installPrompt.userChoice; if (outcome === 'accepted') this.installPrompt = null; } },
                 get filteredQuestions() { if (!this.allData) return []; if (this.search.trim() === '') return this.allData; const searchChars = this.search.toLowerCase().split('').filter(c => c.trim() !== ''); return this.allData.map(item => { let score = 0; const fullText = (item.q + item.a).toLowerCase(); searchChars.forEach(char => { if (fullText.includes(char)) score += 10; }); if (item.q.toLowerCase().includes(this.search.toLowerCase())) score += 50; if (this.search === '鹿好美' && item.id === 1) score += 999; if (this.godMode) score *= 2; return { ...item, score }; }).filter(item => item.score > 0).sort((a, b) => b.score - a.score); },
