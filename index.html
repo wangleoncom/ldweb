@@ -12,6 +12,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="./images/basic/icon.png">
 
+    <script>
+        (function() {
+            var nullFunc = function() {};
+            console.log = nullFunc;
+            console.warn = nullFunc;
+            console.error = nullFunc;
+        })();
+    </script>
+
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Rounded+Mplus+1c:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -24,11 +33,9 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    colors: {
-                        deer: { 50: '#fdf2f8', 100: '#fce7f3', 200: '#fbcfe8', 300: '#f9a8d4', 400: '#f472b6', 500: '#ec4899', 600: '#db2777', 800: '#9d174d', 900: '#831843' }
-                    },
+                    colors: { deer: { 50: '#fdf2f8', 100: '#fce7f3', 200: '#fbcfe8', 300: '#f9a8d4', 400: '#f472b6', 500: '#ec4899', 600: '#db2777', 800: '#9d174d', 900: '#831843' } },
                     fontFamily: { sans: ['"Rounded Mplus 1c"', '"Noto Sans TC"', 'sans-serif'] },
-                    animation: { 'pop-in': 'popIn 0.5s cubic-bezier(0.26, 0.53, 0.74, 1.48) forwards', 'float': 'float 3s ease-in-out infinite' },
+                    animation: { 'pop-in': 'popIn 0.5s cubic-bezier(0.26, 0.53, 0.74, 1.48) forwards', 'float': 'float 3s ease-in-out infinite', 'pulse-slow': 'pulse 3s infinite' },
                     keyframes: {
                         popIn: { '0%': { opacity: '0', transform: 'scale(0.9) translateY(20px)' }, '100%': { opacity: '1', transform: 'scale(1) translateY(0)' } },
                         float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-6px)' } }
@@ -58,47 +65,35 @@
         <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse delay-1000 transition-transform duration-[3s]" :style="`transform: translateY(-${scrollY * 0.1}px)`"></div>
     </div>
 
-    <nav class="fixed top-0 w-full z-50 transition-all duration-500 border-b border-transparent"
-         :class="scrollY > 50 ? 'glass shadow-sm border-white/20' : 'bg-transparent'">
+    <nav class="fixed top-0 w-full z-50 transition-all duration-500 border-b border-transparent" :class="scrollY > 50 ? 'glass shadow-sm border-white/20' : 'bg-transparent'">
         <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
-            <div class="flex items-center cursor-pointer ios-active transition-transform origin-left duration-300" 
-                 @click="changeTab('home')" :class="scrollY > 50 ? 'scale-90' : 'scale-100'">
-                <img src="./images/basic/icon.png" class="w-8 h-8 rounded-full mr-2 border border-deer-300 object-cover shadow-sm">
+            <div class="flex items-center cursor-pointer ios-active transition-transform origin-left duration-300 flex-shrink-0" @click="changeTab('home')" :class="scrollY > 50 ? 'scale-90' : 'scale-100'">
+                <img src="./images/basic/icon.png" class="w-8 h-8 rounded-full mr-2 border border-deer-300 object-cover shadow-sm flex-shrink-0">
                 <span class="font-bold text-xl text-deer-600 dark:text-deer-300 hidden sm:block tracking-wide">鹿 QA</span>
             </div>
-            
             <div class="flex space-x-1 bg-gray-100/50 dark:bg-gray-800/50 p-1 rounded-full backdrop-blur-sm border border-white/20 overflow-x-auto no-scrollbar">
                 <button @click="changeTab('home')" :class="tabClass('home')">首頁</button>
                 <button @click="changeTab('ai')" :class="tabClass('ai')">AI</button>
                 <button @click="startQuizMode()" :class="tabClass('quiz')">測驗</button>
                 <button @click="changeTab('idcard')" :class="tabClass('idcard')">身分證</button>
             </div>
-            
-            <button @click="toggleDarkMode" class="p-2 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50 ios-active transition-colors">
-                <span x-text="isDark ? '☀️' : '🌙'"></span>
-            </button>
+            <button @click="toggleDarkMode" class="p-2 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50 ios-active transition-colors flex-shrink-0"><span x-text="isDark ? '☀️' : '🌙'"></span></button>
         </div>
     </nav>
 
     <main class="pt-24 pb-12 px-4 max-w-7xl mx-auto min-h-[80vh]">
         
         <div x-show="installPrompt" class="mb-6 mx-auto max-w-lg glass p-4 rounded-xl flex items-center justify-between animate-float border border-deer-200">
-            <div class="flex items-center">
-                <span class="text-2xl mr-3">📲</span>
-                <div class="text-xs">
-                    <div class="font-bold text-deer-700 dark:text-deer-300">下載 App 版本</div>
-                    <div class="text-gray-500">安裝到桌面，離線也能用！</div>
-                </div>
-            </div>
+            <div class="flex items-center"><span class="text-2xl mr-3">📲</span><div class="text-xs"><div class="font-bold text-deer-700 dark:text-deer-300">下載 App 版本</div><div class="text-gray-500">安裝到桌面，離線也能用！</div></div></div>
             <button @click="installPWA" class="px-4 py-2 bg-deer-500 text-white rounded-full text-sm font-bold shadow-md ios-active">安裝</button>
         </div>
 
         <div x-show="currentTab === 'home'" x-transition.opacity.duration.500ms>
-            <div class="glass rounded-3xl p-6 mb-8 border-l-4 border-deer-400 flex flex-col md:flex-row items-center gap-6 shadow-xl transform transition duration-100 ease-out origin-top"
-                 :style="`opacity: ${Math.max(0, 1 - scrollY / 300)}; transform: scale(${Math.max(0.9, 1 - scrollY / 1000)}) translateY(${scrollY * 0.2}px)`">
-                <img src="./images/basic/icon.png" class="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover shadow-lg border-4 border-white dark:border-gray-700 cursor-pointer hover:rotate-12 transition-transform duration-500 ios-active">
+            <div class="glass rounded-3xl p-6 mb-8 border-l-4 border-deer-400 flex flex-col md:flex-row items-center gap-6 shadow-xl transform transition duration-100 ease-out origin-top" :style="`opacity: ${Math.max(0, 1 - scrollY / 300)}; transform: scale(${Math.max(0.9, 1 - scrollY / 1000)}) translateY(${scrollY * 0.2}px)`">
+                <img src="./images/basic/icon.png" alt="鹿" 
+                     class="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover shadow-lg border-4 border-white dark:border-gray-700 cursor-pointer hover:rotate-12 transition-transform duration-500 ios-active flex-shrink-0" @click="triggerEasterEgg('profile')">
                 <div class="flex-1 text-center md:text-left">
-                    <h2 class="text-3xl font-bold tracking-tight text-gray-800 dark:text-white">鹿 (Walking Deer)</h2>
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-800 dark:text-white">鹿🦌 (Walking Deer)</h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 leading-relaxed font-medium">🎂 10/03 天秤座 | 📏 170cm | ⚖️ 42kg</p>
                     <div class="flex justify-center md:justify-start gap-3 mt-4">
                         <a href="https://www.tiktok.com/@ld.1003_" target="_blank" class="px-5 py-2 bg-black text-white rounded-full text-sm font-bold ios-active shadow-lg">TikTok</a>
@@ -137,28 +132,52 @@
             </div>
             
             <div class="flex flex-wrap justify-center items-center mt-12 gap-3 pb-12" x-show="totalPages > 1">
+                <button @click="goToPage(1)" :disabled="currentPage === 1" class="px-5 py-2 rounded-full glass font-bold hover:bg-deer-100 disabled:opacity-30 transition ios-active">|◀</button>
                 <button @click="prevPage" :disabled="currentPage === 1" class="px-5 py-2 rounded-full glass font-bold hover:bg-deer-100 disabled:opacity-30 transition ios-active">◀</button>
                 <span class="font-black text-deer-600 dark:text-deer-300 px-3 text-lg"><span x-text="currentPage"></span> / <span x-text="totalPages"></span></span>
                 <button @click="nextPage" :disabled="currentPage === totalPages" class="px-5 py-2 rounded-full glass font-bold hover:bg-deer-100 disabled:opacity-30 transition ios-active">▶</button>
+                <button @click="goToPage(totalPages)" :disabled="currentPage === totalPages" class="px-5 py-2 rounded-full glass font-bold hover:bg-deer-100 disabled:opacity-30 transition ios-active">▶|</button>
             </div>
         </div>
 
         <div x-show="currentTab === 'ai'" x-cloak class="max-w-2xl mx-auto h-[75vh] flex flex-col glass rounded-3xl overflow-hidden shadow-2xl relative border border-white/40">
-            <div class="bg-white/50 dark:bg-black/30 backdrop-blur-md p-4 flex items-center border-b border-gray-200/50 dark:border-gray-700/50">
-                <img src="./images/basic/AI.png" class="w-10 h-10 rounded-full object-cover mr-3 bg-white p-0.5 shadow-md">
+            <div class="absolute inset-0 z-0">
+                <div class="absolute inset-0 z-0 bg-cover bg-center transition-all duration-1000" :style="`background-image: url(${aiBackground})`"></div>
+                <div class="absolute inset-0 z-10 bg-white/70 dark:bg-gray-900/80 backdrop-blur-[5px]"></div>
+            </div>
+
+            <div x-show="aiStatus !== 'online'" class="absolute inset-0 z-20 bg-white/95 dark:bg-gray-900/95 flex flex-col items-center justify-center text-center p-6 transition-opacity duration-500 backdrop-blur-sm">
+                <div class="relative group cursor-pointer ios-active" @click="wakeUpAI">
+                    <img src="./images/basic/AI.png" alt="Sleeping AI" class="w-32 h-32 rounded-full object-cover mb-4 border-4 border-gray-300 grayscale opacity-80 transition-all active:scale-95 hover:grayscale-0 hover:opacity-100 shadow-xl" :class="{'animate-wiggle': wakeUpCount > 0}">
+                    <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-deer-500 text-white text-xs px-3 py-1 rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-md font-bold">點擊叫醒我！</div>
+                </div>
+                <h3 class="text-2xl font-bold mb-2 text-gray-800 dark:text-white">AI 小麋鹿目前...</h3>
+                <p class="text-deer-600 text-lg font-bold mb-4" x-text="aiStatusText"></p>
+                <p class="text-sm text-gray-400" x-show="wakeUpCount > 0">再點 <span class="text-red-500 font-bold text-lg" x-text="5 - wakeUpCount"></span> 下叫他！</p>
+            </div>
+            
+            <div class="relative z-10 bg-white/50 dark:bg-black/30 backdrop-blur-md p-4 flex items-center border-b border-gray-200/50 dark:border-gray-700/50">
+                <img src="./images/basic/AI.png" class="w-10 h-10 rounded-full object-cover mr-3 bg-white p-0.5 shadow-md flex-shrink-0">
                 <div><h3 class="font-bold text-gray-800 dark:text-gray-100">AI 小麋鹿</h3><div class="text-xs text-green-500 animate-pulse">● 線上</div></div>
             </div>
-            <div class="flex-1 overflow-y-auto p-4 space-y-4" id="chatContainer">
+            
+            <div class="relative z-10 flex-1 overflow-y-auto p-4 space-y-4" id="chatContainer">
                 <template x-for="msg in chatHistory" :key="msg.id">
                     <div class="flex w-full animate-pop-in" :class="msg.isUser ? 'justify-end' : 'justify-start'">
                         <div class="max-w-[80%] rounded-2xl px-5 py-3 shadow-md text-sm leading-relaxed" :class="msg.isUser ? 'bg-gradient-to-br from-deer-500 to-pink-600 text-white rounded-br-none' : 'bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-bl-none'"><p x-text="msg.text" class="whitespace-pre-line"></p></div>
                     </div>
                 </template>
+                <div x-show="isTyping" class="flex justify-start animate-pop-in">
+                    <div class="bg-white dark:bg-gray-700 rounded-2xl rounded-bl-none px-4 py-3 flex space-x-1 shadow-sm">
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div><div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100"></div><div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></div>
+                    </div>
+                </div>
             </div>
-            <div class="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-200 dark:border-gray-700">
+            
+            <div class="relative z-10 p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-200 dark:border-gray-700">
                 <form @submit.prevent="sendMessage" class="flex gap-2">
-                    <input type="text" x-model="chatInput" placeholder="輸入問題..." class="flex-1 rounded-full bg-gray-100 dark:bg-gray-800 border-transparent focus:border-deer-400 px-5 py-3 transition-all">
-                    <button type="submit" class="bg-deer-500 hover:bg-deer-600 text-white rounded-full p-3 w-12 h-12 flex items-center justify-center transition-all shadow-lg ios-active">➤</button>
+                    <input type="text" x-model="chatInput" :disabled="aiStatus !== 'online'" placeholder="輸入問題..." class="flex-1 rounded-full bg-gray-100 dark:bg-gray-800 border-transparent focus:border-deer-400 focus:bg-white dark:focus:bg-gray-700 px-5 py-3 transition-all disabled:opacity-50 shadow-inner">
+                    <button type="submit" :disabled="aiStatus !== 'online'" class="bg-deer-500 hover:bg-deer-600 text-white rounded-full p-3 w-12 h-12 flex items-center justify-center transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ios-active">➤</button>
                 </form>
             </div>
         </div>
@@ -166,17 +185,17 @@
         <div x-show="currentTab === 'quiz'" x-cloak class="max-w-2xl mx-auto">
             <div x-show="!quizStarted && !quizEnded" class="text-center py-12 glass rounded-3xl p-10 shadow-2xl animate-pop-in">
                 <div class="text-8xl mb-6 animate-bounce filter drop-shadow-lg">🎓</div>
-                <h2 class="text-3xl font-black mb-4 text-gray-800 dark:text-white">麋鹿大會考</h2>
-                <p class="text-gray-600 dark:text-gray-300 mb-8 font-medium">全對可獲得<span class="text-yellow-500 font-bold">金牌勳章</span>！</p>
+                <h2 class="text-3xl font-black mb-4 text-gray-800 dark:text-white">麋鹿大會考 2.0</h2>
                 <button @click="startQuiz" class="px-10 py-4 bg-gradient-to-r from-deer-400 to-purple-500 text-white rounded-full font-bold text-xl shadow-lg ios-active">挑戰開始</button>
             </div>
             <div x-show="quizStarted && !quizEnded" class="animate-pop-in">
                 <div class="flex justify-between items-center mb-6 px-2">
                     <span class="font-bold text-deer-600 bg-deer-100 px-3 py-1 rounded-full text-sm">Q.<span x-text="currentQuizIndex + 1"></span>/5</span>
-                    <span class="text-sm font-bold bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-full">分: <span x-text="quizScore"></span></span>
+                    <span class="text-sm font-bold bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-full">分數: <span x-text="quizScore"></span></span>
                 </div>
                 <div class="glass rounded-3xl p-8 mb-6 border-l-4 border-deer-400 min-h-[180px] flex items-center justify-center relative shadow-lg">
                     <h3 class="text-2xl font-bold text-center leading-relaxed text-gray-800 dark:text-white" x-text="currentQuestion?.q"></h3>
+                    <div x-show="godMode" class="absolute top-2 right-2 text-xs bg-red-500 text-white px-2 py-1 rounded font-bold animate-pulse">上帝提示: <span x-text="currentQuestion.short || currentQuestion.a"></span></div>
                 </div>
                 <div class="grid grid-cols-1 gap-4">
                     <template x-for="(opt, idx) in currentOptions" :key="idx">
@@ -191,7 +210,7 @@
             </div>
             <div x-show="quizEnded" class="text-center py-12 glass rounded-3xl p-10 shadow-2xl relative overflow-hidden animate-pop-in">
                 <div x-show="quizScore === 5" class="mb-6 relative z-10">
-                    <img src="./images/basic/medal.png" class="w-56 h-56 mx-auto object-contain animate-bounce medal-glow">
+                    <img src="./images/basic/icon.png" class="w-56 h-56 mx-auto object-cover rounded-full animate-bounce medal-glow shadow-lg border-4 border-yellow-300">
                     <div class="text-3xl font-black text-yellow-600 mt-6">恭喜獲得金牌！</div>
                 </div>
                 <div x-show="quizScore < 5" class="text-8xl mb-6"><span x-text="quizScore >= 3 ? '🥈' : '🤡'"></span></div>
@@ -205,7 +224,6 @@
         <div x-show="currentTab === 'idcard'" x-cloak class="max-w-2xl mx-auto">
             <div class="glass rounded-3xl p-8 shadow-2xl animate-pop-in">
                 <h2 class="text-3xl font-black mb-6 text-center text-deer-600 dark:text-deer-300">麋鹿認證中心 🪪</h2>
-                
                 <div class="space-y-4 mb-8">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">你的暱稱 / 名字</label>
@@ -216,21 +234,19 @@
                         <div class="grid grid-cols-3 gap-2">
                             <template x-for="(bg, index) in backgrounds" :key="index">
                                 <div @click="selectedBg = bg" class="aspect-[3/4] rounded-lg overflow-hidden cursor-pointer border-4 transition-all" :class="selectedBg === bg ? 'border-deer-500 scale-95' : 'border-transparent'">
-                                    <img :src="bg" class="w-full h-full object-cover">
+                                    <div class="w-full h-full bg-cover bg-center" :style="`background-image: url(${bg})`"></div>
                                 </div>
                             </template>
                         </div>
                     </div>
                 </div>
-
                 <button @click="generateIDCard" class="w-full py-4 bg-gradient-to-r from-deer-500 to-pink-600 text-white rounded-2xl font-bold shadow-lg ios-active text-lg">生成我的身分證 ✨</button>
             </div>
         </div>
 
         <div id="shareCardTemplate" class="fixed top-0 left-[-9999px] w-[320px] h-[500px] flex flex-col items-center justify-center text-center rounded-xl overflow-hidden relative">
-            <img :src="randomShareBg" class="absolute inset-0 w-full h-full object-cover z-0">
+            <div class="absolute inset-0 z-0 bg-cover bg-center" :style="`background-image: url(${randomShareBg})`"></div>
             <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-10"></div>
-            
             <div class="relative z-20 w-full h-full p-6 flex flex-col items-center justify-center">
                 <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-lg mb-4">
                     <img src="./images/basic/icon.png" class="w-full h-full object-cover">
@@ -242,16 +258,13 @@
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 block">Answer</span>
                     <p id="shareCardA" class="text-deer-600 font-bold text-xl"></p>
                 </div>
-                <div class="mt-6 text-white text-xs font-mono opacity-80 border border-white/30 px-3 py-1 rounded-full">
-                    deer-qa-system.github.io
-                </div>
+                <div class="mt-6 text-white text-xs font-mono opacity-80 border border-white/30 px-3 py-1 rounded-full">deer-qa-system.github.io</div>
             </div>
         </div>
 
         <div id="idCardTemplate" class="fixed top-0 left-[-9999px] w-[320px] h-[500px] flex flex-col items-center justify-between text-center rounded-xl overflow-hidden relative font-sans">
-            <img :src="selectedBg" class="absolute inset-0 w-full h-full object-cover z-0">
+            <div class="absolute inset-0 z-0 bg-cover bg-center" :style="`background-image: url(${selectedBg})`"></div>
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 z-10"></div>
-            
             <div class="relative z-20 w-full p-6 flex justify-between items-start">
                 <img src="./images/basic/icon.png" class="w-12 h-12 rounded-full border-2 border-white">
                 <div class="text-right text-white">
@@ -259,21 +272,11 @@
                     <div class="font-bold text-lg tracking-widest">麋鹿認證</div>
                 </div>
             </div>
-
             <div class="relative z-20 w-full p-6 text-left text-white">
-                <div class="mb-4">
-                    <div class="text-[10px] uppercase opacity-70 tracking-widest">Name</div>
-                    <div class="text-3xl font-black" x-text="idCardName"></div>
-                </div>
+                <div class="mb-4"><div class="text-[10px] uppercase opacity-70 tracking-widest">Name</div><div class="text-3xl font-black" x-text="idCardName"></div></div>
                 <div class="flex justify-between items-end">
-                    <div>
-                        <div class="text-[10px] uppercase opacity-70 tracking-widest">ID Number</div>
-                        <div class="text-xl font-mono" x-text="generatedIdNumber"></div>
-                    </div>
-                    <div>
-                        <div class="text-[10px] uppercase opacity-70 tracking-widest text-right">Date</div>
-                        <div class="text-sm font-mono" x-text="new Date().toISOString().split('T')[0]"></div>
-                    </div>
+                    <div><div class="text-[10px] uppercase opacity-70 tracking-widest">ID Number</div><div class="text-xl font-mono" x-text="generatedIdNumber"></div></div>
+                    <div><div class="text-[10px] uppercase opacity-70 tracking-widest text-right">Date</div><div class="text-sm font-mono" x-text="new Date().toISOString().split('T')[0]"></div></div>
                 </div>
             </div>
         </div>
@@ -292,7 +295,9 @@
     <footer class="text-center py-10 text-gray-400 text-sm font-medium"><p>© 2025 鹿🦌的 QA 檔案室</p></footer>
 
     <script>
-        if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js')); }
+        if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+            window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(err => {}));
+        }
 
         function deerApp() {
             return {
@@ -306,31 +311,18 @@
                 scrollY: 0,
                 
                 installPrompt: null,
+                backgrounds: ['./images/backgrounds/bg1.jpg', './images/backgrounds/bg2.jpg', './images/backgrounds/bg3.jpg'],
+                idCardName: '', selectedBg: './images/backgrounds/bg1.jpg', generatedIdNumber: '',
+                showShareModal: false, randomShareBg: '',
+                currentPage: 1, itemsPerPage: 30,
                 
-                // 圖片路徑設定 (如果要加更多背景圖，加在這裡)
-                backgrounds: [
-                    './images/backgrounds/bg1.jpg',
-                    './images/backgrounds/bg2.jpg',
-                    './images/backgrounds/bg3.jpg'
-                ],
-                
-                // 身分證
-                idCardName: '',
-                selectedBg: './images/backgrounds/bg1.jpg',
-                generatedIdNumber: '',
-                
-                // 分享卡片
-                showShareModal: false,
-                randomShareBg: '',
-
-                currentPage: 1,
-                itemsPerPage: 30,
-                
-                // AI
+                // AI 設定
                 chatInput: '', chatHistory: [], isTyping: false,
-                
-                // 測驗
+                aiStatus: 'offline', aiStatusText: '休息中', wakeUpCount: 0,
+                aiBackground: '',
+
                 quizStarted: false, quizEnded: false, quizData: [], currentQuizIndex: 0, currentOptions: [], hasAnswered: false, selectedOption: null, quizScore: 0, currentCorrectText: '',
+                godMode: false, konamiCode: ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'], konamiIndex: 0,
 
                 initApp() {
                     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) this.toggleDarkMode();
@@ -339,74 +331,134 @@
 
                 handleScroll() { this.scrollY = window.scrollY; },
 
-                // 生成身分證
+                // 修正重點：改用 MOOSE
                 generateIDCard() {
                     if (!this.idCardName) { this.showNotification("請輸入名字！"); return; }
-                    this.generatedIdNumber = 'DEER-' + Math.floor(1000 + Math.random() * 9000);
+                    this.generatedIdNumber = 'MOOSE-' + Math.floor(1000 + Math.random() * 9000);
                     
-                    const el = document.getElementById('idCardTemplate');
                     this.showShareModal = true;
                     document.getElementById('shareResultContainer').innerHTML = '<div class="p-8 text-center text-gray-400">生成中...</div>';
 
-                    // 延遲以確保 DOM 渲染
                     setTimeout(() => {
+                        const el = document.getElementById('idCardTemplate');
                         html2canvas(el, { backgroundColor: null, useCORS: true, scale: 2 }).then(canvas => {
                             const container = document.getElementById('shareResultContainer');
                             container.innerHTML = '';
-                            canvas.style.width = '100%';
-                            canvas.style.height = 'auto';
+                            canvas.style.width = '100%'; canvas.style.height = 'auto';
                             container.appendChild(canvas);
+                        }).catch(err => {
+                            document.getElementById('shareResultContainer').innerHTML = '<div class="text-red-500 text-center p-4">生成失敗</div>';
                         });
                     }, 500);
                 },
 
-                // 生成分享卡片 (使用隨機背景)
                 openShareModal(item) {
                     this.randomShareBg = this.backgrounds[Math.floor(Math.random() * this.backgrounds.length)];
                     document.getElementById('shareCardId').innerText = item.id;
                     document.getElementById('shareCardQ').innerText = item.q;
                     document.getElementById('shareCardA').innerText = item.short || item.a;
                     
-                    const el = document.getElementById('shareCardTemplate');
                     this.showShareModal = true;
                     document.getElementById('shareResultContainer').innerHTML = '<div class="p-8 text-center text-gray-400">生成中...</div>';
 
                     setTimeout(() => {
+                        const el = document.getElementById('shareCardTemplate');
+                        html2canvas(el, { backgroundColor: null, useCORS: true, scale: 2 }).then(canvas => {
+                            const container = document.getElementById('shareResultContainer');
+                            container.innerHTML = '';
+                            canvas.style.width = '100%'; canvas.style.height = 'auto';
+                            container.appendChild(canvas);
+                        }).catch(err => {
+                            document.getElementById('shareResultContainer').innerHTML = '<div class="text-red-500 text-center p-4">生成失敗</div>';
+                        });
+                    }, 500);
+                },
+
+                async installPWA() { if (this.installPrompt) { this.installPrompt.prompt(); const { outcome } = await this.installPrompt.userChoice; if (outcome === 'accepted') this.installPrompt = null; } },
+                get filteredQuestions() { if (!this.allData) return []; if (this.search.trim() === '') return this.allData; const s = this.search.toLowerCase(); return this.allData.filter(i => i.q.toLowerCase().includes(s) || i.a.toLowerCase().includes(s)); },
+                get paginatedData() { const start = (this.currentPage - 1) * this.itemsPerPage; return this.filteredQuestions.slice(start, start + this.itemsPerPage); },
+                get totalPages() { return Math.ceil(this.filteredQuestions.length / this.itemsPerPage); },
+                nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; window.scrollTo(0,0); },
+                prevPage() { if (this.currentPage > 1) this.currentPage--; window.scrollTo(0,0); },
+                
+                changeTab(tab) { 
+                    this.currentTab = tab; window.scrollTo(0,0); 
+                    if(tab === 'ai') { 
+                        this.wakeUpCount = 0; 
+                        this.aiBackground = this.backgrounds[Math.floor(Math.random() * this.backgrounds.length)];
+                        
+                        if (Math.random() > 0.3) { 
+                            this.aiStatus = 'offline'; 
+                            const statuses = ['呼呼大睡中... 😴', '正在直播！快來看 🎥', '正在打傳說 (璀璨場勿擾) 🎮', '去吃三色豆花布丁了 🍮', '被哺嚕踩在鍵盤上 🐈', '正在練 BLACKPINK 的舞 💃']; 
+                            this.aiStatusText = statuses[Math.floor(Math.random() * statuses.length)]; 
+                        } else { this.aiStatus = 'online'; } 
+                    } 
+                },
+                
+                toggleDarkMode() { this.isDark = !this.isDark; document.documentElement.classList.toggle('dark', this.isDark); },
+                toggleCard(id) { if (this.flippedCards.includes(id)) this.flippedCards = this.flippedCards.filter(cid => cid !== id); else this.flippedCards.push(id); },
+                showNotification(msg) { this.toastMessage = msg; this.showToast = true; setTimeout(() => this.showToast = false, 3000); },
+                tabClass(tab) { const active = "bg-white text-deer-600 shadow-md font-bold"; const inactive = "text-gray-500 hover:text-gray-700"; return `px-4 py-1.5 rounded-full text-sm transition-all whitespace-nowrap ${this.currentTab === tab ? active : inactive}`; },
+                sendMessage() { if(!this.chatInput) return; this.chatHistory.push({id: Date.now(), text: this.chatInput, isUser: true, time: 'Now'}); this.chatInput = ''; this.isTyping = true; setTimeout(() => { this.isTyping = false; this.chatHistory.push({id: Date.now(), text: '我是 AI 小麋鹿！', isUser: false, time: 'Now'}); }, 1000); },
+                wakeUpAI() { if (this.aiStatus === 'online') return; this.wakeUpCount++; if (this.wakeUpCount >= 5) { this.aiStatus = 'online'; this.addBotMessage("好啦好啦！被你吵醒了！😠 說吧！"); this.wakeUpCount = 0; confetti({ particleCount: 30, spread: 50, origin: { y: 0.5 } }); } },
+                triggerEasterEgg(type) { if (type === 'icon') this.showNotification("🌈 這是秘密通道嗎？"); if (type === 'profile') { confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }); this.showNotification("🎉 恭喜發現隱藏彩蛋！"); } },
+                checkKonamiCode(e) { if (e.key === this.konamiCode[this.konamiIndex]) { this.konamiIndex++; if (this.konamiIndex === this.konamiCode.length) { this.godMode = !this.godMode; this.showNotification(this.godMode ? "🤫 上帝模式已開啟！" : "上帝模式已關閉"); confetti({ particleCount: 200, spread: 180 }); this.konamiIndex = 0; } } else { this.konamiIndex = 0; } },
+                addBotMessage(text) { this.chatHistory.push({ id: Date.now(), text: text, isUser: false, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }); this.$nextTick(() => { document.getElementById('chatContainer').scrollTop = 99999; }); },
+                startQuizMode() { this.changeTab('quiz'); },
+                startQuiz() { this.quizStarted = true; this.quizEnded = false; this.currentQuizIndex = 0; this.quizScore = 0; this.prepareQuestion(); },
+                prepareQuestion() { this.hasAnswered = false; this.currentCorrectText = this.currentQuestion.short || this.currentQuestion.a; this.currentOptions = [this.currentCorrectText, '錯誤選項1', '錯誤選項2', '錯誤選項3'].sort(() => 0.5 - Math.random()); },
+                get currentQuestion() { return this.allData[this.currentQuizIndex]; },
+                checkAnswer(opt) { this.hasAnswered = true; this.selectedOption = opt; if(opt === this.currentCorrectText) this.quizScore++; },
+                nextQuestion() { if(this.currentQuizIndex < 4) { this.currentQuizIndex++; this.prepareQuestion(); } else { this.quizEnded = true; } },
+                shareResult() {
+                    // 1. 先複製文字到剪貼簿 (當作備用)
+                    const text = `我在「鹿🦌的 QA 檔案室」測驗拿了 ${this.quizScore * 20} 分！\n${this.quizScore === 5 ? '🏆 獲得金牌麋鹿勳章！' : '快來挑戰看看！'}`;
+                    navigator.clipboard.writeText(text).then(() => this.showNotification("✅ 文字已複製，正在生成圖片..."));
+
+                    // 2. 隨機選一張背景圖
+                    this.randomShareBg = this.backgrounds[Math.floor(Math.random() * this.backgrounds.length)];
+                    
+                    // 3. 打開彈窗並顯示載入中
+                    this.showShareModal = true;
+                    document.getElementById('shareResultContainer').innerHTML = '<div class="p-8 text-center text-gray-400">正在製作成績單... 🎨</div>';
+
+                    // 4. 填入動態資料 (分數、評語)
+                    setTimeout(() => {
+                        const score = this.quizScore * 20;
+                        document.getElementById('shareScoreNum').innerText = score;
+                        
+                        // 根據分數給予不同評語
+                        const titleEl = document.getElementById('shareScoreTitle');
+                        const commentEl = document.getElementById('shareScoreComment');
+                        
+                        if (this.quizScore === 5) {
+                            titleEl.innerText = "金牌麋鹿勳章 🏆";
+                            titleEl.className = "text-yellow-400 font-bold text-xl mt-2 tracking-wider filter drop-shadow-md";
+                            commentEl.innerText = "太強了！你是真正的鹿粉！🔥";
+                        } else if (this.quizScore >= 3) {
+                            titleEl.innerText = "銀牌麋鹿勳章 🥈";
+                            titleEl.className = "text-gray-300 font-bold text-xl mt-2 tracking-wider filter drop-shadow-md";
+                            commentEl.innerText = "還不錯喔！差一點點就滿分了！";
+                        } else {
+                            titleEl.innerText = "還需努力 🤡";
+                            titleEl.className = "text-white font-bold text-xl mt-2 tracking-wider filter drop-shadow-md";
+                            commentEl.innerText = "快去複習 QA 再來挑戰吧！加油！";
+                        }
+
+                        // 5. 開始截圖生成
+                        const el = document.getElementById('quizResultTemplate');
                         html2canvas(el, { backgroundColor: null, useCORS: true, scale: 2 }).then(canvas => {
                             const container = document.getElementById('shareResultContainer');
                             container.innerHTML = '';
                             canvas.style.width = '100%';
                             canvas.style.height = 'auto';
                             container.appendChild(canvas);
+                        }).catch(err => {
+                            console.error(err);
+                            document.getElementById('shareResultContainer').innerHTML = '<div class="text-red-500 text-center p-4">生成失敗，請稍後再試</div>';
                         });
-                    }, 500);
-                },
-
-                async installPWA() { if (this.installPrompt) { this.installPrompt.prompt(); const { outcome } = await this.installPrompt.userChoice; if (outcome === 'accepted') this.installPrompt = null; } },
-                
-                // 簡化後的邏輯 (保持原有功能)
-                get filteredQuestions() { if (!this.allData) return []; if (this.search.trim() === '') return this.allData; const s = this.search.toLowerCase(); return this.allData.filter(i => i.q.toLowerCase().includes(s) || i.a.toLowerCase().includes(s)); },
-                get paginatedData() { const start = (this.currentPage - 1) * this.itemsPerPage; return this.filteredQuestions.slice(start, start + this.itemsPerPage); },
-                get totalPages() { return Math.ceil(this.filteredQuestions.length / this.itemsPerPage); },
-                nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; window.scrollTo(0,0); },
-                prevPage() { if (this.currentPage > 1) this.currentPage--; window.scrollTo(0,0); },
-                changeTab(tab) { this.currentTab = tab; window.scrollTo(0,0); },
-                toggleDarkMode() { this.isDark = !this.isDark; document.documentElement.classList.toggle('dark', this.isDark); },
-                toggleCard(id) { if (this.flippedCards.includes(id)) this.flippedCards = this.flippedCards.filter(cid => cid !== id); else this.flippedCards.push(id); },
-                showNotification(msg) { this.toastMessage = msg; this.showToast = true; setTimeout(() => this.showToast = false, 3000); },
-                tabClass(tab) { const active = "bg-white text-deer-600 shadow-md font-bold"; const inactive = "text-gray-500 hover:text-gray-700"; return `px-4 py-1.5 rounded-full text-sm transition-all whitespace-nowrap ${this.currentTab === tab ? active : inactive}`; },
-                
-                // AI
-                sendMessage() { if(!this.chatInput) return; this.chatHistory.push({id: Date.now(), text: this.chatInput, isUser: true, time: 'Now'}); this.chatInput = ''; this.isTyping = true; setTimeout(() => { this.isTyping = false; this.chatHistory.push({id: Date.now(), text: '我是 AI 小麋鹿！', isUser: false, time: 'Now'}); }, 1000); },
-
-                // 測驗 (簡化版)
-                startQuizMode() { this.changeTab('quiz'); },
-                startQuiz() { this.quizStarted = true; this.quizEnded = false; this.currentQuizIndex = 0; this.quizScore = 0; this.prepareQuestion(); },
-                prepareQuestion() { this.hasAnswered = false; this.currentCorrectText = this.currentQuestion.short || this.currentQuestion.a; this.currentOptions = [this.currentCorrectText, '錯誤選項1', '錯誤選項2', '錯誤選項3'].sort(() => 0.5 - Math.random()); },
-                get currentQuestion() { return this.allData[this.currentQuizIndex]; }, // 這裡僅為範例，需配合完整邏輯
-                checkAnswer(opt) { this.hasAnswered = true; this.selectedOption = opt; if(opt === this.currentCorrectText) this.quizScore++; },
-                nextQuestion() { if(this.currentQuizIndex < 4) { this.currentQuizIndex++; this.prepareQuestion(); } else { this.quizEnded = true; } },
-                shareResult() { /* ... */ }
+                    }, 500); // 延遲 500ms 確保 DOM 渲染完畢
+                }
             }
         }
     </script>
