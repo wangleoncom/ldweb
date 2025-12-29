@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>鹿🦌的 QA 檔案室</title>
-    <link rel="icon" href="./icon.jpg" type="image/jpeg">
+    <link rel="icon" href="./icon.png" type="image/jpeg">
     
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#fdf2f8">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="./icon.jpg">
+    <link rel="apple-touch-icon" href="./icon.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Rounded+Mplus+1c:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -75,7 +75,7 @@
     <nav class="fixed top-0 w-full z-50 glass shadow-sm transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
             <div class="flex items-center cursor-pointer" @click="changeTab('home')">
-                <img src="./icon.jpg" class="w-8 h-8 rounded-full mr-2 border border-deer-300 object-cover" @click.stop="triggerEasterEgg('icon')">
+                <img src="./icon.png" class="w-8 h-8 rounded-full mr-2 border border-deer-300 object-cover" @click.stop="triggerEasterEgg('icon')">
                 <span class="font-bold text-xl text-deer-600 dark:text-deer-300 hidden sm:block">鹿的 QA 檔案室</span>
             </div>
             <div class="flex space-x-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-full">
@@ -93,7 +93,7 @@
         
         <div x-show="currentTab === 'home'" x-transition.opacity>
             <div class="glass rounded-2xl p-6 mb-8 border-l-4 border-deer-400 flex flex-col md:flex-row items-center gap-6 shadow-lg transform transition hover:scale-[1.01]">
-                <img src="./icon.jpg" alt="鹿" 
+                <img src="./icon.png" alt="鹿" 
                      class="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover shadow-md border-4 border-white dark:border-gray-700 cursor-pointer hover:rotate-12 transition-transform"
                      @click="triggerEasterEgg('profile')">
                 <div class="flex-1 text-center md:text-left">
