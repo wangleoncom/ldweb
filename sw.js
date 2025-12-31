@@ -1,10 +1,9 @@
-const CACHE_NAME = 'deer-qa-ultimate-v3.1-CHT';
+const CACHE_NAME = 'deer-qa-ultimate-v4.0-Spotlight';
 const ASSETS = [
   './',
   './index.html',
   './deer_db.js',
   './manifest.json',
-  // 核心圖片資源
   './images/basic/icon.png',
   './images/basic/AI.png'
 ];

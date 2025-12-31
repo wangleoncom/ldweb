@@ -80,21 +80,24 @@
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
 
-        /* Tutorial Spotlight Overlay */
-        .tutorial-overlay {
-            position: fixed; inset: 0; z-index: 9998;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
+        /* 聚光燈特效核心 CSS */
+        .spotlight-target {
+            position: relative;
+            z-index: 9999 !important;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85); /* 巨大的陰影形成遮罩 */
+            pointer-events: auto; /* 允許點擊 */
+            transition: all 0.5s ease;
         }
-        .tutorial-highlight {
-            position: relative; z-index: 9999;
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
-            border-radius: 16px; pointer-events: none;
+        /* 當教學模式開啟時，鎖住背景滾動 */
+        body.tutorial-active {
+            overflow: hidden;
         }
     </style>
 </head>
 <body class="text-gray-800 transition-colors duration-300 dark:text-gray-100 font-sans min-h-screen overflow-x-hidden selection:bg-pink-200 selection:text-pink-900"
-      x-data="deerApp()" x-init="initApp()" @scroll.window="handleScroll" :style="`--theme-color: ${currentTheme.color}; --theme-light: ${currentTheme.light}`">
+      x-data="deerApp()" x-init="initApp()" @scroll.window="handleScroll" 
+      :class="{'tutorial-active': showTutorial}"
+      :style="`--theme-color: ${currentTheme.color}; --theme-light: ${currentTheme.light}`">
 
     <div class="fixed inset-0 overflow-hidden -z-10 pointer-events-none">
         <div class="absolute top-0 left-[-10%] w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
@@ -111,7 +114,8 @@
                 <span class="font-bold text-xl text-gray-800 dark:text-white tracking-wide">鹿🦌的QA網站</span>
             </div>
             
-            <div class="flex space-x-1 bg-white/40 dark:bg-black/20 p-1 rounded-full backdrop-blur-md border border-white/10 overflow-x-auto no-scrollbar mx-2" :class="{'z-[9999] ring-4 ring-white': tutorialStep === 2}">
+            <div class="flex space-x-1 bg-white/40 dark:bg-black/20 p-1 rounded-full backdrop-blur-md border border-white/10 overflow-x-auto no-scrollbar mx-2 rounded-xl"
+                 :class="{'spotlight-target ring-4 ring-theme': tutorialStep === 2}">
                 <button @click="changeTab('home')" :class="tabClass('home')">首頁</button>
                 <button @click="changeTab('ai')" :class="tabClass('ai')">AI 麋鹿</button>
                 <button @click="startQuizMode()" :class="tabClass('quiz')">大會考</button>
@@ -166,24 +170,29 @@
                 </div>
 
                 <div class="glass rounded-[32px] p-6 border border-white/40 shadow-xl flex flex-col justify-center items-center relative overflow-hidden">
-                    <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Fan Level</div>
-                    <div class="text-3xl font-black text-theme mb-1" x-text="fanLevelTitle"></div>
+                    <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">粉絲等級 (Fan Level)</div>
+                    <div class="text-3xl font-black text-theme mb-1" x-text="currentLevelInfo.title"></div>
                     <div class="text-sm text-gray-500 font-mono mb-4">LV.<span x-text="calculateLevel(fanXP)"></span></div>
                     
                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-2 overflow-hidden relative">
-                        <div class="bg-theme h-4 rounded-full transition-all duration-1000 ease-out" :style="`width: ${xpPercentage}%`"></div>
+                        <div class="bg-theme h-4 rounded-full transition-all duration-1000 ease-out relative overflow-hidden" :style="`width: ${xpPercentage}%`">
+                            <div class="absolute inset-0 bg-white/30 animate-[progress_2s_infinite_linear]" style="background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent); background-size: 1rem 1rem;"></div>
+                        </div>
                     </div>
                     <div class="text-xs text-gray-400 w-full flex justify-between">
                         <span x-text="fanXP"></span>
-                        <span x-text="nextLevelXP"></span>
+                        <span>下個等級: <span x-text="currentLevelInfo.next"></span></span>
                     </div>
-                    <div class="mt-4 text-[10px] text-gray-400 text-center">多互動可累積 XP 升級！</div>
+                    <div class="mt-4 text-[10px] text-gray-400 text-center">每天登入、問 AI 問題、做測驗可獲得 XP！</div>
                 </div>
             </div>
 
             <div class="sticky top-20 z-40 mb-8 transition-all duration-500 ease-out" :class="scrollY > 150 ? 'pt-2 px-2' : ''">
-                <div class="relative max-w-2xl mx-auto transition-all duration-300" :class="scrollY > 150 ? 'shadow-2xl scale-[0.98]' : 'shadow-lg'"
-                     :class="{'z-[9999] ring-4 ring-white ring-offset-4 ring-offset-black/50': tutorialStep === 1}">
+                <div class="relative max-w-2xl mx-auto transition-all duration-300" 
+                     :class="[
+                        scrollY > 150 ? 'shadow-2xl scale-[0.98]' : 'shadow-lg',
+                        tutorialStep === 1 ? 'spotlight-target ring-4 ring-theme ring-offset-4 ring-offset-transparent' : ''
+                     ]">
                     <div class="absolute inset-0 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl transition-all duration-500" :class="scrollY > 150 ? 'opacity-100' : 'opacity-90'"></div>
                     <input type="text" x-model="search" @input="currentPage = 1" placeholder="🔍 搜尋問題... (例如: 男友、身高)" 
                            class="relative w-full pl-6 pr-6 py-4 rounded-2xl bg-transparent border-2 border-transparent focus:border-theme focus:ring-0 text-lg transition-all placeholder-gray-400 dark:text-white"
@@ -229,7 +238,7 @@
         </div>
 
         <div x-show="currentTab === 'ai'" x-cloak class="max-w-2xl mx-auto h-[75vh] flex flex-col glass rounded-[32px] overflow-hidden shadow-2xl relative border border-white/40 animate-pop-in"
-             :class="{'z-[9999] ring-4 ring-white': tutorialStep === 3}">
+             :class="{'spotlight-target ring-4 ring-theme': tutorialStep === 3}">
             <div class="absolute inset-0 z-0">
                 <div class="absolute inset-0 z-0 bg-cover bg-center transition-all duration-1000" :style="`background-image: url(${aiBackground})`"></div>
                 <div class="absolute inset-0 z-10 bg-white/70 dark:bg-gray-900/80 backdrop-blur-[8px]"></div>
@@ -268,7 +277,7 @@
             
             <div class="relative z-10 p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-200/20">
                 <form @submit.prevent="sendMessage" class="flex gap-2">
-                    <input type="text" x-model="chatInput" :disabled="aiStatus !== 'online'" placeholder="問問關於鹿的事情... (試試: 幾歲)" class="flex-1 rounded-full bg-gray-100 dark:bg-gray-800 border-none focus:ring-2 focus:ring-theme px-5 py-3 transition-all disabled:opacity-50">
+                    <input type="text" x-model="chatInput" :disabled="aiStatus !== 'online'" placeholder="問問關於鹿的事情... (試試: 主播幾歲)" class="flex-1 rounded-full bg-gray-100 dark:bg-gray-800 border-none focus:ring-2 focus:ring-theme px-5 py-3 transition-all disabled:opacity-50">
                     <button type="submit" :disabled="aiStatus !== 'online'" class="bg-theme hover:opacity-90 text-white rounded-full p-3 w-12 h-12 flex items-center justify-center shadow-lg disabled:opacity-50 ios-btn">➤</button>
                 </form>
             </div>
@@ -392,27 +401,30 @@
         <div x-show="showUpdateModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" x-cloak x-transition.opacity>
             <div class="bg-white dark:bg-gray-800 w-full max-w-md rounded-3xl p-6 shadow-2xl border-2 border-theme animate-pop-in relative">
                 <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-theme text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg tracking-widest">UPDATE</div>
-                <h3 class="text-2xl font-black text-center mb-4 text-gray-800 dark:text-white">🎉 網站大更新 v3.1</h3>
+                <h3 class="text-2xl font-black text-center mb-4 text-gray-800 dark:text-white">🎉 網站大更新 v4.0</h3>
                 <div class="space-y-3 mb-6 text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
-                    <p>✨ <b>AI 大進化：</b>現在聽得懂「主播」、「妳」是誰了！</p>
-                    <p>🖼️ <b>美圖修復：</b>分享卡片的文字變清晰囉！</p>
-                    <p>🎓 <b>新手引導：</b>新增了第一次使用的教學模式。</p>
-                    <p>🎨 <b>視覺升級：</b>更多可愛的動畫效果。</p>
+                    <p>💡 <b>新手引導修復：</b>全新的聚光燈教學模式，不再卡住！</p>
+                    <p>🧠 <b>AI 變聰明了：</b>現在「主播」、「鹿🦌」它都聽得懂。</p>
+                    <p>📈 <b>等級系統：</b>明確的經驗值進度條。</p>
                 </div>
                 <button @click="closeUpdateModal" class="w-full py-3 bg-theme text-white rounded-full font-bold shadow-lg ios-btn">太棒了！</button>
             </div>
         </div>
 
-        <div x-show="showTutorial" class="tutorial-overlay flex flex-col items-center justify-center text-white text-center p-8" x-cloak x-transition.opacity>
-            <div class="mb-8 max-w-xs">
-                <div class="text-6xl mb-4 animate-bounce">🦌</div>
-                <h2 class="text-2xl font-bold mb-2" x-text="tutorialSteps[tutorialStep-1].title"></h2>
-                <p class="text-white/80" x-text="tutorialSteps[tutorialStep-1].desc"></p>
+        <div x-show="showTutorial" class="fixed inset-0 z-[9000] flex flex-col items-center justify-center text-white text-center p-8 pointer-events-none" x-cloak x-transition.opacity>
+            <div class="pointer-events-auto bg-black/50 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl mb-8 max-w-xs animate-pop-in">
+                <div class="text-5xl mb-4">🦌</div>
+                <h2 class="text-2xl font-bold mb-2 text-theme-light" x-text="tutorialSteps[tutorialStep-1].title"></h2>
+                <p class="text-white/90 leading-relaxed" x-text="tutorialSteps[tutorialStep-1].desc"></p>
             </div>
-            <button @click="nextTutorialStep" class="px-8 py-3 bg-white text-theme rounded-full font-bold shadow-xl ios-btn">
-                <span x-text="tutorialStep === tutorialSteps.length ? '開始使用' : '下一步'"></span>
-            </button>
-            <button @click="endTutorial" class="mt-4 text-sm text-white/50 underline">跳過教學</button>
+            
+            <div class="pointer-events-auto flex gap-4">
+                <button @click="endTutorial" class="px-6 py-3 bg-white/10 text-white rounded-full font-bold hover:bg-white/20 backdrop-blur-md transition-colors text-sm">跳過</button>
+                <button @click="nextTutorialStep" class="px-8 py-3 bg-theme text-white rounded-full font-bold shadow-xl ios-btn hover:scale-105 transition-transform flex items-center">
+                    <span x-text="tutorialStep === tutorialSteps.length ? '開始使用' : '下一步'"></span>
+                    <span x-show="tutorialStep !== tutorialSteps.length" class="ml-2">➜</span>
+                </button>
+            </div>
         </div>
 
         <div x-show="showToast" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-y-10 opacity-0" x-transition:enter-end="translate-y-0 opacity-100" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-full text-sm z-[110] shadow-2xl font-bold flex items-center border border-white/10">
@@ -455,30 +467,36 @@
                 currentPage: 1, itemsPerPage: 30,
                 
                 // 系統狀態
-                appVersion: '3.1.0',
+                appVersion: '4.0.0', // 更新版本號
                 showUpdateModal: false,
                 showTutorial: false,
                 tutorialStep: 0, // 0:Off, 1:Search, 2:Tabs, 3:AI
                 tutorialSteps: [
-                    { title: "智慧搜尋", desc: "想知道鹿🦌的身高、生日？直接在這裡搜尋關鍵字！" },
-                    { title: "功能切換", desc: "這裡有首頁、AI聊天、大會考和身分證製作功能。" },
-                    { title: "AI 麋鹿", desc: "無聊時可以找 AI 麋鹿聊天，它知道很多秘密喔！" }
+                    { title: "智慧搜尋", desc: "找不到問題？直接輸入關鍵字，例如「身高」、「生日」。" },
+                    { title: "功能切換", desc: "點這裡切換到「AI 聊天」、「大會考」或「身分證」。" },
+                    { title: "AI 麋鹿", desc: "無聊時可以找 AI 聊天，它現在更聰明了！" }
                 ],
                 
                 fanXP: 0,
                 
-                get fanLevelTitle() {
+                // 等級邏輯
+                get currentLevelInfo() {
                     const level = this.calculateLevel(this.fanXP);
-                    if (level >= 50) return "傳說鹿神 👑";
-                    if (level >= 20) return "骨灰級鐵粉 🔥";
-                    if (level >= 10) return "資深鹿迷 💖";
-                    if (level >= 5) return "實習麋鹿 🦌";
-                    return "路人粉 🌱";
+                    let title = "路人粉 🌱";
+                    let next = 500;
+                    
+                    if (this.fanXP >= 5000) { title = "傳說鹿神 👑"; next = "MAX"; }
+                    else if (this.fanXP >= 2000) { title = "骨灰級鐵粉 🔥"; next = 5000; }
+                    else if (this.fanXP >= 1000) { title = "資深鹿迷 💖"; next = 2000; }
+                    else if (this.fanXP >= 500) { title = "實習麋鹿 🦌"; next = 1000; }
+                    
+                    return { title, next };
                 },
-                get nextLevelXP() { return (this.calculateLevel(this.fanXP) + 1) * 100; },
                 get xpPercentage() {
                     const level = this.calculateLevel(this.fanXP);
-                    return Math.min(100, Math.max(0, ((this.fanXP - (level * 100)) / 100) * 100));
+                    // 簡單進度條邏輯：每 100 分算一個進度循環，或者基於當前區間
+                    // 為了視覺效果，我們讓它看起來像是在累積
+                    return (this.fanXP % 100); 
                 },
                 
                 chatInput: '', chatHistory: [], isTyping: false, aiStatus: 'offline', aiStatusText: 'Offline', wakeUpCount: 0, aiBackground: '',
@@ -497,12 +515,10 @@
                     this.updateAIStatusText();
                     this.addXP(10);
 
-                    // 檢查版本更新
                     const storedVersion = localStorage.getItem('deer_app_version');
                     if (storedVersion !== this.appVersion) {
                         this.showUpdateModal = true;
                     } else if (!localStorage.getItem('deer_tutorial_done')) {
-                        // 如果沒有更新，且沒做過教學，則顯示教學
                         setTimeout(() => this.startTutorial(), 500);
                     }
                 },
@@ -510,7 +526,6 @@
                 closeUpdateModal() {
                     this.showUpdateModal = false;
                     localStorage.setItem('deer_app_version', this.appVersion);
-                    // 關閉更新公告後，如果沒做過教學，則開始教學
                     if (!localStorage.getItem('deer_tutorial_done')) {
                         setTimeout(() => this.startTutorial(), 500);
                     }
@@ -520,14 +535,18 @@
                     this.showTutorial = true;
                     this.tutorialStep = 1;
                     window.scrollTo(0, 0);
+                    this.changeTab('home'); // 強制回到首頁開始
                 },
 
                 nextTutorialStep() {
                     if (this.tutorialStep < this.tutorialSteps.length) {
                         this.tutorialStep++;
-                        // 如果是介紹 AI，切換到 AI Tab
-                        if (this.tutorialStep === 3) this.changeTab('ai');
-                        else this.changeTab('home');
+                        // 自動導航邏輯：避免用戶卡住
+                        if (this.tutorialStep === 3) {
+                            this.changeTab('ai'); // 強制切換到 AI 頁面
+                        } else {
+                            this.changeTab('home');
+                        }
                     } else {
                         this.endTutorial();
                     }
@@ -600,16 +619,17 @@
 
                 async installPWA() { if (this.installPrompt) { this.installPrompt.prompt(); const { outcome } = await this.installPrompt.userChoice; if (outcome === 'accepted') this.installPrompt = null; } },
                 
-                // 🧠 智慧搜尋 v2.0
+                // 🧠 智慧搜尋 v3.0 (包含 AI 同義詞理解)
                 smartSearch(query) {
                     if (!query) return [];
                     
-                    // 正規化：將常見同義詞替換為標準關鍵字
+                    // 1. 同義詞映射 (AI 理解邏輯)
+                    // 無論用戶輸入什麼暱稱，都轉成資料庫聽得懂的關鍵字
                     let normalizedQuery = query.toLowerCase()
-                        .replace(/主播|妳|你|她/g, '鹿')
+                        .replace(/主播|妳|你|她|老婆|姐姐|鹿鹿/g, '鹿') 
                         .replace(/男朋友|男友/g, '男朋友');
 
-                    // 斷詞
+                    // 2. 斷詞
                     const terms = normalizedQuery.split(/\s+/).filter(t => t.length > 0);
                     
                     return this.allData.map(item => {
@@ -619,9 +639,10 @@
                         const tags = (item.tags || []).join(' ').toLowerCase();
                         
                         terms.forEach(term => {
-                            if (tags.includes(term)) score += 15;
-                            if (qText.includes(term)) score += 10;
-                            if (aText.includes(term)) score += 2;
+                            // 權重分配
+                            if (tags.includes(term)) score += 20; // Tag 最準
+                            if (qText.includes(term)) score += 10; // 問題次之
+                            if (aText.includes(term)) score += 2;  // 答案最末
                         });
                         return { ...item, score };
                     }).filter(item => item.score > 0).sort((a, b) => b.score - a.score);
@@ -660,6 +681,7 @@
                             response = "哈囉！我是 AI 麋鹿，關於鹿的事情我都略懂略懂 😎";
                             if (this.idCardName) response += ` ${this.idCardName}！`;
                         } else {
+                            // 呼叫更新後的智慧搜尋
                             const results = this.smartSearch(userText);
                             if (results.length > 0) {
                                 const prefixes = ["這題我知道！✨", "根據資料顯示... 📚", "幫你查到了！💡", "嗯... 是這樣的："];
