@@ -24,7 +24,6 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="./deer_db.js"></script>
-    <script src="script.js"></script>
 
     <script>
         tailwind.config = {
@@ -36,46 +35,41 @@
                         'pop-in': 'popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards', 
                         'float': 'float 6s ease-in-out infinite',
                         'pulse-slow': 'pulse 3s infinite',
-                        'progress': 'progress 1s ease-out forwards'
+                        'blob': 'blob 7s infinite',
+                        'tilt': 'tilt 10s infinite linear'
                     },
                     keyframes: {
                         popIn: { '0%': { opacity: '0', transform: 'scale(0.95) translateY(10px)' }, '100%': { opacity: '1', transform: 'scale(1) translateY(0)' } },
                         float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
-                        progress: { '0%': { width: '0%' } }
+                        blob: { "0%": { transform: "translate(0px, 0px) scale(1)" }, "33%": { transform: "translate(30px, -50px) scale(1.1)" }, "66%": { transform: "translate(-20px, 20px) scale(0.9)" }, "100%": { transform: "translate(0px, 0px) scale(1)" } },
+                        tilt: { "0%, 50%, 100%": { transform: "rotate(0deg)" }, "25%": { transform: "rotate(1deg)" }, "75%": { transform: "rotate(-1deg)" } }
                     }
                 }
             }
         }
     </script>
     <style>
-        /* CSS Variables for Dynamic Themes */
-        :root {
-            --theme-color: #ec4899; /* Default Pink */
-            --theme-light: #fce7f3;
-        }
-        
-        /* Apply Theme Color */
+        :root { --theme-color: #ec4899; --theme-light: #fce7f3; }
         .text-theme { color: var(--theme-color); }
         .bg-theme { background-color: var(--theme-color); }
         .bg-theme-light { background-color: var(--theme-light); }
         .border-theme { border-color: var(--theme-color); }
-        .ring-theme { --tw-ring-color: var(--theme-color); }
         
         html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
         body { background-color: #fdf2f8; transition: background-color 0.3s; }
         .dark body { background-color: #0f172a; }
         
         .glass { 
-            background: rgba(255, 255, 255, 0.65); 
-            backdrop-filter: blur(24px) saturate(180%); 
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.4); 
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            background: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: blur(20px) saturate(180%); 
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.5); 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
         }
         .dark .glass { 
-            background: rgba(30, 30, 30, 0.65); 
+            background: rgba(30, 30, 30, 0.7); 
             border: 1px solid rgba(255, 255, 255, 0.08); 
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
 
         .ios-btn { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -85,31 +79,43 @@
         .transform-style-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
+
+        /* Tutorial Spotlight Overlay */
+        .tutorial-overlay {
+            position: fixed; inset: 0; z-index: 9998;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+        }
+        .tutorial-highlight {
+            position: relative; z-index: 9999;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+            border-radius: 16px; pointer-events: none;
+        }
     </style>
 </head>
 <body class="text-gray-800 transition-colors duration-300 dark:text-gray-100 font-sans min-h-screen overflow-x-hidden selection:bg-pink-200 selection:text-pink-900"
       x-data="deerApp()" x-init="initApp()" @scroll.window="handleScroll" :style="`--theme-color: ${currentTheme.color}; --theme-light: ${currentTheme.light}`">
 
     <div class="fixed inset-0 overflow-hidden -z-10 pointer-events-none">
-        <div class="absolute top-[-20%] left-[-20%] w-[600px] h-[600px] rounded-full mix-blend-multiply filter blur-[120px] opacity-30 animate-float" :style="`background-color: ${currentTheme.color}; transform: translateY(${scrollY * 0.05}px)`"></div>
-        <div class="absolute bottom-[-20%] right-[-20%] w-[600px] h-[600px] bg-blue-300 rounded-full mix-blend-multiply filter blur-[120px] opacity-30 animate-float" style="animation-delay: 2s;" :style="`transform: translateY(-${scrollY * 0.05}px)`"></div>
+        <div class="absolute top-0 left-[-10%] w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+        <div class="absolute top-0 right-[-10%] w-96 h-96 bg-yellow-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-32 left-20 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
     </div>
 
     <nav class="fixed top-0 w-full z-50 transition-all duration-500 border-b border-transparent"
          :class="scrollY > 20 ? 'glass shadow-sm border-white/20' : 'bg-transparent'">
         <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
             
-            <div class="flex items-center cursor-pointer ios-btn flex-shrink-0 transition-all duration-300" 
-                 @click="changeTab('home')" :class="scrollY > 20 ? 'scale-90' : 'scale-100'">
-                <img src="./images/basic/icon.png" class="w-9 h-9 rounded-full mr-2 border-2 border-theme object-cover shadow-sm flex-shrink-0">
-                <span class="font-bold text-xl text-gray-800 dark:text-white tracking-wide font-sans">DEER.OS</span>
+            <div class="flex items-center cursor-pointer ios-btn flex-shrink-0" @click="changeTab('home')">
+                <img src="./images/basic/icon.png" class="w-9 h-9 rounded-full mr-2 border-2 border-theme object-cover shadow-sm">
+                <span class="font-bold text-xl text-gray-800 dark:text-white tracking-wide">鹿🦌的QA網站</span>
             </div>
             
-            <div class="flex space-x-1 bg-white/40 dark:bg-black/20 p-1 rounded-full backdrop-blur-md border border-white/10 overflow-x-auto no-scrollbar mx-2">
-                <button @click="changeTab('home')" :class="tabClass('home')"><span x-text="t('nav_home')"></span></button>
-                <button @click="changeTab('ai')" :class="tabClass('ai')"><span x-text="t('nav_ai')"></span></button>
-                <button @click="startQuizMode()" :class="tabClass('quiz')"><span x-text="t('nav_quiz')"></span></button>
-                <button @click="changeTab('idcard')" :class="tabClass('idcard')"><span x-text="t('nav_id')"></span></button>
+            <div class="flex space-x-1 bg-white/40 dark:bg-black/20 p-1 rounded-full backdrop-blur-md border border-white/10 overflow-x-auto no-scrollbar mx-2" :class="{'z-[9999] ring-4 ring-white': tutorialStep === 2}">
+                <button @click="changeTab('home')" :class="tabClass('home')">首頁</button>
+                <button @click="changeTab('ai')" :class="tabClass('ai')">AI 麋鹿</button>
+                <button @click="startQuizMode()" :class="tabClass('quiz')">大會考</button>
+                <button @click="changeTab('idcard')" :class="tabClass('idcard')">身分證</button>
             </div>
             
             <div class="flex items-center gap-2 flex-shrink-0" x-data="{ open: false }">
@@ -117,19 +123,11 @@
                     <button @click="open = !open" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 ios-btn text-lg">🎨</button>
                     <div x-show="open" @click.outside="open = false" x-transition class="absolute right-0 mt-3 w-64 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-4 z-50">
                         <div class="mb-4">
-                            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Theme Color</div>
+                            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">主題顏色</div>
                             <div class="flex justify-between gap-2">
                                 <template x-for="theme in themes" :key="theme.name">
                                     <button @click="setTheme(theme)" class="w-8 h-8 rounded-full border-2 transition-transform hover:scale-110" :style="`background-color: ${theme.color}; border-color: ${currentTheme.name === theme.name ? 'white' : 'transparent'}; box-shadow: ${currentTheme.name === theme.name ? '0 0 0 2px '+theme.color : 'none'}`"></button>
                                 </template>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Language</div>
-                            <div class="flex flex-col gap-1">
-                                <button @click="setLang('zh-TW')" class="px-3 py-2 rounded-lg text-sm text-left hover:bg-black/5 dark:hover:bg-white/10" :class="lang === 'zh-TW' ? 'font-bold text-theme' : ''">繁體中文</button>
-                                <button @click="setLang('en')" class="px-3 py-2 rounded-lg text-sm text-left hover:bg-black/5 dark:hover:bg-white/10" :class="lang === 'en' ? 'font-bold text-theme' : ''">English</button>
-                                <button @click="setLang('zh-CN')" class="px-3 py-2 rounded-lg text-sm text-left hover:bg-black/5 dark:hover:bg-white/10" :class="lang === 'zh-CN' ? 'font-bold text-theme' : ''">简体中文</button>
                             </div>
                         </div>
                     </div>
@@ -144,27 +142,27 @@
     <main class="pt-24 pb-20 px-4 max-w-6xl mx-auto min-h-screen">
         
         <div x-show="installPrompt" x-transition class="mb-6 mx-auto max-w-md glass p-4 rounded-2xl flex items-center justify-between border border-theme shadow-lg">
-            <div class="flex items-center"><span class="text-3xl mr-3">📲</span><div><div class="font-bold text-gray-800 dark:text-white" x-text="t('pwa_title')"></div><div class="text-xs text-gray-500" x-text="t('pwa_desc')"></div></div></div>
-            <button @click="installPWA" class="px-5 py-2 bg-theme text-white rounded-full text-sm font-bold shadow-md hover:opacity-90 ios-btn" x-text="t('pwa_btn')"></button>
+            <div class="flex items-center"><span class="text-3xl mr-3">📲</span><div><div class="font-bold text-gray-800 dark:text-white">安裝 鹿🦌APP</div><div class="text-xs text-gray-500">加入主畫面體驗更佳！</div></div></div>
+            <button @click="installPWA" class="px-5 py-2 bg-theme text-white rounded-full text-sm font-bold shadow-md hover:opacity-90 ios-btn">安裝</button>
         </div>
 
         <div x-show="currentTab === 'home'" x-transition.opacity.duration.300ms>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="md:col-span-2 glass rounded-[32px] p-8 border border-white/40 flex flex-col sm:flex-row items-center gap-8 shadow-xl relative overflow-hidden">
+                <div class="md:col-span-2 glass rounded-[32px] p-8 border border-white/40 flex flex-col sm:flex-row items-center gap-8 shadow-xl relative overflow-hidden animate-tilt">
                     <div class="relative group z-10">
                         <img src="./images/basic/icon.png" class="w-28 h-28 md:w-32 md:h-32 rounded-full object-cover shadow-2xl border-4 border-white dark:border-gray-700 ios-btn cursor-pointer flex-shrink-0" @click="triggerEasterEgg('profile')">
                         <div class="absolute -bottom-2 -right-2 bg-green-400 w-6 h-6 rounded-full border-4 border-white dark:border-gray-800 animate-pulse"></div>
                     </div>
                     <div class="flex-1 text-center sm:text-left z-10">
                         <h2 class="text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">鹿🦌 <span class="text-lg font-normal text-gray-500"></span></h2>
-                        <p class="text-gray-600 dark:text-gray-300 font-medium mb-4 leading-relaxed whitespace-pre-line" x-text="t('profile_desc')"></p>
+                        <p class="text-gray-600 dark:text-gray-300 font-medium mb-4 leading-relaxed whitespace-pre-line">🎂 10/03 天秤座｜📏 170cm｜⚖️ 42kg
+🐈 貓咪：哺嚕 (英國短毛貓)</p>
                         <div class="flex justify-center sm:justify-start gap-3">
                             <a href="https://www.tiktok.com/@ld.1003_" target="_blank" class="px-5 py-2 bg-black text-white rounded-full text-sm font-bold shadow-lg ios-btn flex items-center gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg> TikTok</a>
                             <a href="https://www.instagram.com/ld.1003_/" target="_blank" class="px-5 py-2 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 text-white rounded-full text-sm font-bold shadow-lg ios-btn flex items-center gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg> IG</a>
                         </div>
                     </div>
-                    <div class="absolute right-0 top-0 w-64 h-64 bg-gradient-to-br from-transparent to-theme opacity-10 rounded-full blur-3xl -z-0"></div>
                 </div>
 
                 <div class="glass rounded-[32px] p-6 border border-white/40 shadow-xl flex flex-col justify-center items-center relative overflow-hidden">
@@ -179,15 +177,15 @@
                         <span x-text="fanXP"></span>
                         <span x-text="nextLevelXP"></span>
                     </div>
-                    
                     <div class="mt-4 text-[10px] text-gray-400 text-center">多互動可累積 XP 升級！</div>
                 </div>
             </div>
 
             <div class="sticky top-20 z-40 mb-8 transition-all duration-500 ease-out" :class="scrollY > 150 ? 'pt-2 px-2' : ''">
-                <div class="relative max-w-2xl mx-auto transition-all duration-300" :class="scrollY > 150 ? 'shadow-2xl scale-[0.98]' : 'shadow-lg'">
+                <div class="relative max-w-2xl mx-auto transition-all duration-300" :class="scrollY > 150 ? 'shadow-2xl scale-[0.98]' : 'shadow-lg'"
+                     :class="{'z-[9999] ring-4 ring-white ring-offset-4 ring-offset-black/50': tutorialStep === 1}">
                     <div class="absolute inset-0 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl transition-all duration-500" :class="scrollY > 150 ? 'opacity-100' : 'opacity-90'"></div>
-                    <input type="text" x-model="search" @input="currentPage = 1" :placeholder="t('search_ph')" 
+                    <input type="text" x-model="search" @input="currentPage = 1" placeholder="🔍 搜尋問題... (例如: 男友、身高)" 
                            class="relative w-full pl-6 pr-6 py-4 rounded-2xl bg-transparent border-2 border-transparent focus:border-theme focus:ring-0 text-lg transition-all placeholder-gray-400 dark:text-white"
                            :class="scrollY > 150 ? 'py-3 text-base' : 'py-4 text-lg'">
                 </div>
@@ -206,8 +204,8 @@
                                     <h3 class="text-lg font-bold leading-snug text-gray-800 dark:text-gray-100 line-clamp-3" x-text="item.q"></h3>
                                 </div>
                                 <div class="flex justify-between items-end">
-                                    <span x-show="search.length > 0 && item.score > 0" class="text-xs text-theme font-bold bg-theme-light dark:bg-gray-700 px-2 py-1 rounded">MATCH</span>
-                                    <div class="text-xs text-gray-400 font-bold uppercase tracking-wider flex items-center">Flip <span class="ml-1 text-lg">➜</span></div>
+                                    <span x-show="search.length > 0 && item.score > 0" class="text-xs text-theme font-bold bg-theme-light dark:bg-gray-700 px-2 py-1 rounded">符合</span>
+                                    <div class="text-xs text-gray-400 font-bold uppercase tracking-wider flex items-center">翻轉 <span class="ml-1 text-lg">➜</span></div>
                                 </div>
                             </div>
                             <div class="absolute w-full h-full glass rounded-[24px] p-6 flex flex-col backface-hidden rotate-y-180 bg-white dark:bg-gray-800 border-b-4 border-theme overflow-y-auto">
@@ -215,7 +213,7 @@
                                     <p class="text-[17px] font-medium text-center leading-relaxed text-gray-700 dark:text-gray-200" x-text="item.a"></p>
                                 </div>
                                 <button @click.stop="openShareModal(item)" class="w-full mt-3 flex justify-center items-center gap-2 text-xs text-theme bg-theme-light dark:bg-gray-700 px-4 py-3 rounded-xl font-bold hover:opacity-80 transition-colors ios-btn">
-                                    <span class="text-lg">📸</span> <span x-text="t('share_card_btn')"></span>
+                                    <span class="text-lg">📸</span> 生成美圖分享
                                 </button>
                             </div>
                         </div>
@@ -230,7 +228,8 @@
             </div>
         </div>
 
-        <div x-show="currentTab === 'ai'" x-cloak class="max-w-2xl mx-auto h-[75vh] flex flex-col glass rounded-[32px] overflow-hidden shadow-2xl relative border border-white/40 animate-pop-in">
+        <div x-show="currentTab === 'ai'" x-cloak class="max-w-2xl mx-auto h-[75vh] flex flex-col glass rounded-[32px] overflow-hidden shadow-2xl relative border border-white/40 animate-pop-in"
+             :class="{'z-[9999] ring-4 ring-white': tutorialStep === 3}">
             <div class="absolute inset-0 z-0">
                 <div class="absolute inset-0 z-0 bg-cover bg-center transition-all duration-1000" :style="`background-image: url(${aiBackground})`"></div>
                 <div class="absolute inset-0 z-10 bg-white/70 dark:bg-gray-900/80 backdrop-blur-[8px]"></div>
@@ -239,16 +238,16 @@
             <div x-show="aiStatus !== 'online'" class="absolute inset-0 z-20 bg-white/80 dark:bg-gray-900/80 flex flex-col items-center justify-center text-center p-6 transition-opacity duration-500 backdrop-blur-md">
                 <div class="relative group cursor-pointer ios-btn" @click="wakeUpAI">
                     <img src="./images/basic/AI.png" class="w-32 h-32 rounded-full object-cover mb-4 border-4 border-white shadow-2xl grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all" :class="{'animate-pulse': wakeUpCount > 0}">
-                    <div class="absolute -bottom-3 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-3 py-1 rounded-full whitespace-nowrap font-bold shadow-lg" x-text="t('ai_wake_btn')"></div>
+                    <div class="absolute -bottom-3 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-3 py-1 rounded-full whitespace-nowrap font-bold shadow-lg">點擊叫醒我！</div>
                 </div>
-                <h3 class="text-3xl font-black mb-2 text-gray-800 dark:text-white mt-6">AI Moose 😴</h3>
+                <h3 class="text-3xl font-black mb-2 text-gray-800 dark:text-white mt-6">AI 麋鹿 😴</h3>
                 <p class="text-theme font-bold text-lg mb-4" x-text="aiStatusText"></p>
-                <p class="text-sm text-gray-500 font-medium" x-show="wakeUpCount > 0" x-text="t('ai_wake_hint').replace('{n}', 5-wakeUpCount)"></p>
+                <p class="text-sm text-gray-500 font-medium" x-show="wakeUpCount > 0" x-text="`再點 ${5-wakeUpCount} 下！`"></p>
             </div>
             
             <div class="relative z-10 bg-white/60 dark:bg-black/40 backdrop-blur-md p-4 flex items-center border-b border-gray-200/20">
                 <img src="./images/basic/AI.png" class="w-10 h-10 rounded-full object-cover mr-3 bg-white p-0.5 shadow-md flex-shrink-0">
-                <div><h3 class="font-bold text-gray-800 dark:text-gray-100">AI Moose</h3><div class="text-xs text-green-500 font-bold flex items-center"><span class="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span> Online</div></div>
+                <div><h3 class="font-bold text-gray-800 dark:text-gray-100">AI 麋鹿</h3><div class="text-xs text-green-500 font-bold flex items-center"><span class="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span> Online</div></div>
             </div>
             
             <div class="relative z-10 flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth" id="chatContainer">
@@ -269,7 +268,7 @@
             
             <div class="relative z-10 p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-200/20">
                 <form @submit.prevent="sendMessage" class="flex gap-2">
-                    <input type="text" x-model="chatInput" :disabled="aiStatus !== 'online'" :placeholder="t('ai_input_ph')" class="flex-1 rounded-full bg-gray-100 dark:bg-gray-800 border-none focus:ring-2 focus:ring-theme px-5 py-3 transition-all disabled:opacity-50">
+                    <input type="text" x-model="chatInput" :disabled="aiStatus !== 'online'" placeholder="問問關於鹿的事情... (試試: 幾歲)" class="flex-1 rounded-full bg-gray-100 dark:bg-gray-800 border-none focus:ring-2 focus:ring-theme px-5 py-3 transition-all disabled:opacity-50">
                     <button type="submit" :disabled="aiStatus !== 'online'" class="bg-theme hover:opacity-90 text-white rounded-full p-3 w-12 h-12 flex items-center justify-center shadow-lg disabled:opacity-50 ios-btn">➤</button>
                 </form>
             </div>
@@ -278,14 +277,14 @@
         <div x-show="currentTab === 'quiz'" x-cloak class="max-w-2xl mx-auto">
             <div x-show="!quizStarted && !quizEnded" class="text-center py-16 glass rounded-[32px] p-10 shadow-2xl animate-pop-in">
                 <div class="text-8xl mb-6 animate-float drop-shadow-xl">🎓</div>
-                <h2 class="text-4xl font-black mb-4 text-gray-800 dark:text-white tracking-tight" x-text="t('quiz_title')"></h2>
-                <p class="text-gray-600 dark:text-gray-300 mb-10 font-medium text-lg" x-text="t('quiz_intro')"></p>
-                <button @click="startQuiz" class="px-12 py-4 bg-gradient-to-r from-theme to-purple-600 text-white rounded-full font-black text-xl shadow-xl ios-btn" x-text="t('quiz_start_btn')"></button>
+                <h2 class="text-4xl font-black mb-4 text-gray-800 dark:text-white tracking-tight">麋鹿大會考</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-10 font-medium text-lg">全對可獲得限定版 Gold Moose Medal！🏆</p>
+                <button @click="startQuiz" class="px-12 py-4 bg-gradient-to-r from-theme to-purple-600 text-white rounded-full font-black text-xl shadow-xl ios-btn">開始挑戰</button>
             </div>
             <div x-show="quizStarted && !quizEnded" class="animate-pop-in">
                 <div class="flex justify-between items-center mb-6 px-4">
                     <span class="font-bold text-white bg-theme px-4 py-1.5 rounded-full text-sm">Q.<span x-text="currentQuizIndex + 1"></span>/5</span>
-                    <span class="text-sm font-bold bg-gray-200 dark:bg-gray-700 px-4 py-1.5 rounded-full">Score: <span x-text="quizScore"></span></span>
+                    <span class="text-sm font-bold bg-gray-200 dark:bg-gray-700 px-4 py-1.5 rounded-full">分數: <span x-text="quizScore"></span></span>
                 </div>
                 <div class="glass rounded-3xl p-8 mb-6 border-l-8 border-theme min-h-[180px] flex items-center justify-center relative shadow-lg">
                     <h3 class="text-2xl font-bold text-center leading-relaxed text-gray-800 dark:text-white" x-text="currentQuestion?.q"></h3>
@@ -299,30 +298,30 @@
                         </button>
                     </template>
                 </div>
-                <button x-show="hasAnswered" @click="nextQuestion" class="mt-8 w-full py-4 bg-gray-800 dark:bg-gray-700 text-white rounded-2xl font-bold shadow-lg ios-btn text-lg">Next ➜</button>
+                <button x-show="hasAnswered" @click="nextQuestion" class="mt-8 w-full py-4 bg-gray-800 dark:bg-gray-700 text-white rounded-2xl font-bold shadow-lg ios-btn text-lg">下一題 ➜</button>
             </div>
             <div x-show="quizEnded" class="text-center py-16 glass rounded-[32px] p-10 shadow-2xl relative overflow-hidden animate-pop-in">
                 <div x-show="quizScore === 5" class="mb-8 relative z-10">
                     <div class="w-48 h-48 mx-auto rounded-full bg-gradient-to-tr from-yellow-300 to-yellow-600 p-1 animate-float shadow-2xl">
                         <img src="./images/basic/icon.png" class="w-full h-full rounded-full object-cover border-4 border-white">
                     </div>
-                    <div class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-orange-600 mt-6" x-text="t('quiz_gold')"></div>
+                    <div class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-orange-600 mt-6">Gold Moose Medal 🏆</div>
                 </div>
                 <div x-show="quizScore < 5" class="text-8xl mb-6 transform rotate-12 inline-block"><span x-text="quizScore >= 3 ? '🥈' : '🤡'"></span></div>
-                <h2 class="text-6xl font-black text-gray-800 dark:text-white mb-2 tracking-tighter">Score: <span x-text="quizScore * 20" class="text-theme"></span></h2>
+                <h2 class="text-6xl font-black text-gray-800 dark:text-white mb-2 tracking-tighter">總分: <span x-text="quizScore * 20" class="text-theme"></span></h2>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center mt-12">
-                    <button @click="startQuiz" class="px-8 py-3 bg-gray-200 dark:bg-gray-700 rounded-full font-bold ios-btn" x-text="t('quiz_retry')"></button>
-                    <button @click="shareResult" class="px-8 py-3 bg-theme text-white rounded-full font-bold shadow-lg ios-btn" x-text="t('quiz_share')"></button>
+                    <button @click="startQuiz" class="px-8 py-3 bg-gray-200 dark:bg-gray-700 rounded-full font-bold ios-btn">再測一次</button>
+                    <button @click="shareResult" class="px-8 py-3 bg-theme text-white rounded-full font-bold shadow-lg ios-btn">分享成績</button>
                 </div>
             </div>
         </div>
 
         <div x-show="currentTab === 'idcard'" x-cloak class="max-w-2xl mx-auto">
             <div class="glass rounded-[32px] p-8 shadow-2xl animate-pop-in">
-                <h2 class="text-3xl font-black mb-8 text-center text-theme">Moose Center 🪪</h2>
+                <h2 class="text-3xl font-black mb-8 text-center text-theme">麋鹿認證中心 🪪</h2>
                 <div class="space-y-6 mb-10">
-                    <div><label class="block text-sm font-bold text-gray-500 mb-2 uppercase" x-text="t('id_label_name')"></label><input type="text" x-model="idCardName" :placeholder="t('id_ph_name')" class="w-full px-5 py-4 rounded-2xl bg-white/50 dark:bg-black/30 border border-gray-200 dark:border-gray-700 focus:border-theme focus:ring-0 text-lg"></div>
-                    <div><label class="block text-sm font-bold text-gray-500 mb-2 uppercase" x-text="t('id_label_bg')"></label>
+                    <div><label class="block text-sm font-bold text-gray-500 mb-2 uppercase">你的暱稱</label><input type="text" x-model="idCardName" placeholder="輸入暱稱..." class="w-full px-5 py-4 rounded-2xl bg-white/50 dark:bg-black/30 border border-gray-200 dark:border-gray-700 focus:border-theme focus:ring-0 text-lg"></div>
+                    <div><label class="block text-sm font-bold text-gray-500 mb-2 uppercase">選擇背景</label>
                         <div class="grid grid-cols-3 gap-3">
                             <template x-for="(bg, index) in backgrounds" :key="index">
                                 <div @click="selectedBg = bg" class="aspect-[3/4] rounded-xl overflow-hidden cursor-pointer border-4 transition-all" :class="selectedBg === bg ? 'border-theme scale-95' : 'border-transparent opacity-80 hover:opacity-100'">
@@ -332,7 +331,7 @@
                         </div>
                     </div>
                 </div>
-                <button @click="generateIDCard" class="w-full py-4 bg-gradient-to-r from-theme to-pink-600 text-white rounded-2xl font-bold shadow-xl ios-btn text-lg flex items-center justify-center"><span class="mr-2">✨</span> <span x-text="t('id_btn')"></span></button>
+                <button @click="generateIDCard" class="w-full py-4 bg-gradient-to-r from-theme to-pink-600 text-white rounded-2xl font-bold shadow-xl ios-btn text-lg flex items-center justify-center"><span class="mr-2">✨</span> 生成身分證</button>
             </div>
         </div>
 
@@ -354,14 +353,14 @@
             <div class="absolute inset-0 z-10 bg-black/40 backdrop-blur-[6px]"></div>
             <div class="relative z-20 w-full p-8 flex flex-col items-center">
                 <img src="./images/basic/icon.png" class="w-20 h-20 rounded-full border-4 border-white shadow-xl mb-6">
-                <div class="bg-white/90 p-8 rounded-[32px] w-full shadow-2xl backdrop-blur-md">
-                    <div class="text-xs font-black text-deer-500 uppercase tracking-widest mb-3">Question</div>
+                <div class="bg-white/95 p-8 rounded-[32px] w-full shadow-2xl backdrop-blur-md border border-white/50">
+                    <div class="text-xs font-black text-pink-500 uppercase tracking-widest mb-3">Question</div>
                     <p id="shareCardQ" class="font-bold text-gray-900 mb-6 text-xl leading-relaxed"></p>
                     <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-6"></div>
                     <div class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Answer</div>
-                    <p id="shareCardA" class="text-deer-600 font-bold text-2xl"></p>
+                    <p id="shareCardA" class="text-pink-600 font-bold text-2xl leading-relaxed"></p>
                 </div>
-                <div class="mt-8 text-white/60 text-[10px] font-mono border border-white/20 px-3 py-1 rounded-full">https://wangleoncom.github.io/ldweb/</div>
+                <div class="mt-8 text-white/80 text-[10px] font-mono border border-white/40 px-3 py-1 rounded-full bg-black/20">https://wangleoncom.github.io/ldweb/</div>
             </div>
         </div>
 
@@ -386,8 +385,34 @@
             <div class="bg-white rounded-[32px] p-6 max-w-sm w-full flex flex-col items-center animate-pop-in relative">
                 <div class="absolute -top-12 text-white font-bold text-sm tracking-widest opacity-80">長按圖片儲存 📸</div>
                 <div id="shareResultContainer" class="mb-6 shadow-2xl rounded-2xl overflow-hidden w-full bg-gray-100 min-h-[300px] flex items-center justify-center"></div>
-                <button @click="showShareModal = false" class="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-full font-bold text-sm transition-colors ios-btn">Close</button>
+                <button @click="showShareModal = false" class="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-full font-bold text-sm transition-colors ios-btn">關閉</button>
             </div>
+        </div>
+        
+        <div x-show="showUpdateModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" x-cloak x-transition.opacity>
+            <div class="bg-white dark:bg-gray-800 w-full max-w-md rounded-3xl p-6 shadow-2xl border-2 border-theme animate-pop-in relative">
+                <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-theme text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg tracking-widest">UPDATE</div>
+                <h3 class="text-2xl font-black text-center mb-4 text-gray-800 dark:text-white">🎉 網站大更新 v3.1</h3>
+                <div class="space-y-3 mb-6 text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
+                    <p>✨ <b>AI 大進化：</b>現在聽得懂「主播」、「妳」是誰了！</p>
+                    <p>🖼️ <b>美圖修復：</b>分享卡片的文字變清晰囉！</p>
+                    <p>🎓 <b>新手引導：</b>新增了第一次使用的教學模式。</p>
+                    <p>🎨 <b>視覺升級：</b>更多可愛的動畫效果。</p>
+                </div>
+                <button @click="closeUpdateModal" class="w-full py-3 bg-theme text-white rounded-full font-bold shadow-lg ios-btn">太棒了！</button>
+            </div>
+        </div>
+
+        <div x-show="showTutorial" class="tutorial-overlay flex flex-col items-center justify-center text-white text-center p-8" x-cloak x-transition.opacity>
+            <div class="mb-8 max-w-xs">
+                <div class="text-6xl mb-4 animate-bounce">🦌</div>
+                <h2 class="text-2xl font-bold mb-2" x-text="tutorialSteps[tutorialStep-1].title"></h2>
+                <p class="text-white/80" x-text="tutorialSteps[tutorialStep-1].desc"></p>
+            </div>
+            <button @click="nextTutorialStep" class="px-8 py-3 bg-white text-theme rounded-full font-bold shadow-xl ios-btn">
+                <span x-text="tutorialStep === tutorialSteps.length ? '開始使用' : '下一步'"></span>
+            </button>
+            <button @click="endTutorial" class="mt-4 text-sm text-white/50 underline">跳過教學</button>
         </div>
 
         <div x-show="showToast" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-y-10 opacity-0" x-transition:enter-end="translate-y-0 opacity-100" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-full text-sm z-[110] shadow-2xl font-bold flex items-center border border-white/10">
@@ -400,51 +425,6 @@
         if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
             window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
         }
-
-        const TRANSLATIONS = {
-            'zh-TW': {
-                nav_home: '首頁', nav_ai: 'AI', nav_quiz: '測驗', nav_id: '身分證',
-                profile_desc: '🎂 10/03 天秤座｜📏 170cm｜⚖️ 42kg\n🐈 貓咪：哺嚕 (英國短毛貓)',
-                search_ph: '🔍 搜尋問題... (例如: 男友、身高)',
-                share_card_btn: '生成美圖分享',
-                pwa_title: '安裝 DEER.OS', pwa_desc: '加入主畫面體驗更佳！', pwa_btn: '安裝',
-                ai_wake_btn: '點擊叫醒我！', ai_wake_hint: '再點 {n} 下！', ai_input_ph: '問問關於鹿的事情...',
-                quiz_title: 'Moose Exam', quiz_intro: '全對可獲得限定版 Gold Moose Medal！🏆', quiz_start_btn: '開始挑戰',
-                quiz_gold: 'Gold Moose Medal 🏆', quiz_retry: '再測一次', quiz_share: '分享成績',
-                id_label_name: '你的暱稱', id_ph_name: '輸入暱稱...', id_label_bg: '選擇背景', id_btn: '生成身分證',
-                ai_hello: '哈囉！我是 AI Moose，關於鹿的事情我都略懂略懂 😎',
-                ai_unknown: '這題超綱了！我去翻翻筆記... 🤔 (資料庫無此紀錄)',
-                ai_status_sleep: '呼呼大睡中... 😴', ai_status_live: '正在直播！快來看 🎥', ai_status_game: '正在打傳說 🎮'
-            },
-            'en': {
-                nav_home: 'Home', nav_ai: 'AI', nav_quiz: 'Quiz', nav_id: 'ID Card',
-                profile_desc: '🎂 Oct 3 Libra｜📏 170cm｜⚖️ 42kg\n🐈 Cat: Buru (British Shorthair)',
-                search_ph: '🔍 Search keywords (e.g. boyfriend)',
-                share_card_btn: 'Share Image',
-                pwa_title: 'Install DEER.OS', pwa_desc: 'Add to home screen!', pwa_btn: 'Install',
-                ai_wake_btn: 'Wake me up!', ai_wake_hint: '{n} more taps!', ai_input_ph: 'Ask me anything about Deer...',
-                quiz_title: 'Moose Exam', quiz_intro: 'Get the Gold Medal by answering all correctly! 🏆', quiz_start_btn: 'Start',
-                quiz_gold: 'Gold Moose Medal 🏆', quiz_retry: 'Retry', quiz_share: 'Share',
-                id_label_name: 'Nickname', id_ph_name: 'Enter name...', id_label_bg: 'Select Background', id_btn: 'Generate ID',
-                ai_hello: 'Hi! I am AI Moose. Ask me anything about Walking Deer! 😎',
-                ai_unknown: 'Hmm, I don\'t know that one yet. Maybe ask in the live stream? 🤔',
-                ai_status_sleep: 'Sleeping... 😴', ai_status_live: 'Streaming now! 🎥', ai_status_game: 'Playing AOV 🎮'
-            },
-            'zh-CN': {
-                nav_home: '首页', nav_ai: 'AI', nav_quiz: '测验', nav_id: '身份证',
-                profile_desc: '🎂 10/03 天秤座｜📏 170cm｜⚖️ 42kg\n🐈 猫咪：哺噜 (英国短毛猫)',
-                search_ph: '🔍 搜索问题... (例如: 男友、身高)',
-                share_card_btn: '生成美图分享',
-                pwa_title: '安装 DEER.OS', pwa_desc: '加入主屏幕体验更加！', pwa_btn: '安装',
-                ai_wake_btn: '点击叫醒我！', ai_wake_hint: '再点 {n} 下！', ai_input_ph: '问问关于鹿的事情...',
-                quiz_title: 'Moose Exam', quiz_intro: '全对可获得限定版 Gold Moose Medal！🏆', quiz_start_btn: '开始挑战',
-                quiz_gold: 'Gold Moose Medal 🏆', quiz_retry: '再测一次', quiz_share: '分享成绩',
-                id_label_name: '你的昵称', id_ph_name: '输入昵称...', id_label_bg: '选择背景', id_btn: '生成身份证',
-                ai_hello: '哈喽！我是 AI Moose，关于鹿的事情我都略懂略懂 😎',
-                ai_unknown: '这题超纲了！我去翻翻笔记... 🤔 (资料库无此纪录)',
-                ai_status_sleep: '呼呼大睡中... 😴', ai_status_live: '正在直播！快来看 🎥', ai_status_game: '正在打传说 🎮'
-            }
-        };
 
         const THEMES = [
             { name: 'pink', color: '#ec4899', light: '#fce7f3' },
@@ -465,7 +445,6 @@
                 toastMessage: '',
                 scrollY: 0,
                 
-                lang: 'zh-TW',
                 themes: THEMES,
                 currentTheme: THEMES[0],
                 installPrompt: null,
@@ -475,7 +454,17 @@
                 showShareModal: false, randomShareBg: '',
                 currentPage: 1, itemsPerPage: 30,
                 
-                // Fan Level Logic
+                // 系統狀態
+                appVersion: '3.1.0',
+                showUpdateModal: false,
+                showTutorial: false,
+                tutorialStep: 0, // 0:Off, 1:Search, 2:Tabs, 3:AI
+                tutorialSteps: [
+                    { title: "智慧搜尋", desc: "想知道鹿🦌的身高、生日？直接在這裡搜尋關鍵字！" },
+                    { title: "功能切換", desc: "這裡有首頁、AI聊天、大會考和身分證製作功能。" },
+                    { title: "AI 麋鹿", desc: "無聊時可以找 AI 麋鹿聊天，它知道很多秘密喔！" }
+                ],
+                
                 fanXP: 0,
                 
                 get fanLevelTitle() {
@@ -486,25 +475,16 @@
                     if (level >= 5) return "實習麋鹿 🦌";
                     return "路人粉 🌱";
                 },
-                get nextLevelXP() {
-                    const level = this.calculateLevel(this.fanXP);
-                    return (level + 1) * 100;
-                },
+                get nextLevelXP() { return (this.calculateLevel(this.fanXP) + 1) * 100; },
                 get xpPercentage() {
                     const level = this.calculateLevel(this.fanXP);
-                    const currentLevelBase = level * 100;
-                    const nextLevelBase = (level + 1) * 100;
-                    return Math.min(100, Math.max(0, ((this.fanXP - currentLevelBase) / (nextLevelBase - currentLevelBase)) * 100));
+                    return Math.min(100, Math.max(0, ((this.fanXP - (level * 100)) / 100) * 100));
                 },
                 
                 chatInput: '', chatHistory: [], isTyping: false, aiStatus: 'offline', aiStatusText: 'Offline', wakeUpCount: 0, aiBackground: '',
                 quizStarted: false, quizEnded: false, quizData: [], currentQuizIndex: 0, currentOptions: [], hasAnswered: false, selectedOption: null, quizScore: 0, currentCorrectText: '',
-                godMode: false, konamiCode: ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'], konamiIndex: 0,
 
                 initApp() {
-                    const savedLang = localStorage.getItem('deer_lang');
-                    if (savedLang) this.lang = savedLang;
-                    
                     const savedTheme = localStorage.getItem('deer_theme');
                     if (savedTheme) this.currentTheme = JSON.parse(savedTheme);
 
@@ -515,25 +495,60 @@
                     window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); this.installPrompt = e; });
                     this.aiBackground = this.backgrounds[0];
                     this.updateAIStatusText();
-                    this.addXP(10); // Daily Login
+                    this.addXP(10);
+
+                    // 檢查版本更新
+                    const storedVersion = localStorage.getItem('deer_app_version');
+                    if (storedVersion !== this.appVersion) {
+                        this.showUpdateModal = true;
+                    } else if (!localStorage.getItem('deer_tutorial_done')) {
+                        // 如果沒有更新，且沒做過教學，則顯示教學
+                        setTimeout(() => this.startTutorial(), 500);
+                    }
                 },
 
-                t(key) { return TRANSLATIONS[this.lang][key] || key; },
-                setLang(l) { this.lang = l; localStorage.setItem('deer_lang', l); this.updateAIStatusText(); },
+                closeUpdateModal() {
+                    this.showUpdateModal = false;
+                    localStorage.setItem('deer_app_version', this.appVersion);
+                    // 關閉更新公告後，如果沒做過教學，則開始教學
+                    if (!localStorage.getItem('deer_tutorial_done')) {
+                        setTimeout(() => this.startTutorial(), 500);
+                    }
+                },
+
+                startTutorial() {
+                    this.showTutorial = true;
+                    this.tutorialStep = 1;
+                    window.scrollTo(0, 0);
+                },
+
+                nextTutorialStep() {
+                    if (this.tutorialStep < this.tutorialSteps.length) {
+                        this.tutorialStep++;
+                        // 如果是介紹 AI，切換到 AI Tab
+                        if (this.tutorialStep === 3) this.changeTab('ai');
+                        else this.changeTab('home');
+                    } else {
+                        this.endTutorial();
+                    }
+                },
+
+                endTutorial() {
+                    this.showTutorial = false;
+                    this.tutorialStep = 0;
+                    this.changeTab('home');
+                    localStorage.setItem('deer_tutorial_done', 'true');
+                },
+
                 setTheme(t) { this.currentTheme = t; localStorage.setItem('deer_theme', JSON.stringify(t)); },
-                
                 handleScroll() { this.scrollY = window.scrollY; },
-
                 calculateLevel(xp) { return Math.floor(xp / 100); },
-                addXP(amount) { 
-                    this.fanXP += amount; 
-                    localStorage.setItem('deer_xp', this.fanXP); 
-                },
+                addXP(amount) { this.fanXP += amount; localStorage.setItem('deer_xp', this.fanXP); },
 
                 updateAIStatusText() {
                     if (this.aiStatus === 'offline') {
-                        const statusKeys = ['ai_status_sleep', 'ai_status_live', 'ai_status_game'];
-                        this.aiStatusText = this.t(statusKeys[Math.floor(Math.random() * statusKeys.length)]);
+                        const statusTexts = ['呼呼大睡中... 😴', '正在直播！快來看 🎥', '正在打傳說 🎮'];
+                        this.aiStatusText = statusTexts[Math.floor(Math.random() * statusTexts.length)];
                     } else {
                         this.aiStatusText = 'Online';
                     }
@@ -542,7 +557,7 @@
                 generateImageFromTemplate(templateId) {
                     this.showShareModal = true;
                     const container = document.getElementById('shareResultContainer');
-                    container.innerHTML = '<div class="p-8 text-center text-gray-400 animate-pulse">Processing... ✨</div>';
+                    container.innerHTML = '<div class="p-8 text-center text-gray-400 animate-pulse">正在生成圖片... ✨</div>';
                     setTimeout(() => {
                         const el = document.getElementById(templateId);
                         html2canvas(el, { backgroundColor: null, useCORS: true, scale: 3, logging: false }).then(canvas => {
@@ -552,12 +567,12 @@
                             img.className = "w-full h-auto rounded-xl shadow-sm";
                             container.appendChild(img);
                             this.addXP(20);
-                        }).catch(err => { container.innerHTML = '<div class="text-red-500 text-center p-4 text-xs">Error<br>Check Images</div>'; });
-                    }, 600);
+                        }).catch(err => { container.innerHTML = '<div class="text-red-500 text-center p-4 text-xs">生成失敗，請稍後再試</div>'; });
+                    }, 800);
                 },
 
                 generateIDCard() {
-                    if (!this.idCardName) { this.showNotification("Name required!"); return; }
+                    if (!this.idCardName) { this.showNotification("請輸入暱稱！"); return; }
                     this.generatedIdNumber = 'MOOSE-' + Math.floor(1000 + Math.random() * 9000);
                     this.generateImageFromTemplate('idCardTemplate');
                 },
@@ -576,19 +591,26 @@
                         document.getElementById('shareScoreNum').innerText = score;
                         const titleEl = document.getElementById('shareScoreTitle');
                         const commentEl = document.getElementById('shareScoreComment');
-                        if (this.quizScore === 5) { titleEl.innerText = this.t('quiz_gold'); commentEl.innerText = "Certified Moose! 🔥"; } 
-                        else if (this.quizScore >= 3) { titleEl.innerText = "Silver Medal 🥈"; commentEl.innerText = "Not bad!"; } 
-                        else { titleEl.innerText = "Try Again 🤡"; commentEl.innerText = "Fighting!"; }
+                        if (this.quizScore === 5) { titleEl.innerText = "Gold Moose Medal 🏆"; commentEl.innerText = "你是真正的傳說鹿粉！🔥"; } 
+                        else if (this.quizScore >= 3) { titleEl.innerText = "Silver Medal 🥈"; commentEl.innerText = "還不錯喔，繼續加油！"; } 
+                        else { titleEl.innerText = "Try Again 🤡"; commentEl.innerText = "去複習一下再來吧！"; }
                         this.generateImageFromTemplate('quizResultTemplate');
                     }, 100);
                 },
 
                 async installPWA() { if (this.installPrompt) { this.installPrompt.prompt(); const { outcome } = await this.installPrompt.userChoice; if (outcome === 'accepted') this.installPrompt = null; } },
                 
-                // Smart Search Logic (Used by both Search Bar and AI)
+                // 🧠 智慧搜尋 v2.0
                 smartSearch(query) {
                     if (!query) return [];
-                    const terms = query.toLowerCase().split(/\s+/).filter(t => t.length > 0);
+                    
+                    // 正規化：將常見同義詞替換為標準關鍵字
+                    let normalizedQuery = query.toLowerCase()
+                        .replace(/主播|妳|你|她/g, '鹿')
+                        .replace(/男朋友|男友/g, '男朋友');
+
+                    // 斷詞
+                    const terms = normalizedQuery.split(/\s+/).filter(t => t.length > 0);
                     
                     return this.allData.map(item => {
                         let score = 0;
@@ -597,9 +619,9 @@
                         const tags = (item.tags || []).join(' ').toLowerCase();
                         
                         terms.forEach(term => {
-                            if (tags.includes(term)) score += 10; // Tag match is high priority
-                            if (qText.includes(term)) score += 5;
-                            if (aText.includes(term)) score += 1;
+                            if (tags.includes(term)) score += 15;
+                            if (qText.includes(term)) score += 10;
+                            if (aText.includes(term)) score += 2;
                         });
                         return { ...item, score };
                     }).filter(item => item.score > 0).sort((a, b) => b.score - a.score);
@@ -622,42 +644,38 @@
                 tabClass(tab) { const active = "bg-white text-theme shadow-sm font-bold"; const inactive = "text-gray-500 hover:text-gray-900"; return `px-5 py-2 rounded-full text-sm transition-all whitespace-nowrap ${this.currentTab === tab ? active : inactive}`; },
                 getOptionClass(opt) { if (!this.hasAnswered) return "bg-white dark:bg-gray-800 hover:bg-theme-light border-transparent"; if (opt === this.currentCorrectText) return "bg-green-100 border-green-500 text-green-800"; if (opt === this.selectedOption) return "bg-red-100 border-red-500 text-red-800"; return "opacity-50"; },
 
-                // Enhanced AI Logic 2.0
                 sendMessage() { 
                     if(!this.chatInput) return; 
                     const userText = this.chatInput;
                     this.chatHistory.push({id: Date.now(), text: userText, isUser: true}); 
                     this.chatInput = ''; this.isTyping = true; 
-                    this.addXP(5); // XP for chatting
+                    this.addXP(5);
 
                     setTimeout(() => { 
                         this.isTyping = false; 
                         let response = "";
                         
-                        // Greeting
                         const lower = userText.toLowerCase();
-                        if (['hi', 'hello', '你好', '嗨'].some(w => lower.includes(w))) {
-                            response = this.t('ai_hello');
+                        if (['hi', 'hello', '你好', '嗨', '安安'].some(w => lower.includes(w))) {
+                            response = "哈囉！我是 AI 麋鹿，關於鹿的事情我都略懂略懂 😎";
                             if (this.idCardName) response += ` ${this.idCardName}！`;
                         } else {
-                            // Use Smart Search Algorithm
                             const results = this.smartSearch(userText);
                             if (results.length > 0) {
-                                // Add some personality
-                                const prefixes = ["嗯... 讓我想想 🤔", "我知道這個！💡", "根據我的資料庫... 📚", "這題簡單！✨"];
+                                const prefixes = ["這題我知道！✨", "根據資料顯示... 📚", "幫你查到了！💡", "嗯... 是這樣的："];
                                 const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
                                 response = `${prefix}\n${results[0].a}`;
                             } else {
-                                response = this.t('ai_unknown');
+                                response = "這題超綱了！我去翻翻筆記... 🤔 (您可以試著換個問法，例如「身高」、「生日」)";
                             }
                         }
                         
                         this.chatHistory.push({id: Date.now(), text: response, isUser: false}); 
                         this.$nextTick(() => { document.getElementById('chatContainer').scrollTop = 99999; });
-                    }, 1000); 
+                    }, 800); 
                 },
                 
-                wakeUpAI() { if (this.aiStatus === 'online') return; this.wakeUpCount++; if (this.wakeUpCount >= 5) { this.aiStatus = 'online'; this.addBotMessage(this.t('ai_hello')); this.wakeUpCount = 0; confetti({ particleCount: 30, spread: 50, origin: { y: 0.5 } }); } },
+                wakeUpAI() { if (this.aiStatus === 'online') return; this.wakeUpCount++; if (this.wakeUpCount >= 5) { this.aiStatus = 'online'; this.addBotMessage("哈囉！我是 AI 麋鹿，關於鹿的事情我都略懂略懂 😎"); this.wakeUpCount = 0; confetti({ particleCount: 30, spread: 50, origin: { y: 0.5 } }); } },
                 triggerEasterEgg(type) { if (type === 'profile') { confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }); this.showNotification("🎉 XP +50!"); this.addXP(50); } },
                 addBotMessage(text) { this.chatHistory.push({ id: Date.now(), text: text, isUser: false }); this.$nextTick(() => { document.getElementById('chatContainer').scrollTop = 99999; }); },
                 
