@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>鹿🦌的QA網站</title>
     <link rel="icon" href="./images/basic/icon.png" type="image/png">
-    
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#fdf2f8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -32,26 +31,39 @@
             theme: {
                 extend: {
                     fontFamily: { sans: ['"Rounded Mplus 1c"', '"Noto Sans TC"', '"Inter"', '-apple-system', 'sans-serif'] },
-                    colors: { deer: { 50: '#fdf2f8', 100: '#fce7f3', 200: '#fbcfe8', 300: '#f9a8d4', 400: '#f472b6', 500: '#ec4899', 600: '#db2777', 800: '#9d174d', 900: '#831843' } },
                     animation: { 
                         'pop-in': 'popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards', 
                         'float': 'float 6s ease-in-out infinite',
-                        'pulse-slow': 'pulse 3s infinite'
+                        'pulse-slow': 'pulse 3s infinite',
+                        'progress': 'progress 1s ease-out forwards'
                     },
                     keyframes: {
                         popIn: { '0%': { opacity: '0', transform: 'scale(0.95) translateY(10px)' }, '100%': { opacity: '1', transform: 'scale(1) translateY(0)' } },
-                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } }
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        progress: { '0%': { width: '0%' } }
                     }
                 }
             }
         }
     </script>
     <style>
+        /* CSS Variables for Dynamic Themes */
+        :root {
+            --theme-color: #ec4899; /* Default Pink */
+            --theme-light: #fce7f3;
+        }
+        
+        /* Apply Theme Color */
+        .text-theme { color: var(--theme-color); }
+        .bg-theme { background-color: var(--theme-color); }
+        .bg-theme-light { background-color: var(--theme-light); }
+        .border-theme { border-color: var(--theme-color); }
+        .ring-theme { --tw-ring-color: var(--theme-color); }
+        
         html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
-        body { background-color: #fdf2f8; }
+        body { background-color: #fdf2f8; transition: background-color 0.3s; }
         .dark body { background-color: #0f172a; }
         
-        /* 極致毛玻璃 */
         .glass { 
             background: rgba(255, 255, 255, 0.65); 
             backdrop-filter: blur(24px) saturate(180%); 
@@ -65,25 +77,20 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
         }
 
-        /* iOS 回彈微動效 */
         .ios-btn { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .ios-btn:active { transform: scale(0.94); }
-
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        /* 翻牌特效 */
         .perspective-1000 { perspective: 1000px; }
         .transform-style-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
-        .medal-glow { filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.6)); }
     </style>
 </head>
-<body class="text-gray-800 transition-colors duration-300 dark:text-gray-100 font-sans min-h-screen overflow-x-hidden selection:bg-deer-300 selection:text-deer-900"
-      x-data="deerApp()" x-init="initApp()" @scroll.window="handleScroll">
+<body class="text-gray-800 transition-colors duration-300 dark:text-gray-100 font-sans min-h-screen overflow-x-hidden selection:bg-pink-200 selection:text-pink-900"
+      x-data="deerApp()" x-init="initApp()" @scroll.window="handleScroll" :style="`--theme-color: ${currentTheme.color}; --theme-light: ${currentTheme.light}`">
 
     <div class="fixed inset-0 overflow-hidden -z-10 pointer-events-none">
-        <div class="absolute top-[-20%] left-[-20%] w-[600px] h-[600px] bg-deer-300 rounded-full mix-blend-multiply filter blur-[120px] opacity-30 animate-float" :style="`transform: translateY(${scrollY * 0.05}px)`"></div>
+        <div class="absolute top-[-20%] left-[-20%] w-[600px] h-[600px] rounded-full mix-blend-multiply filter blur-[120px] opacity-30 animate-float" :style="`background-color: ${currentTheme.color}; transform: translateY(${scrollY * 0.05}px)`"></div>
         <div class="absolute bottom-[-20%] right-[-20%] w-[600px] h-[600px] bg-blue-300 rounded-full mix-blend-multiply filter blur-[120px] opacity-30 animate-float" style="animation-delay: 2s;" :style="`transform: translateY(-${scrollY * 0.05}px)`"></div>
     </div>
 
@@ -93,8 +100,8 @@
             
             <div class="flex items-center cursor-pointer ios-btn flex-shrink-0 transition-all duration-300" 
                  @click="changeTab('home')" :class="scrollY > 20 ? 'scale-90' : 'scale-100'">
-                <img src="./images/basic/icon.png" class="w-9 h-9 rounded-full mr-2 border border-deer-200 object-cover shadow-sm flex-shrink-0">
-                <span class="font-bold text-xl text-deer-600 dark:text-deer-300 tracking-wide font-sans">DEER.OS</span>
+                <img src="./images/basic/icon.png" class="w-9 h-9 rounded-full mr-2 border-2 border-theme object-cover shadow-sm flex-shrink-0">
+                <span class="font-bold text-xl text-gray-800 dark:text-white tracking-wide font-sans">DEER.OS</span>
             </div>
             
             <div class="flex space-x-1 bg-white/40 dark:bg-black/20 p-1 rounded-full backdrop-blur-md border border-white/10 overflow-x-auto no-scrollbar mx-2">
@@ -104,13 +111,26 @@
                 <button @click="changeTab('idcard')" :class="tabClass('idcard')"><span x-text="t('nav_id')"></span></button>
             </div>
             
-            <div class="flex items-center gap-2 flex-shrink-0">
-                <div class="relative" x-data="{ open: false }">
-                    <button @click="open = !open" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 ios-btn text-lg">🌐</button>
-                    <div x-show="open" @click.outside="open = false" x-transition class="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-2 z-50">
-                        <a @click="setLang('zh-TW'); open=false" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm">繁體中文</a>
-                        <a @click="setLang('en'); open=false" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm">English</a>
-                        <a @click="setLang('zh-CN'); open=false" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm">简体中文</a>
+            <div class="flex items-center gap-2 flex-shrink-0" x-data="{ open: false }">
+                <div class="relative">
+                    <button @click="open = !open" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 ios-btn text-lg">🎨</button>
+                    <div x-show="open" @click.outside="open = false" x-transition class="absolute right-0 mt-3 w-64 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-4 z-50">
+                        <div class="mb-4">
+                            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Theme Color</div>
+                            <div class="flex justify-between gap-2">
+                                <template x-for="theme in themes" :key="theme.name">
+                                    <button @click="setTheme(theme)" class="w-8 h-8 rounded-full border-2 transition-transform hover:scale-110" :style="`background-color: ${theme.color}; border-color: ${currentTheme.name === theme.name ? 'white' : 'transparent'}; box-shadow: ${currentTheme.name === theme.name ? '0 0 0 2px '+theme.color : 'none'}`"></button>
+                                </template>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Language</div>
+                            <div class="flex flex-col gap-1">
+                                <button @click="setLang('zh-TW')" class="px-3 py-2 rounded-lg text-sm text-left hover:bg-black/5 dark:hover:bg-white/10" :class="lang === 'zh-TW' ? 'font-bold text-theme' : ''">繁體中文</button>
+                                <button @click="setLang('en')" class="px-3 py-2 rounded-lg text-sm text-left hover:bg-black/5 dark:hover:bg-white/10" :class="lang === 'en' ? 'font-bold text-theme' : ''">English</button>
+                                <button @click="setLang('zh-CN')" class="px-3 py-2 rounded-lg text-sm text-left hover:bg-black/5 dark:hover:bg-white/10" :class="lang === 'zh-CN' ? 'font-bold text-theme' : ''">简体中文</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <button @click="toggleDarkMode" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 ios-btn transition-colors">
@@ -122,26 +142,44 @@
 
     <main class="pt-24 pb-20 px-4 max-w-6xl mx-auto min-h-screen">
         
-        <div x-show="installPrompt" x-transition class="mb-6 mx-auto max-w-md glass p-4 rounded-2xl flex items-center justify-between border border-white/50 shadow-lg">
-            <div class="flex items-center"><span class="text-3xl mr-3">📲</span><div><div class="font-bold text-deer-800 dark:text-deer-200" x-text="t('pwa_title')"></div><div class="text-xs text-gray-500" x-text="t('pwa_desc')"></div></div></div>
-            <button @click="installPWA" class="px-5 py-2 bg-deer-500 text-white rounded-full text-sm font-bold shadow-md hover:bg-deer-600 ios-btn" x-text="t('pwa_btn')"></button>
+        <div x-show="installPrompt" x-transition class="mb-6 mx-auto max-w-md glass p-4 rounded-2xl flex items-center justify-between border border-theme shadow-lg">
+            <div class="flex items-center"><span class="text-3xl mr-3">📲</span><div><div class="font-bold text-gray-800 dark:text-white" x-text="t('pwa_title')"></div><div class="text-xs text-gray-500" x-text="t('pwa_desc')"></div></div></div>
+            <button @click="installPWA" class="px-5 py-2 bg-theme text-white rounded-full text-sm font-bold shadow-md hover:opacity-90 ios-btn" x-text="t('pwa_btn')"></button>
         </div>
 
         <div x-show="currentTab === 'home'" x-transition.opacity.duration.300ms>
             
-            <div class="glass rounded-[32px] p-8 mb-8 border border-white/40 flex flex-col md:flex-row items-center gap-8 shadow-xl transform transition-all duration-300 hover:scale-[1.005]"
-                 :style="`opacity: ${Math.max(0, 1 - scrollY / 400)}; transform: scale(${Math.max(0.95, 1 - scrollY / 1000)})`">
-                <div class="relative group">
-                    <img src="./images/basic/icon.png" class="w-28 h-28 md:w-36 md:h-36 rounded-full object-cover shadow-2xl border-4 border-white dark:border-gray-700 ios-btn cursor-pointer flex-shrink-0" @click="triggerEasterEgg('profile')">
-                    <div class="absolute -bottom-2 -right-2 bg-green-400 w-6 h-6 rounded-full border-4 border-white dark:border-gray-800 animate-pulse"></div>
-                </div>
-                <div class="flex-1 text-center md:text-left">
-                    <h2 class="text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">鹿🦌 <span class="text-lg font-normal text-gray-500"></span></h2>
-                    <p class="text-gray-600 dark:text-gray-300 font-medium mb-4 leading-relaxed" x-text="t('profile_desc')"></p>
-                    <div class="flex justify-center md:justify-start gap-3">
-                        <a href="https://www.tiktok.com/@ld.1003_" target="_blank" class="px-6 py-2.5 bg-black text-white rounded-full text-sm font-bold shadow-lg ios-btn flex items-center gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg> TikTok</a>
-                        <a href="https://www.instagram.com/ld.1003_/" target="_blank" class="px-6 py-2.5 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 text-white rounded-full text-sm font-bold shadow-lg ios-btn flex items-center gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg> Instagram</a>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="md:col-span-2 glass rounded-[32px] p-8 border border-white/40 flex flex-col sm:flex-row items-center gap-8 shadow-xl relative overflow-hidden">
+                    <div class="relative group z-10">
+                        <img src="./images/basic/icon.png" class="w-28 h-28 md:w-32 md:h-32 rounded-full object-cover shadow-2xl border-4 border-white dark:border-gray-700 ios-btn cursor-pointer flex-shrink-0" @click="triggerEasterEgg('profile')">
+                        <div class="absolute -bottom-2 -right-2 bg-green-400 w-6 h-6 rounded-full border-4 border-white dark:border-gray-800 animate-pulse"></div>
                     </div>
+                    <div class="flex-1 text-center sm:text-left z-10">
+                        <h2 class="text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">鹿🦌 <span class="text-lg font-normal text-gray-500"></span></h2>
+                        <p class="text-gray-600 dark:text-gray-300 font-medium mb-4 leading-relaxed whitespace-pre-line" x-text="t('profile_desc')"></p>
+                        <div class="flex justify-center sm:justify-start gap-3">
+                            <a href="https://www.tiktok.com/@ld.1003_" target="_blank" class="px-5 py-2 bg-black text-white rounded-full text-sm font-bold shadow-lg ios-btn flex items-center gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg> TikTok</a>
+                            <a href="https://www.instagram.com/ld.1003_/" target="_blank" class="px-5 py-2 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 text-white rounded-full text-sm font-bold shadow-lg ios-btn flex items-center gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg> IG</a>
+                        </div>
+                    </div>
+                    <div class="absolute right-0 top-0 w-64 h-64 bg-gradient-to-br from-transparent to-theme opacity-10 rounded-full blur-3xl -z-0"></div>
+                </div>
+
+                <div class="glass rounded-[32px] p-6 border border-white/40 shadow-xl flex flex-col justify-center items-center relative overflow-hidden">
+                    <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Fan Level</div>
+                    <div class="text-3xl font-black text-theme mb-1" x-text="fanLevelTitle"></div>
+                    <div class="text-sm text-gray-500 font-mono mb-4">LV.<span x-text="calculateLevel(fanXP)"></span></div>
+                    
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-2 overflow-hidden relative">
+                        <div class="bg-theme h-4 rounded-full transition-all duration-1000 ease-out" :style="`width: ${xpPercentage}%`"></div>
+                    </div>
+                    <div class="text-xs text-gray-400 w-full flex justify-between">
+                        <span x-text="fanXP"></span>
+                        <span x-text="nextLevelXP"></span>
+                    </div>
+                    
+                    <div class="mt-4 text-[10px] text-gray-400 text-center">多互動可累積 XP 升級！</div>
                 </div>
             </div>
 
@@ -149,7 +187,7 @@
                 <div class="relative max-w-2xl mx-auto transition-all duration-300" :class="scrollY > 150 ? 'shadow-2xl scale-[0.98]' : 'shadow-lg'">
                     <div class="absolute inset-0 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl transition-all duration-500" :class="scrollY > 150 ? 'opacity-100' : 'opacity-90'"></div>
                     <input type="text" x-model="search" @input="currentPage = 1" :placeholder="t('search_ph')" 
-                           class="relative w-full pl-6 pr-6 py-4 rounded-2xl bg-transparent border-2 border-transparent focus:border-deer-300 focus:ring-0 text-lg transition-all placeholder-gray-400 dark:text-white"
+                           class="relative w-full pl-6 pr-6 py-4 rounded-2xl bg-transparent border-2 border-transparent focus:border-theme focus:ring-0 text-lg transition-all placeholder-gray-400 dark:text-white"
                            :class="scrollY > 150 ? 'py-3 text-base' : 'py-4 text-lg'">
                 </div>
             </div>
@@ -161,21 +199,21 @@
                             <div class="absolute w-full h-full glass rounded-[24px] p-6 flex flex-col justify-between backface-hidden border-t-2 border-white/60 bg-gradient-to-br from-white/90 to-white/50 dark:from-gray-800/90 dark:to-gray-900/50">
                                 <div>
                                     <div class="flex items-center gap-2 mb-3">
-                                        <span class="text-[10px] font-black tracking-widest text-white bg-deer-400 px-2 py-1 rounded-md">Q.<span x-text="item.id"></span></span>
+                                        <span class="text-[10px] font-black tracking-widest text-white bg-theme px-2 py-1 rounded-md">Q.<span x-text="item.id"></span></span>
                                         <span x-show="item.tags && item.tags[0]" class="text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-500 px-2 py-1 rounded-md" x-text="item.tags ? item.tags[0] : ''"></span>
                                     </div>
                                     <h3 class="text-lg font-bold leading-snug text-gray-800 dark:text-gray-100 line-clamp-3" x-text="item.q"></h3>
                                 </div>
                                 <div class="flex justify-between items-end">
-                                    <span x-show="search.length > 0 && item.score > 0" class="text-xs text-pink-500 font-bold bg-pink-50 dark:bg-pink-900/30 px-2 py-1 rounded">MATCH</span>
+                                    <span x-show="search.length > 0 && item.score > 0" class="text-xs text-theme font-bold bg-theme-light dark:bg-gray-700 px-2 py-1 rounded">MATCH</span>
                                     <div class="text-xs text-gray-400 font-bold uppercase tracking-wider flex items-center">Flip <span class="ml-1 text-lg">➜</span></div>
                                 </div>
                             </div>
-                            <div class="absolute w-full h-full glass rounded-[24px] p-6 flex flex-col backface-hidden rotate-y-180 bg-white dark:bg-gray-800 border-b-4 border-deer-300 overflow-y-auto">
+                            <div class="absolute w-full h-full glass rounded-[24px] p-6 flex flex-col backface-hidden rotate-y-180 bg-white dark:bg-gray-800 border-b-4 border-theme overflow-y-auto">
                                 <div class="flex-1 flex items-center justify-center">
                                     <p class="text-[17px] font-medium text-center leading-relaxed text-gray-700 dark:text-gray-200" x-text="item.a"></p>
                                 </div>
-                                <button @click.stop="openShareModal(item)" class="w-full mt-3 flex justify-center items-center gap-2 text-xs text-deer-600 bg-deer-50 dark:bg-deer-900/30 px-4 py-3 rounded-xl font-bold hover:bg-deer-100 transition-colors ios-btn">
+                                <button @click.stop="openShareModal(item)" class="w-full mt-3 flex justify-center items-center gap-2 text-xs text-theme bg-theme-light dark:bg-gray-700 px-4 py-3 rounded-xl font-bold hover:opacity-80 transition-colors ios-btn">
                                     <span class="text-lg">📸</span> <span x-text="t('share_card_btn')"></span>
                                 </button>
                             </div>
@@ -185,9 +223,9 @@
             </div>
             
             <div class="flex flex-wrap justify-center items-center mt-12 gap-3 pb-12" x-show="totalPages > 1">
-                <button @click="prevPage" :disabled="currentPage === 1" class="px-6 py-3 rounded-full glass font-bold hover:bg-deer-100 disabled:opacity-30 ios-btn">◀</button>
-                <span class="font-black text-deer-600 dark:text-deer-300 px-4 text-xl"><span x-text="currentPage"></span> <span class="text-sm opacity-50">/</span> <span x-text="totalPages"></span></span>
-                <button @click="nextPage" :disabled="currentPage === totalPages" class="px-6 py-3 rounded-full glass font-bold hover:bg-deer-100 disabled:opacity-30 ios-btn">▶</button>
+                <button @click="prevPage" :disabled="currentPage === 1" class="px-6 py-3 rounded-full glass font-bold hover:bg-theme hover:text-white disabled:opacity-30 ios-btn">◀</button>
+                <span class="font-black text-theme px-4 text-xl"><span x-text="currentPage"></span> <span class="text-sm opacity-50">/</span> <span x-text="totalPages"></span></span>
+                <button @click="nextPage" :disabled="currentPage === totalPages" class="px-6 py-3 rounded-full glass font-bold hover:bg-theme hover:text-white disabled:opacity-30 ios-btn">▶</button>
             </div>
         </div>
 
@@ -203,7 +241,7 @@
                     <div class="absolute -bottom-3 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-3 py-1 rounded-full whitespace-nowrap font-bold shadow-lg" x-text="t('ai_wake_btn')"></div>
                 </div>
                 <h3 class="text-3xl font-black mb-2 text-gray-800 dark:text-white mt-6">AI Moose 😴</h3>
-                <p class="text-deer-600 font-bold text-lg mb-4" x-text="aiStatusText"></p>
+                <p class="text-theme font-bold text-lg mb-4" x-text="aiStatusText"></p>
                 <p class="text-sm text-gray-500 font-medium" x-show="wakeUpCount > 0" x-text="t('ai_wake_hint').replace('{n}', 5-wakeUpCount)"></p>
             </div>
             
@@ -216,7 +254,7 @@
                 <template x-for="msg in chatHistory" :key="msg.id">
                     <div class="flex w-full animate-pop-in" :class="msg.isUser ? 'justify-end' : 'justify-start'">
                         <div class="max-w-[85%] rounded-2xl px-5 py-3 shadow-sm text-[15px] leading-relaxed" 
-                             :class="msg.isUser ? 'bg-gradient-to-br from-deer-500 to-pink-600 text-white rounded-br-none' : 'bg-white/90 dark:bg-gray-700/90 text-gray-800 dark:text-gray-100 rounded-bl-none border border-white/20'">
+                             :class="msg.isUser ? 'bg-gradient-to-br from-theme to-pink-400 text-white rounded-br-none' : 'bg-white/90 dark:bg-gray-700/90 text-gray-800 dark:text-gray-100 rounded-bl-none border border-white/20'">
                             <p x-text="msg.text" class="whitespace-pre-line"></p>
                         </div>
                     </div>
@@ -230,8 +268,8 @@
             
             <div class="relative z-10 p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-200/20">
                 <form @submit.prevent="sendMessage" class="flex gap-2">
-                    <input type="text" x-model="chatInput" :disabled="aiStatus !== 'online'" :placeholder="t('ai_input_ph')" class="flex-1 rounded-full bg-gray-100 dark:bg-gray-800 border-none focus:ring-2 focus:ring-deer-400 px-5 py-3 transition-all disabled:opacity-50">
-                    <button type="submit" :disabled="aiStatus !== 'online'" class="bg-deer-500 hover:bg-deer-600 text-white rounded-full p-3 w-12 h-12 flex items-center justify-center shadow-lg disabled:opacity-50 ios-btn">➤</button>
+                    <input type="text" x-model="chatInput" :disabled="aiStatus !== 'online'" :placeholder="t('ai_input_ph')" class="flex-1 rounded-full bg-gray-100 dark:bg-gray-800 border-none focus:ring-2 focus:ring-theme px-5 py-3 transition-all disabled:opacity-50">
+                    <button type="submit" :disabled="aiStatus !== 'online'" class="bg-theme hover:opacity-90 text-white rounded-full p-3 w-12 h-12 flex items-center justify-center shadow-lg disabled:opacity-50 ios-btn">➤</button>
                 </form>
             </div>
         </div>
@@ -241,15 +279,14 @@
                 <div class="text-8xl mb-6 animate-float drop-shadow-xl">🎓</div>
                 <h2 class="text-4xl font-black mb-4 text-gray-800 dark:text-white tracking-tight" x-text="t('quiz_title')"></h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-10 font-medium text-lg" x-text="t('quiz_intro')"></p>
-                <button @click="startQuiz" class="px-12 py-4 bg-gradient-to-r from-deer-400 to-purple-600 text-white rounded-full font-black text-xl shadow-xl ios-btn" x-text="t('quiz_start_btn')"></button>
+                <button @click="startQuiz" class="px-12 py-4 bg-gradient-to-r from-theme to-purple-600 text-white rounded-full font-black text-xl shadow-xl ios-btn" x-text="t('quiz_start_btn')"></button>
             </div>
-            
             <div x-show="quizStarted && !quizEnded" class="animate-pop-in">
                 <div class="flex justify-between items-center mb-6 px-4">
-                    <span class="font-bold text-deer-600 bg-deer-100 px-4 py-1.5 rounded-full text-sm">Q.<span x-text="currentQuizIndex + 1"></span>/5</span>
+                    <span class="font-bold text-white bg-theme px-4 py-1.5 rounded-full text-sm">Q.<span x-text="currentQuizIndex + 1"></span>/5</span>
                     <span class="text-sm font-bold bg-gray-200 dark:bg-gray-700 px-4 py-1.5 rounded-full">Score: <span x-text="quizScore"></span></span>
                 </div>
-                <div class="glass rounded-3xl p-8 mb-6 border-l-8 border-deer-400 min-h-[180px] flex items-center justify-center relative shadow-lg">
+                <div class="glass rounded-3xl p-8 mb-6 border-l-8 border-theme min-h-[180px] flex items-center justify-center relative shadow-lg">
                     <h3 class="text-2xl font-bold text-center leading-relaxed text-gray-800 dark:text-white" x-text="currentQuestion?.q"></h3>
                 </div>
                 <div class="grid grid-cols-1 gap-4">
@@ -263,7 +300,6 @@
                 </div>
                 <button x-show="hasAnswered" @click="nextQuestion" class="mt-8 w-full py-4 bg-gray-800 dark:bg-gray-700 text-white rounded-2xl font-bold shadow-lg ios-btn text-lg">Next ➜</button>
             </div>
-            
             <div x-show="quizEnded" class="text-center py-16 glass rounded-[32px] p-10 shadow-2xl relative overflow-hidden animate-pop-in">
                 <div x-show="quizScore === 5" class="mb-8 relative z-10">
                     <div class="w-48 h-48 mx-auto rounded-full bg-gradient-to-tr from-yellow-300 to-yellow-600 p-1 animate-float shadow-2xl">
@@ -272,36 +308,30 @@
                     <div class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-orange-600 mt-6" x-text="t('quiz_gold')"></div>
                 </div>
                 <div x-show="quizScore < 5" class="text-8xl mb-6 transform rotate-12 inline-block"><span x-text="quizScore >= 3 ? '🥈' : '🤡'"></span></div>
-                <h2 class="text-6xl font-black text-gray-800 dark:text-white mb-2 tracking-tighter">Score: <span x-text="quizScore * 20" class="text-deer-500"></span></h2>
+                <h2 class="text-6xl font-black text-gray-800 dark:text-white mb-2 tracking-tighter">Score: <span x-text="quizScore * 20" class="text-theme"></span></h2>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center mt-12">
                     <button @click="startQuiz" class="px-8 py-3 bg-gray-200 dark:bg-gray-700 rounded-full font-bold ios-btn" x-text="t('quiz_retry')"></button>
-                    <button @click="shareResult" class="px-8 py-3 bg-deer-500 text-white rounded-full font-bold shadow-lg ios-btn" x-text="t('quiz_share')"></button>
+                    <button @click="shareResult" class="px-8 py-3 bg-theme text-white rounded-full font-bold shadow-lg ios-btn" x-text="t('quiz_share')"></button>
                 </div>
             </div>
         </div>
 
         <div x-show="currentTab === 'idcard'" x-cloak class="max-w-2xl mx-auto">
             <div class="glass rounded-[32px] p-8 shadow-2xl animate-pop-in">
-                <h2 class="text-3xl font-black mb-8 text-center text-deer-600 dark:text-deer-300">Moose Center 🪪</h2>
+                <h2 class="text-3xl font-black mb-8 text-center text-theme">Moose Center 🪪</h2>
                 <div class="space-y-6 mb-10">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide" x-text="t('id_label_name')"></label>
-                        <input type="text" x-model="idCardName" :placeholder="t('id_ph_name')" class="w-full px-5 py-4 rounded-2xl bg-white/50 dark:bg-black/30 border border-gray-200 dark:border-gray-700 focus:border-deer-400 focus:ring-0 text-lg">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide" x-text="t('id_label_bg')"></label>
+                    <div><label class="block text-sm font-bold text-gray-500 mb-2 uppercase" x-text="t('id_label_name')"></label><input type="text" x-model="idCardName" :placeholder="t('id_ph_name')" class="w-full px-5 py-4 rounded-2xl bg-white/50 dark:bg-black/30 border border-gray-200 dark:border-gray-700 focus:border-theme focus:ring-0 text-lg"></div>
+                    <div><label class="block text-sm font-bold text-gray-500 mb-2 uppercase" x-text="t('id_label_bg')"></label>
                         <div class="grid grid-cols-3 gap-3">
                             <template x-for="(bg, index) in backgrounds" :key="index">
-                                <div @click="selectedBg = bg" class="aspect-[3/4] rounded-xl overflow-hidden cursor-pointer border-4 transition-all duration-300 hover:shadow-lg" :class="selectedBg === bg ? 'border-deer-500 scale-95 ring-2 ring-deer-200' : 'border-transparent opacity-80 hover:opacity-100'">
+                                <div @click="selectedBg = bg" class="aspect-[3/4] rounded-xl overflow-hidden cursor-pointer border-4 transition-all" :class="selectedBg === bg ? 'border-theme scale-95' : 'border-transparent opacity-80 hover:opacity-100'">
                                     <div class="w-full h-full bg-cover bg-center" :style="`background-image: url(${bg})`"></div>
                                 </div>
                             </template>
                         </div>
                     </div>
                 </div>
-                <button @click="generateIDCard" class="w-full py-4 bg-gradient-to-r from-deer-500 to-pink-600 text-white rounded-2xl font-bold shadow-xl ios-btn text-lg flex items-center justify-center">
-                    <span class="mr-2">✨</span> <span x-text="t('id_btn')"></span>
-                </button>
+                <button @click="generateIDCard" class="w-full py-4 bg-gradient-to-r from-theme to-pink-600 text-white rounded-2xl font-bold shadow-xl ios-btn text-lg flex items-center justify-center"><span class="mr-2">✨</span> <span x-text="t('id_btn')"></span></button>
             </div>
         </div>
 
@@ -314,10 +344,7 @@
             </div>
             <div class="relative z-20 p-8 pb-12">
                 <div class="mb-6"><div class="text-[10px] font-bold tracking-[0.2em] opacity-70 mb-1">NAME</div><div class="text-4xl font-black tracking-tight" x-text="idCardName"></div></div>
-                <div class="flex justify-between items-end border-t border-white/30 pt-4">
-                    <div><div class="text-[10px] font-bold tracking-[0.2em] opacity-70 mb-1">ID NUMBER</div><div class="text-xl font-mono font-bold" x-text="generatedIdNumber"></div></div>
-                    <div class="text-right"><div class="text-[10px] font-bold tracking-[0.2em] opacity-70 mb-1">DATE</div><div class="text-sm font-mono opacity-90" x-text="new Date().toISOString().split('T')[0]"></div></div>
-                </div>
+                <div class="flex justify-between items-end border-t border-white/30 pt-4"><div><div class="text-[10px] font-bold tracking-[0.2em] opacity-70 mb-1">ID NUMBER</div><div class="text-xl font-mono font-bold" x-text="generatedIdNumber"></div></div><div class="text-right"><div class="text-[10px] font-bold tracking-[0.2em] opacity-70 mb-1">DATE</div><div class="text-sm font-mono opacity-90" x-text="new Date().toISOString().split('T')[0]"></div></div></div>
             </div>
         </div>
 
@@ -418,6 +445,14 @@
             }
         };
 
+        const THEMES = [
+            { name: 'pink', color: '#ec4899', light: '#fce7f3' },
+            { name: 'blue', color: '#3b82f6', light: '#dbeafe' },
+            { name: 'purple', color: '#8b5cf6', light: '#ede9fe' },
+            { name: 'orange', color: '#f97316', light: '#ffedd5' },
+            { name: 'green', color: '#10b981', light: '#d1fae5' }
+        ];
+
         function deerApp() {
             return {
                 allData: window.DEER_QA || [],
@@ -430,12 +465,36 @@
                 scrollY: 0,
                 
                 lang: 'zh-TW',
+                themes: THEMES,
+                currentTheme: THEMES[0],
                 installPrompt: null,
                 backgrounds: ['./images/backgrounds/bg1.jpg', './images/backgrounds/bg2.jpg', './images/backgrounds/bg3.jpg'],
                 
                 idCardName: '', selectedBg: './images/backgrounds/bg1.jpg', generatedIdNumber: '',
                 showShareModal: false, randomShareBg: '',
                 currentPage: 1, itemsPerPage: 30,
+                
+                // Fan Level Logic
+                fanXP: 0,
+                
+                get fanLevelTitle() {
+                    const level = this.calculateLevel(this.fanXP);
+                    if (level >= 50) return "傳說鹿神 👑";
+                    if (level >= 20) return "骨灰級鐵粉 🔥";
+                    if (level >= 10) return "資深鹿迷 💖";
+                    if (level >= 5) return "實習麋鹿 🦌";
+                    return "路人粉 🌱";
+                },
+                get nextLevelXP() {
+                    const level = this.calculateLevel(this.fanXP);
+                    return (level + 1) * 100;
+                },
+                get xpPercentage() {
+                    const level = this.calculateLevel(this.fanXP);
+                    const currentLevelBase = level * 100;
+                    const nextLevelBase = (level + 1) * 100;
+                    return Math.min(100, Math.max(0, ((this.fanXP - currentLevelBase) / (nextLevelBase - currentLevelBase)) * 100));
+                },
                 
                 chatInput: '', chatHistory: [], isTyping: false, aiStatus: 'offline', aiStatusText: 'Offline', wakeUpCount: 0, aiBackground: '',
                 quizStarted: false, quizEnded: false, quizData: [], currentQuizIndex: 0, currentOptions: [], hasAnswered: false, selectedOption: null, quizScore: 0, currentCorrectText: '',
@@ -444,16 +503,31 @@
                 initApp() {
                     const savedLang = localStorage.getItem('deer_lang');
                     if (savedLang) this.lang = savedLang;
+                    
+                    const savedTheme = localStorage.getItem('deer_theme');
+                    if (savedTheme) this.currentTheme = JSON.parse(savedTheme);
+
+                    const savedXP = localStorage.getItem('deer_xp');
+                    if (savedXP) this.fanXP = parseInt(savedXP);
+                    
                     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) this.toggleDarkMode();
                     window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); this.installPrompt = e; });
                     this.aiBackground = this.backgrounds[0];
                     this.updateAIStatusText();
+                    this.addXP(10); // Daily Login
                 },
 
                 t(key) { return TRANSLATIONS[this.lang][key] || key; },
                 setLang(l) { this.lang = l; localStorage.setItem('deer_lang', l); this.updateAIStatusText(); },
-
+                setTheme(t) { this.currentTheme = t; localStorage.setItem('deer_theme', JSON.stringify(t)); },
+                
                 handleScroll() { this.scrollY = window.scrollY; },
+
+                calculateLevel(xp) { return Math.floor(xp / 100); },
+                addXP(amount) { 
+                    this.fanXP += amount; 
+                    localStorage.setItem('deer_xp', this.fanXP); 
+                },
 
                 updateAIStatusText() {
                     if (this.aiStatus === 'offline') {
@@ -476,6 +550,7 @@
                             img.src = canvas.toDataURL("image/png");
                             img.className = "w-full h-auto rounded-xl shadow-sm";
                             container.appendChild(img);
+                            this.addXP(20);
                         }).catch(err => { container.innerHTML = '<div class="text-red-500 text-center p-4 text-xs">Error<br>Check Images</div>'; });
                     }, 600);
                 },
@@ -508,7 +583,32 @@
                 },
 
                 async installPWA() { if (this.installPrompt) { this.installPrompt.prompt(); const { outcome } = await this.installPrompt.userChoice; if (outcome === 'accepted') this.installPrompt = null; } },
-                get filteredQuestions() { if (!this.allData) return []; if (this.search.trim() === '') return this.allData; const s = this.search.toLowerCase(); return this.allData.filter(i => i.q.toLowerCase().includes(s) || i.a.toLowerCase().includes(s)); },
+                
+                // Smart Search Logic (Used by both Search Bar and AI)
+                smartSearch(query) {
+                    if (!query) return [];
+                    const terms = query.toLowerCase().split(/\s+/).filter(t => t.length > 0);
+                    
+                    return this.allData.map(item => {
+                        let score = 0;
+                        const qText = item.q.toLowerCase();
+                        const aText = item.a.toLowerCase();
+                        const tags = (item.tags || []).join(' ').toLowerCase();
+                        
+                        terms.forEach(term => {
+                            if (tags.includes(term)) score += 10; // Tag match is high priority
+                            if (qText.includes(term)) score += 5;
+                            if (aText.includes(term)) score += 1;
+                        });
+                        return { ...item, score };
+                    }).filter(item => item.score > 0).sort((a, b) => b.score - a.score);
+                },
+
+                get filteredQuestions() { 
+                    if (this.search.trim() === '') return this.allData; 
+                    return this.smartSearch(this.search);
+                },
+                
                 get paginatedData() { const start = (this.currentPage - 1) * this.itemsPerPage; return this.filteredQuestions.slice(start, start + this.itemsPerPage); },
                 get totalPages() { return Math.ceil(this.filteredQuestions.length / this.itemsPerPage); },
                 nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; window.scrollTo(0,0); },
@@ -518,44 +618,54 @@
                 toggleDarkMode() { this.isDark = !this.isDark; document.documentElement.classList.toggle('dark', this.isDark); },
                 toggleCard(id) { if (this.flippedCards.includes(id)) this.flippedCards = this.flippedCards.filter(cid => cid !== id); else this.flippedCards.push(id); },
                 showNotification(msg) { this.toastMessage = msg; this.showToast = true; setTimeout(() => this.showToast = false, 3000); },
-                tabClass(tab) { const active = "bg-white text-deer-600 shadow-sm font-bold"; const inactive = "text-gray-500 hover:text-gray-900"; return `px-5 py-2 rounded-full text-sm transition-all whitespace-nowrap ${this.currentTab === tab ? active : inactive}`; },
-                
-                // Enhanced AI Logic
+                tabClass(tab) { const active = "bg-white text-theme shadow-sm font-bold"; const inactive = "text-gray-500 hover:text-gray-900"; return `px-5 py-2 rounded-full text-sm transition-all whitespace-nowrap ${this.currentTab === tab ? active : inactive}`; },
+                getOptionClass(opt) { if (!this.hasAnswered) return "bg-white dark:bg-gray-800 hover:bg-theme-light border-transparent"; if (opt === this.currentCorrectText) return "bg-green-100 border-green-500 text-green-800"; if (opt === this.selectedOption) return "bg-red-100 border-red-500 text-red-800"; return "opacity-50"; },
+
+                // Enhanced AI Logic 2.0
                 sendMessage() { 
                     if(!this.chatInput) return; 
                     const userText = this.chatInput;
                     this.chatHistory.push({id: Date.now(), text: userText, isUser: true}); 
                     this.chatInput = ''; this.isTyping = true; 
-                    
+                    this.addXP(5); // XP for chatting
+
                     setTimeout(() => { 
                         this.isTyping = false; 
                         let response = "";
                         
-                        // Smart Logic
+                        // Greeting
                         const lower = userText.toLowerCase();
-                        if (lower.includes('hi') || lower.includes('hello') || lower.includes('你好')) {
+                        if (['hi', 'hello', '你好', '嗨'].some(w => lower.includes(w))) {
                             response = this.t('ai_hello');
-                            if (this.idCardName) response += ` (${this.idCardName})`;
+                            if (this.idCardName) response += ` ${this.idCardName}！`;
                         } else {
-                            // Simple match from DB
-                            const match = this.allData.find(i => i.q.includes(userText) || (i.tags && i.tags.some(t => userText.includes(t))));
-                            response = match ? match.a : this.t('ai_unknown');
+                            // Use Smart Search Algorithm
+                            const results = this.smartSearch(userText);
+                            if (results.length > 0) {
+                                // Add some personality
+                                const prefixes = ["嗯... 讓我想想 🤔", "我知道這個！💡", "根據我的資料庫... 📚", "這題簡單！✨"];
+                                const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+                                response = `${prefix}\n${results[0].a}`;
+                            } else {
+                                response = this.t('ai_unknown');
+                            }
                         }
                         
                         this.chatHistory.push({id: Date.now(), text: response, isUser: false}); 
+                        this.$nextTick(() => { document.getElementById('chatContainer').scrollTop = 99999; });
                     }, 1000); 
                 },
                 
                 wakeUpAI() { if (this.aiStatus === 'online') return; this.wakeUpCount++; if (this.wakeUpCount >= 5) { this.aiStatus = 'online'; this.addBotMessage(this.t('ai_hello')); this.wakeUpCount = 0; confetti({ particleCount: 30, spread: 50, origin: { y: 0.5 } }); } },
-                triggerEasterEgg(type) { if (type === 'profile') { confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }); this.showNotification("🎉 彩蛋！"); } },
+                triggerEasterEgg(type) { if (type === 'profile') { confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }); this.showNotification("🎉 XP +50!"); this.addXP(50); } },
                 addBotMessage(text) { this.chatHistory.push({ id: Date.now(), text: text, isUser: false }); this.$nextTick(() => { document.getElementById('chatContainer').scrollTop = 99999; }); },
                 
                 startQuizMode() { this.changeTab('quiz'); this.quizStarted = false; this.quizEnded = false; },
                 startQuiz() { this.quizStarted = true; this.quizEnded = false; this.currentQuizIndex = 0; this.quizScore = 0; this.prepareQuestion(); },
                 prepareQuestion() { this.hasAnswered = false; this.currentCorrectText = this.currentQuestion.short || this.currentQuestion.a; this.currentOptions = [this.currentCorrectText, 'AOV', 'BlackPink', 'Sleep'].sort(() => 0.5 - Math.random()); },
                 get currentQuestion() { return this.allData[this.currentQuizIndex]; },
-                checkAnswer(opt) { this.hasAnswered = true; this.selectedOption = opt; if(opt === this.currentCorrectText) this.quizScore++; },
-                nextQuestion() { if(this.currentQuizIndex < 4) { this.currentQuizIndex++; this.prepareQuestion(); } else { this.quizEnded = true; } }
+                checkAnswer(opt) { this.hasAnswered = true; this.selectedOption = opt; if(opt === this.currentCorrectText) { this.quizScore++; this.addXP(10); } },
+                nextQuestion() { if(this.currentQuizIndex < 4) { this.currentQuizIndex++; this.prepareQuestion(); } else { this.quizEnded = true; if(this.quizScore===5) this.addXP(100); } }
             }
         }
     </script>
