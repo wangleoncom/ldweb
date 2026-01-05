@@ -75,13 +75,14 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
         }
 
-        .glass { 
-            background: rgba(255, 255, 255, 0.7); 
-            backdrop-filter: blur(20px) saturate(180%); 
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.5); 
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
-        }
+        /* 將原本 glass-premium 的內容複製過來 */
+.glass { 
+    background: rgba(255, 255, 255, 0.65); 
+    backdrop-filter: blur(24px) saturate(180%); 
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6); 
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
 
         .ios-btn { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; }
         .ios-btn:active { transform: scale(0.94); }
@@ -156,6 +157,9 @@
                         </div>
                     </div>
                 </div>
+                <button @click="toggleMute" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 ios-btn transition-colors" :class="{'opacity-50': isMuted}">
+                    <span x-text="isMuted ? '🔇' : '🔊'"></span>
+                </button>
                 <button @click="toggleDarkMode" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 ios-btn transition-colors">
                     <span x-text="isDark ? '☀️' : '🌙'"></span>
                 </button>
@@ -181,19 +185,82 @@
                         <p class="text-gray-600 dark:text-gray-300 font-medium mb-4 leading-relaxed whitespace-pre-line">🎂 10/03 天秤座｜📏 170cm｜⚖️ 42kg
 🐈 貓咪：哺嚕 (英國短毛貓)</p>
                         <div class="flex justify-center sm:justify-start gap-3">
-                            <a href="https://www.tiktok.com/@ld.1003_" target="_blank" class="px-5 py-2 bg-black text-white rounded-full text-sm font-bold shadow-lg ios-btn flex items-center gap-2">TikTok</a>
-                            <a href="https://www.instagram.com/ld.1003_/" target="_blank" class="px-5 py-2 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 text-white rounded-full text-sm font-bold shadow-lg ios-btn flex items-center gap-2">IG</a>
+                            <a href="https://www.tiktok.com/@ld.1003_" target="_blank" class="px-5 py-2 bg-black text-white rounded-full text-sm font-bold shadow-lg ios-btn flex items-center gap-2 hover:bg-gray-800">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+                                TikTok
+                            </a>
+                            <a href="https://www.instagram.com/ld.1003_/" target="_blank" class="px-5 py-2 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 text-white rounded-full text-sm font-bold shadow-lg ios-btn flex items-center gap-2 hover:opacity-90">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+                                Instagram
+                            </a>
                         </div>
                     </div>
                 </div>
 
-                <div class="glass-premium rounded-[32px] p-6 border border-white/40 shadow-xl flex flex-col justify-center items-center relative overflow-hidden">
-                    <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">粉絲等級 (Fan Level)</div>
-                    <div class="text-3xl font-black text-theme mb-1" x-text="currentLevelInfo.title"></div>
-                    <div class="text-sm text-gray-500 font-mono mb-4">LV.<span x-text="calculateLevel(fanXP)"></span></div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-2 overflow-hidden relative">
-                        <div class="bg-theme h-4 rounded-full transition-all duration-1000 ease-out relative overflow-hidden" :style="`width: ${xpPercentage}%`">
-                            <div class="absolute inset-0 bg-white/30 animate-[progress_2s_infinite_linear]" style="background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent); background-size: 1rem 1rem;"></div>
+                <div class="flex flex-col gap-6">
+                    <div class="glass-premium rounded-[32px] p-6 border border-white/40 shadow-xl flex flex-col justify-center items-center relative overflow-hidden">
+                        <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">粉絲等級 (Fan Level)</div>
+                        <div class="text-3xl font-black text-theme mb-1" x-text="currentLevelInfo.title"></div>
+                        <div class="text-sm text-gray-500 font-mono mb-4">LV.<span x-text="calculateLevel(fanXP)"></span></div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-2 overflow-hidden relative">
+                            <div class="bg-theme h-4 rounded-full transition-all duration-1000 ease-out relative overflow-hidden" :style="`width: ${xpPercentage}%`">
+                                <div class="absolute inset-0 bg-white/30 animate-[progress_2s_infinite_linear]" style="background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent); background-size: 1rem 1rem;"></div>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-[10px] text-gray-400 text-center">每天互動可獲得 XP！</div>
+                    </div>
+
+                    <div class="glass-premium rounded-[32px] p-6 border border-white/40 shadow-xl relative overflow-hidden">
+                        <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <span>📅 重要時刻</span>
+                            <span class="w-full h-[1px] bg-gray-200 dark:bg-gray-700"></span>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-2xl">🎂</span>
+                                    <div>
+                                        <div class="text-xs text-gray-500 font-bold uppercase">Birthday</div>
+                                        <div class="font-bold text-gray-800 dark:text-gray-100">10月3日</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <template x-if="dateInfo.isBirthdayClose">
+                                        <div class="px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-black animate-pulse">
+                                            倒數 <span x-text="dateInfo.birthdayDiff"></span> 天
+                                        </div>
+                                    </template>
+                                    <template x-if="!dateInfo.isBirthdayClose">
+                                        <div class="text-xs text-gray-400 font-mono" x-text="dateInfo.birthdayDiff + ' days left'"></div>
+                                    </template>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-2xl grayscale opacity-80">🎵</span>
+                                    <div>
+                                        <div class="text-xs text-gray-500 font-bold uppercase">TikTok Debut</div>
+                                        <div class="font-bold text-gray-800 dark:text-gray-100">2024/08/07</div>
+                                    </div>
+                                </div>
+                                <div class="text-xs text-theme font-bold font-mono">
+                                    +<span x-text="dateInfo.daysTikTok"></span> days
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-2xl grayscale opacity-80">📸</span>
+                                    <div>
+                                        <div class="text-xs text-gray-500 font-bold uppercase">Instagram Debut</div>
+                                        <div class="font-bold text-gray-800 dark:text-gray-100">2024/06/02</div>
+                                    </div>
+                                </div>
+                                <div class="text-xs text-theme font-bold font-mono">
+                                    +<span x-text="dateInfo.daysIG"></span> days
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -448,11 +515,11 @@
         <div x-show="showUpdateModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" x-cloak x-transition.opacity>
             <div class="bg-white dark:bg-gray-800 w-full max-w-md rounded-3xl p-6 shadow-2xl border-2 border-theme animate-pop-in relative">
                 <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-theme text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg tracking-widest">UPDATE</div>
-                <h3 class="text-2xl font-black text-center mb-4 text-gray-800 dark:text-white">🎉 v5.1 Ultimate</h3>
+                <h3 class="text-2xl font-black text-center mb-4 text-gray-800 dark:text-white">🎉 v5.2 Sound & Events</h3>
                 <div class="space-y-3 mb-6 text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
-                    <p>🎤 <b>語音 AI：</b>按麥克風直接用講的！</p>
-                    <p>🎓 <b>考卷模式：</b>新增姓名輸入，獎狀更漂亮。</p>
-                    <p>📸 <b>真．圖片生成：</b>修復無法存檔的問題。</p>
+                    <p>🔊 <b>互動音效：</b>點擊按鈕會有可愛音效！</p>
+                    <p>📅 <b>紀念日追蹤：</b>新增生日倒數與出道日計算。</p>
+                    <p>✨ <b>介面優化：</b>新增了官方社群圖示。</p>
                 </div>
                 <button @click="closeUpdateModal" class="w-full py-3 bg-theme text-white rounded-full font-bold shadow-lg ios-btn">太棒了！</button>
             </div>
