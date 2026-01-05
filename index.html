@@ -142,7 +142,7 @@
         };
         window.playClickSound = window.playSound;
 
-        // 3. 完整邏輯整合 (包含首頁計算、AI Fuse搜尋、大會考、身分證)
+        // 3. 完整邏輯整合
         function deerApp() {
             return {
                 currentTab: 'home',
@@ -153,6 +153,12 @@
                 search: '',
                 installPrompt: null,
                 
+                // ★★★ 修復重點：加入 scrollY 與 handleScroll ★★★
+                scrollY: 0,
+                handleScroll() {
+                    this.scrollY = window.scrollY;
+                },
+
                 // 首頁相關
                 dateInfo: { birthdayDiff: 0, daysTikTok: 0, daysIG: 0, isBirthdayClose: false },
                 paginatedData: [],
@@ -190,7 +196,7 @@
 
                 // 身分證相關
                 idCardName: '',
-                selectedBg: './images/bg1.jpg', // 預設背景
+                selectedBg: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=400&q=80',
                 generatedIdNumber: 'D1003' + Math.floor(Math.random()*9000+1000),
                 backgrounds: [
                     'https://images.unsplash.com/photo-1557683316-973673baf926?w=400&q=80',
@@ -213,7 +219,7 @@
                 ],
                 currentTheme: {name: 'pink', color: '#ec4899', light: '#fce7f3'},
                 
-                // 備用資料 (若無外部 JS)
+                // 備用資料
                 qaData: [
                     { id:1, q: "麋鹿的身高是多少？", a: "我是 170cm 喔！", tags: ["身高"] },
                     { id:2, q: "麋鹿的生日是什麼時候？", a: "我的生日是 10月3日，天秤座！", tags: ["生日"] },
@@ -234,7 +240,6 @@
                 initApp() {
                     // 1. 初始化資料與搜尋
                     const dataSrc = window.qaData || this.qaData;
-                    const quizSrc = window.quizData || this.quizData;
                     
                     // Fuse 搜尋設定
                     this.fuseInstance = new Fuse(dataSrc, { includeScore: true, keys: ['q', 'tags'] });
@@ -371,11 +376,10 @@
                         this.loadQuestion();
                     } else {
                         this.quizEnded = true;
-                        // 自動生成成績單 (模擬)
+                        // 自動生成成績單
                         setTimeout(() => {
                             const element = document.getElementById('examPaperTemplate');
                             if(element) element.style.display = 'flex';
-                            // 這裡可以接 html2canvas 邏輯
                         }, 500);
                     }
                 },
