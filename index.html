@@ -152,9 +152,8 @@
                 tutorialStep: 0,
                 search: '',
                 installPrompt: null,
-                
-                // ★★★ 修復重點：加入 scrollY 與 handleScroll ★★★
                 scrollY: 0,
+                
                 handleScroll() {
                     this.scrollY = window.scrollY;
                 },
@@ -238,36 +237,29 @@
                 ],
 
                 initApp() {
-                    // 1. 初始化資料與搜尋
                     const dataSrc = window.qaData || this.qaData;
-                    
-                    // Fuse 搜尋設定
                     this.fuseInstance = new Fuse(dataSrc, { includeScore: true, keys: ['q', 'tags'] });
                     
-                    // 2. 計算日期
                     const today = new Date();
                     const currentYear = today.getFullYear();
-                    // 生日倒數 (10/03)
                     const nextBirthday = new Date(currentYear, 9, 3);
                     if (today > nextBirthday) nextBirthday.setFullYear(currentYear + 1);
                     const diffTime = Math.abs(nextBirthday - today);
                     this.dateInfo.birthdayDiff = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
                     this.dateInfo.isBirthdayClose = this.dateInfo.birthdayDiff < 30;
 
-                    // 出道日計算 (假設 2024/08/07)
                     const tiktokDate = new Date(2024, 7, 7);
                     this.dateInfo.daysTikTok = Math.floor((today - tiktokDate) / (1000 * 60 * 60 * 24));
                     const igDate = new Date(2024, 5, 2);
                     this.dateInfo.daysIG = Math.floor((today - igDate) / (1000 * 60 * 60 * 24));
                     
-                    // 3. 初始化首頁卡片
                     this.updatePaginatedData();
                 },
 
                 changeTab(tab) {
                     this.currentTab = tab;
                     window.scrollTo({top: 0, behavior: 'smooth'});
-                    if(tab === 'quiz') this.quizStarted = false; // 重置考試狀態
+                    if(tab === 'quiz') this.quizStarted = false;
                 },
 
                 // --- AI 聊天邏輯 ---
@@ -327,7 +319,6 @@
                 },
                 updatePaginatedData() {
                     const allData = window.qaData || this.qaData;
-                    // 簡單處理搜尋
                     let filtered = allData;
                     if(this.search) {
                          if(this.fuseInstance) {
@@ -350,7 +341,6 @@
                     this.quizEnded = false;
                     this.quizScore = 0;
                     this.currentQuizIndex = 0;
-                    // 隨機取 5 題
                     const src = window.quizData || this.quizData;
                     this.currentQuizSet = src.sort(() => 0.5 - Math.random()).slice(0, 5);
                     this.loadQuestion();
@@ -376,7 +366,6 @@
                         this.loadQuestion();
                     } else {
                         this.quizEnded = true;
-                        // 自動生成成績單
                         setTimeout(() => {
                             const element = document.getElementById('examPaperTemplate');
                             if(element) element.style.display = 'flex';
@@ -390,10 +379,9 @@
                     this.generatedIdNumber = 'D' + Math.floor(100000 + Math.random() * 900000);
                     const element = document.getElementById('idCardTemplate');
                     if(element) {
-                        element.style.display = 'flex'; // 顯示隱藏的模板
-                        // 使用 html2canvas 截圖
+                        element.style.display = 'flex'; 
                         html2canvas(element).then(canvas => {
-                            element.style.display = 'none'; // 截完圖隱藏
+                            element.style.display = 'none';
                             const img = canvas.toDataURL("image/png");
                             const container = document.getElementById('shareResultContainer');
                             container.innerHTML = `<img src="${img}" class="w-full h-full object-contain">`;
@@ -479,12 +467,39 @@
 
     <div class="fixed bottom-6 left-0 right-0 z-50 flex justify-center px-4 safe-area-bottom">
         <nav class="flex items-center gap-1 overflow-x-auto no-scrollbar 
-                    bg-white/10 dark:bg-black/40 backdrop-blur-2xl border border-white/20 shadow-2xl 
+                    bg-white/20 dark:bg-black/40 backdrop-blur-2xl border border-white/20 shadow-2xl 
                     rounded-[2rem] p-1.5 w-full max-w-md mx-auto ring-1 ring-white/10">
-            <button @click="changeTab('home'); window.playSound()" :class="currentTab === 'home' ? 'bg-white text-black font-bold shadow-md' : 'text-white/70 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'" class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">首頁</button>
-            <button @click="changeTab('ai'); window.playSound()" :class="currentTab === 'ai' ? 'bg-white text-black font-bold shadow-md' : 'text-white/70 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'" class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">AI 聊天</button>
-            <button @click="startQuizMode(); window.playSound()" :class="currentTab === 'quiz' ? 'bg-white text-black font-bold shadow-md' : 'text-white/70 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'" class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">大會考</button>
-            <button @click="changeTab('idcard'); window.playSound()" :class="currentTab === 'idcard' ? 'bg-white text-black font-bold shadow-md' : 'text-white/70 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'" class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">身分證</button>
+            <button @click="changeTab('home'); window.playSound()" 
+                    :class="currentTab === 'home' 
+                        ? 'bg-white text-pink-600 font-bold shadow-md' 
+                        : 'text-gray-500 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'"
+                    class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">
+                首頁
+            </button>
+
+            <button @click="changeTab('ai'); window.playSound()" 
+                    :class="currentTab === 'ai' 
+                        ? 'bg-white text-pink-600 font-bold shadow-md' 
+                        : 'text-gray-500 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'"
+                    class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">
+                AI 聊天
+            </button>
+
+            <button @click="startQuizMode(); window.playSound()" 
+                    :class="currentTab === 'quiz' 
+                        ? 'bg-white text-pink-600 font-bold shadow-md' 
+                        : 'text-gray-500 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'"
+                    class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">
+                大會考
+            </button>
+            
+            <button @click="changeTab('idcard'); window.playSound()" 
+                    :class="currentTab === 'idcard' 
+                        ? 'bg-white text-pink-600 font-bold shadow-md' 
+                        : 'text-gray-500 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'"
+                    class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">
+                身分證
+            </button>
         </nav>
     </div>
 
@@ -587,8 +602,8 @@
                     <div class="flex w-full animate-pop-in" :class="msg.isUser ? 'justify-end' : 'justify-start'">
                         <div @click="openMsgDetail(msg)"
                              class="max-w-[85%] rounded-2xl px-5 py-3 shadow-sm text-[15px] leading-relaxed cursor-pointer transition-transform active:scale-95" 
-                             :class="msg.isUser ? 'bg-gradient-to-br from-theme to-pink-400 text-white rounded-br-none' : 'bg-white/90 dark:bg-gray-700/90 text-gray-800 dark:text-gray-100 rounded-bl-none border border-white/20 hover:bg-gray-50 dark:hover:bg-gray-600'">
-                            <p x-text="msg.text" class="whitespace-pre-line"></p>
+                             :class="msg.isUser ? 'bg-gradient-to-br from-pink-500 to-rose-500 text-white rounded-br-none' : 'bg-white/90 dark:bg-gray-700/90 text-gray-800 dark:text-gray-100 rounded-bl-none border border-white/20 hover:bg-gray-50 dark:hover:bg-gray-600'">
+                             <p x-text="msg.text" class="whitespace-pre-line"></p>
                             <div x-show="!msg.isUser && msg.accuracy" class="text-[10px] text-gray-400 mt-1 text-right flex items-center justify-end gap-1"><span>ℹ️</span> 點擊查看來源</div>
                         </div>
                     </div>
