@@ -5,6 +5,8 @@
   "display": "standalone",
   "background_color": "#fdf2f8",
   "theme_color": "#fdf2f8",
+  "orientation": "portrait",
+  "categories": ["entertainment", "social"],
   "icons": [
     {
       "src": "./images/basic/icon.png",
@@ -15,6 +17,14 @@
       "src": "./images/basic/icon.png",
       "sizes": "512x512",
       "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./images/basic/icon.png", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "label": "Home Screen"
     }
   ]
 }

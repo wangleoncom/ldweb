@@ -11,21 +11,22 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="./images/basic/icon.png">
 
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Rounded+Mplus+1c:wght@400;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    
+    <script src="./deer_db.js"></script>
+    <script src="./app.js"></script> <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <script>
+        // 簡單的 Console 屏蔽
         (function() {
             var nullFunc = function() {};
             console.log = nullFunc; console.warn = nullFunc; console.error = nullFunc;
         })();
-    </script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Rounded+Mplus+1c:wght@400;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script src="./deer_db.js"></script>
-
-    <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -80,15 +81,13 @@
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
 
-        /* 聚光燈特效核心 CSS */
         .spotlight-target {
             position: relative;
             z-index: 9999 !important;
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85); /* 巨大的陰影形成遮罩 */
-            pointer-events: auto; /* 允許點擊 */
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85);
+            pointer-events: auto;
             transition: all 0.5s ease;
         }
-        /* 當教學模式開啟時，鎖住背景滾動 */
         body.tutorial-active {
             overflow: hidden;
         }
@@ -401,11 +400,11 @@
         <div x-show="showUpdateModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" x-cloak x-transition.opacity>
             <div class="bg-white dark:bg-gray-800 w-full max-w-md rounded-3xl p-6 shadow-2xl border-2 border-theme animate-pop-in relative">
                 <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-theme text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg tracking-widest">UPDATE</div>
-                <h3 class="text-2xl font-black text-center mb-4 text-gray-800 dark:text-white">🎉 網站大更新 v4.0</h3>
+                <h3 class="text-2xl font-black text-center mb-4 text-gray-800 dark:text-white">🎉 網站大更新 v4.1</h3>
                 <div class="space-y-3 mb-6 text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
-                    <p>💡 <b>新手引導修復：</b>全新的聚光燈教學模式，不再卡住！</p>
-                    <p>🧠 <b>AI 變聰明了：</b>現在「主播」、「鹿🦌」它都聽得懂。</p>
-                    <p>📈 <b>等級系統：</b>明確的經驗值進度條。</p>
+                    <p>🔍 <b>智慧搜尋：</b>打錯字也能找到！例如「傳說隊決」->「傳說對決」。</p>
+                    <p>⚡ <b>效能優化：</b>網站載入速度更快了。</p>
+                    <p>🐛 <b>Bug 修復：</b>修復了手機鍵盤擋住輸入框的問題。</p>
                 </div>
                 <button @click="closeUpdateModal" class="w-full py-3 bg-theme text-white rounded-full font-bold shadow-lg ios-btn">太棒了！</button>
             </div>
@@ -432,282 +431,10 @@
         </div>
 
     </main>
-
+    
     <script>
         if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
             window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
-        }
-
-        const THEMES = [
-            { name: 'pink', color: '#ec4899', light: '#fce7f3' },
-            { name: 'blue', color: '#3b82f6', light: '#dbeafe' },
-            { name: 'purple', color: '#8b5cf6', light: '#ede9fe' },
-            { name: 'orange', color: '#f97316', light: '#ffedd5' },
-            { name: 'green', color: '#10b981', light: '#d1fae5' }
-        ];
-
-        function deerApp() {
-            return {
-                allData: window.DEER_QA || [],
-                search: '',
-                currentTab: 'home',
-                isDark: false,
-                flippedCards: [],
-                showToast: false,
-                toastMessage: '',
-                scrollY: 0,
-                
-                themes: THEMES,
-                currentTheme: THEMES[0],
-                installPrompt: null,
-                backgrounds: ['./images/backgrounds/bg1.jpg', './images/backgrounds/bg2.jpg', './images/backgrounds/bg3.jpg'],
-                
-                idCardName: '', selectedBg: './images/backgrounds/bg1.jpg', generatedIdNumber: '',
-                showShareModal: false, randomShareBg: '',
-                currentPage: 1, itemsPerPage: 30,
-                
-                // 系統狀態
-                appVersion: '4.0.0', // 更新版本號
-                showUpdateModal: false,
-                showTutorial: false,
-                tutorialStep: 0, // 0:Off, 1:Search, 2:Tabs, 3:AI
-                tutorialSteps: [
-                    { title: "智慧搜尋", desc: "找不到問題？直接輸入關鍵字，例如「身高」、「生日」。" },
-                    { title: "功能切換", desc: "點這裡切換到「AI 聊天」、「大會考」或「身分證」。" },
-                    { title: "AI 麋鹿", desc: "無聊時可以找 AI 聊天，它現在更聰明了！" }
-                ],
-                
-                fanXP: 0,
-                
-                // 等級邏輯
-                get currentLevelInfo() {
-                    const level = this.calculateLevel(this.fanXP);
-                    let title = "路人粉 🌱";
-                    let next = 500;
-                    
-                    if (this.fanXP >= 5000) { title = "傳說鹿神 👑"; next = "MAX"; }
-                    else if (this.fanXP >= 2000) { title = "骨灰級鐵粉 🔥"; next = 5000; }
-                    else if (this.fanXP >= 1000) { title = "資深鹿迷 💖"; next = 2000; }
-                    else if (this.fanXP >= 500) { title = "實習麋鹿 🦌"; next = 1000; }
-                    
-                    return { title, next };
-                },
-                get xpPercentage() {
-                    const level = this.calculateLevel(this.fanXP);
-                    // 簡單進度條邏輯：每 100 分算一個進度循環，或者基於當前區間
-                    // 為了視覺效果，我們讓它看起來像是在累積
-                    return (this.fanXP % 100); 
-                },
-                
-                chatInput: '', chatHistory: [], isTyping: false, aiStatus: 'offline', aiStatusText: 'Offline', wakeUpCount: 0, aiBackground: '',
-                quizStarted: false, quizEnded: false, quizData: [], currentQuizIndex: 0, currentOptions: [], hasAnswered: false, selectedOption: null, quizScore: 0, currentCorrectText: '',
-
-                initApp() {
-                    const savedTheme = localStorage.getItem('deer_theme');
-                    if (savedTheme) this.currentTheme = JSON.parse(savedTheme);
-
-                    const savedXP = localStorage.getItem('deer_xp');
-                    if (savedXP) this.fanXP = parseInt(savedXP);
-                    
-                    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) this.toggleDarkMode();
-                    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); this.installPrompt = e; });
-                    this.aiBackground = this.backgrounds[0];
-                    this.updateAIStatusText();
-                    this.addXP(10);
-
-                    const storedVersion = localStorage.getItem('deer_app_version');
-                    if (storedVersion !== this.appVersion) {
-                        this.showUpdateModal = true;
-                    } else if (!localStorage.getItem('deer_tutorial_done')) {
-                        setTimeout(() => this.startTutorial(), 500);
-                    }
-                },
-
-                closeUpdateModal() {
-                    this.showUpdateModal = false;
-                    localStorage.setItem('deer_app_version', this.appVersion);
-                    if (!localStorage.getItem('deer_tutorial_done')) {
-                        setTimeout(() => this.startTutorial(), 500);
-                    }
-                },
-
-                startTutorial() {
-                    this.showTutorial = true;
-                    this.tutorialStep = 1;
-                    window.scrollTo(0, 0);
-                    this.changeTab('home'); // 強制回到首頁開始
-                },
-
-                nextTutorialStep() {
-                    if (this.tutorialStep < this.tutorialSteps.length) {
-                        this.tutorialStep++;
-                        // 自動導航邏輯：避免用戶卡住
-                        if (this.tutorialStep === 3) {
-                            this.changeTab('ai'); // 強制切換到 AI 頁面
-                        } else {
-                            this.changeTab('home');
-                        }
-                    } else {
-                        this.endTutorial();
-                    }
-                },
-
-                endTutorial() {
-                    this.showTutorial = false;
-                    this.tutorialStep = 0;
-                    this.changeTab('home');
-                    localStorage.setItem('deer_tutorial_done', 'true');
-                },
-
-                setTheme(t) { this.currentTheme = t; localStorage.setItem('deer_theme', JSON.stringify(t)); },
-                handleScroll() { this.scrollY = window.scrollY; },
-                calculateLevel(xp) { return Math.floor(xp / 100); },
-                addXP(amount) { this.fanXP += amount; localStorage.setItem('deer_xp', this.fanXP); },
-
-                updateAIStatusText() {
-                    if (this.aiStatus === 'offline') {
-                        const statusTexts = ['呼呼大睡中... 😴', '正在直播！快來看 🎥', '正在打傳說 🎮'];
-                        this.aiStatusText = statusTexts[Math.floor(Math.random() * statusTexts.length)];
-                    } else {
-                        this.aiStatusText = 'Online';
-                    }
-                },
-
-                generateImageFromTemplate(templateId) {
-                    this.showShareModal = true;
-                    const container = document.getElementById('shareResultContainer');
-                    container.innerHTML = '<div class="p-8 text-center text-gray-400 animate-pulse">正在生成圖片... ✨</div>';
-                    setTimeout(() => {
-                        const el = document.getElementById(templateId);
-                        html2canvas(el, { backgroundColor: null, useCORS: true, scale: 3, logging: false }).then(canvas => {
-                            container.innerHTML = '';
-                            const img = document.createElement('img');
-                            img.src = canvas.toDataURL("image/png");
-                            img.className = "w-full h-auto rounded-xl shadow-sm";
-                            container.appendChild(img);
-                            this.addXP(20);
-                        }).catch(err => { container.innerHTML = '<div class="text-red-500 text-center p-4 text-xs">生成失敗，請稍後再試</div>'; });
-                    }, 800);
-                },
-
-                generateIDCard() {
-                    if (!this.idCardName) { this.showNotification("請輸入暱稱！"); return; }
-                    this.generatedIdNumber = 'MOOSE-' + Math.floor(1000 + Math.random() * 9000);
-                    this.generateImageFromTemplate('idCardTemplate');
-                },
-
-                openShareModal(item) {
-                    this.randomShareBg = this.backgrounds[Math.floor(Math.random() * this.backgrounds.length)];
-                    document.getElementById('shareCardQ').innerText = item.q;
-                    document.getElementById('shareCardA').innerText = item.short || item.a;
-                    this.generateImageFromTemplate('shareCardTemplate');
-                },
-
-                shareResult() {
-                    this.randomShareBg = this.backgrounds[Math.floor(Math.random() * this.backgrounds.length)];
-                    const score = this.quizScore * 20;
-                    setTimeout(() => {
-                        document.getElementById('shareScoreNum').innerText = score;
-                        const titleEl = document.getElementById('shareScoreTitle');
-                        const commentEl = document.getElementById('shareScoreComment');
-                        if (this.quizScore === 5) { titleEl.innerText = "Gold Moose Medal 🏆"; commentEl.innerText = "你是真正的傳說鹿粉！🔥"; } 
-                        else if (this.quizScore >= 3) { titleEl.innerText = "Silver Medal 🥈"; commentEl.innerText = "還不錯喔，繼續加油！"; } 
-                        else { titleEl.innerText = "Try Again 🤡"; commentEl.innerText = "去複習一下再來吧！"; }
-                        this.generateImageFromTemplate('quizResultTemplate');
-                    }, 100);
-                },
-
-                async installPWA() { if (this.installPrompt) { this.installPrompt.prompt(); const { outcome } = await this.installPrompt.userChoice; if (outcome === 'accepted') this.installPrompt = null; } },
-                
-                // 🧠 智慧搜尋 v3.0 (包含 AI 同義詞理解)
-                smartSearch(query) {
-                    if (!query) return [];
-                    
-                    // 1. 同義詞映射 (AI 理解邏輯)
-                    // 無論用戶輸入什麼暱稱，都轉成資料庫聽得懂的關鍵字
-                    let normalizedQuery = query.toLowerCase()
-                        .replace(/主播|妳|你|她|老婆|姐姐|鹿鹿/g, '鹿') 
-                        .replace(/男朋友|男友/g, '男朋友');
-
-                    // 2. 斷詞
-                    const terms = normalizedQuery.split(/\s+/).filter(t => t.length > 0);
-                    
-                    return this.allData.map(item => {
-                        let score = 0;
-                        const qText = item.q.toLowerCase();
-                        const aText = item.a.toLowerCase();
-                        const tags = (item.tags || []).join(' ').toLowerCase();
-                        
-                        terms.forEach(term => {
-                            // 權重分配
-                            if (tags.includes(term)) score += 20; // Tag 最準
-                            if (qText.includes(term)) score += 10; // 問題次之
-                            if (aText.includes(term)) score += 2;  // 答案最末
-                        });
-                        return { ...item, score };
-                    }).filter(item => item.score > 0).sort((a, b) => b.score - a.score);
-                },
-
-                get filteredQuestions() { 
-                    if (this.search.trim() === '') return this.allData; 
-                    return this.smartSearch(this.search);
-                },
-                
-                get paginatedData() { const start = (this.currentPage - 1) * this.itemsPerPage; return this.filteredQuestions.slice(start, start + this.itemsPerPage); },
-                get totalPages() { return Math.ceil(this.filteredQuestions.length / this.itemsPerPage); },
-                nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; window.scrollTo(0,0); },
-                prevPage() { if (this.currentPage > 1) this.currentPage--; window.scrollTo(0,0); },
-                
-                changeTab(tab) { this.currentTab = tab; window.scrollTo(0,0); if(tab === 'ai') { this.wakeUpCount = 0; this.aiBackground = this.backgrounds[Math.floor(Math.random() * this.backgrounds.length)]; this.updateAIStatusText(); if (Math.random() < 0.7) this.aiStatus = 'offline'; else this.aiStatus = 'online'; } },
-                toggleDarkMode() { this.isDark = !this.isDark; document.documentElement.classList.toggle('dark', this.isDark); },
-                toggleCard(id) { if (this.flippedCards.includes(id)) this.flippedCards = this.flippedCards.filter(cid => cid !== id); else this.flippedCards.push(id); },
-                showNotification(msg) { this.toastMessage = msg; this.showToast = true; setTimeout(() => this.showToast = false, 3000); },
-                tabClass(tab) { const active = "bg-white text-theme shadow-sm font-bold"; const inactive = "text-gray-500 hover:text-gray-900"; return `px-5 py-2 rounded-full text-sm transition-all whitespace-nowrap ${this.currentTab === tab ? active : inactive}`; },
-                getOptionClass(opt) { if (!this.hasAnswered) return "bg-white dark:bg-gray-800 hover:bg-theme-light border-transparent"; if (opt === this.currentCorrectText) return "bg-green-100 border-green-500 text-green-800"; if (opt === this.selectedOption) return "bg-red-100 border-red-500 text-red-800"; return "opacity-50"; },
-
-                sendMessage() { 
-                    if(!this.chatInput) return; 
-                    const userText = this.chatInput;
-                    this.chatHistory.push({id: Date.now(), text: userText, isUser: true}); 
-                    this.chatInput = ''; this.isTyping = true; 
-                    this.addXP(5);
-
-                    setTimeout(() => { 
-                        this.isTyping = false; 
-                        let response = "";
-                        
-                        const lower = userText.toLowerCase();
-                        if (['hi', 'hello', '你好', '嗨', '安安'].some(w => lower.includes(w))) {
-                            response = "哈囉！我是 AI 麋鹿，關於鹿的事情我都略懂略懂 😎";
-                            if (this.idCardName) response += ` ${this.idCardName}！`;
-                        } else {
-                            // 呼叫更新後的智慧搜尋
-                            const results = this.smartSearch(userText);
-                            if (results.length > 0) {
-                                const prefixes = ["這題我知道！✨", "根據資料顯示... 📚", "幫你查到了！💡", "嗯... 是這樣的："];
-                                const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-                                response = `${prefix}\n${results[0].a}`;
-                            } else {
-                                response = "這題超綱了！我去翻翻筆記... 🤔 (您可以試著換個問法，例如「身高」、「生日」)";
-                            }
-                        }
-                        
-                        this.chatHistory.push({id: Date.now(), text: response, isUser: false}); 
-                        this.$nextTick(() => { document.getElementById('chatContainer').scrollTop = 99999; });
-                    }, 800); 
-                },
-                
-                wakeUpAI() { if (this.aiStatus === 'online') return; this.wakeUpCount++; if (this.wakeUpCount >= 5) { this.aiStatus = 'online'; this.addBotMessage("哈囉！我是 AI 麋鹿，關於鹿的事情我都略懂略懂 😎"); this.wakeUpCount = 0; confetti({ particleCount: 30, spread: 50, origin: { y: 0.5 } }); } },
-                triggerEasterEgg(type) { if (type === 'profile') { confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }); this.showNotification("🎉 XP +50!"); this.addXP(50); } },
-                addBotMessage(text) { this.chatHistory.push({ id: Date.now(), text: text, isUser: false }); this.$nextTick(() => { document.getElementById('chatContainer').scrollTop = 99999; }); },
-                
-                startQuizMode() { this.changeTab('quiz'); this.quizStarted = false; this.quizEnded = false; },
-                startQuiz() { this.quizStarted = true; this.quizEnded = false; this.currentQuizIndex = 0; this.quizScore = 0; this.prepareQuestion(); },
-                prepareQuestion() { this.hasAnswered = false; this.currentCorrectText = this.currentQuestion.short || this.currentQuestion.a; this.currentOptions = [this.currentCorrectText, 'AOV', 'BlackPink', 'Sleep'].sort(() => 0.5 - Math.random()); },
-                get currentQuestion() { return this.allData[this.currentQuizIndex]; },
-                checkAnswer(opt) { this.hasAnswered = true; this.selectedOption = opt; if(opt === this.currentCorrectText) { this.quizScore++; this.addXP(10); } },
-                nextQuestion() { if(this.currentQuizIndex < 4) { this.currentQuizIndex++; this.prepareQuestion(); } else { this.quizEnded = true; if(this.quizScore===5) this.addXP(100); } }
-            }
         }
     </script>
 </body>
