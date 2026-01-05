@@ -1,10 +1,10 @@
-const CACHE_NAME = 'deer-qa-v5.0'; // 升級版本號
+const CACHE_NAME = 'deer-qa-v5.1'; 
 const ASSETS = [
   './',
   './index.html',
   './app.js',
   './deer_db.js',
-  './quiz_db.js', // 新增這個
+  './quiz_db.js',
   './manifest.json',
   './images/basic/icon.png',
   './images/basic/AI.png'
@@ -36,7 +36,6 @@ self.addEventListener('fetch', (e) => {
   if (!e.request.url.startsWith('http')) return;
   const url = new URL(e.request.url);
 
-  // 資料庫類檔案 Network First
   if (url.pathname.endsWith('deer_db.js') || url.pathname.endsWith('quiz_db.js')) {
     e.respondWith(
       fetch(e.request).then(response => {

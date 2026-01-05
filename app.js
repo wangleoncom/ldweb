@@ -1,14 +1,13 @@
 /**
- * 鹿 QA 核心邏輯 - app.js (v5.0 Ultimate)
- * 包含：語音AI、精美動畫控制、真·圖片生成、隨機題庫系統
+ * 鹿 QA 核心邏輯 - app.js (v5.1 Ultimate)
  */
 
 const THEMES = [
-    { name: 'pink', color: '#ec4899', light: '#fce7f3', gradient: 'from-pink-400 to-rose-500' },
-    { name: 'blue', color: '#3b82f6', light: '#dbeafe', gradient: 'from-blue-400 to-cyan-500' },
-    { name: 'purple', color: '#8b5cf6', light: '#ede9fe', gradient: 'from-violet-400 to-purple-600' },
-    { name: 'orange', color: '#f97316', light: '#ffedd5', gradient: 'from-orange-400 to-amber-500' },
-    { name: 'green', color: '#10b981', light: '#d1fae5', gradient: 'from-emerald-400 to-teal-500' }
+    { name: 'pink', color: '#ec4899', light: '#fce7f3' },
+    { name: 'blue', color: '#3b82f6', light: '#dbeafe' },
+    { name: 'purple', color: '#8b5cf6', light: '#ede9fe' },
+    { name: 'orange', color: '#f97316', light: '#ffedd5' },
+    { name: 'green', color: '#10b981', light: '#d1fae5' }
 ];
 
 function deerApp() {
@@ -44,13 +43,13 @@ function deerApp() {
         randomShareBg: '',
         
         // 系統狀態
-        appVersion: '5.0.0',
+        appVersion: '5.1.0',
         showUpdateModal: false,
         showTutorial: false,
         tutorialStep: 0,
         tutorialSteps: [
             { title: "語音對話", desc: "現在按一下麥克風，就可以直接用講的問 AI 喔！" },
-            { title: "大會考 2.0", desc: "題庫升級！每次隨機出 10 題，考完還會發考卷。" },
+            { title: "大會考 2.0", desc: "輸入名字開始挑戰，全對可以獲得專屬獎狀！" },
             { title: "美圖分享", desc: "生成的圖片現在可以直接長按儲存或是右鍵下載了！" }
         ],
         
@@ -58,11 +57,12 @@ function deerApp() {
         
         // AI 聊天變數
         chatInput: '', chatHistory: [], isTyping: false, aiStatus: 'offline', aiStatusText: 'Offline', wakeUpCount: 0, aiBackground: '',
-        isListening: false, // 語音狀態
+        isListening: false, 
         
-        // 測驗變數 (大會考 2.0)
+        // 測驗變數
         quizStarted: false, quizEnded: false, 
-        currentQuizSet: [], // 當次隨機抽出的題目
+        quizTakerName: '', // 考生姓名
+        currentQuizSet: [], 
         currentQuizIndex: 0, 
         quizScore: 0, 
         hasAnswered: false, 
@@ -98,7 +98,7 @@ function deerApp() {
             }
         },
 
-        // --- 核心：智慧搜尋 ---
+        // --- 核心：智慧搜尋 (含雜訊過濾) ---
         smartSearch(query) {
             if (!query) return [];
             let rawQuery = query.toLowerCase();
@@ -120,7 +120,7 @@ function deerApp() {
                 });
                 return fuse.search(normalizedQuery).map(res => ({ ...res.item, score: 1 }));
             } else {
-                return []; // Fallback omitted for brevity
+                return []; 
             }
         },
 
@@ -183,34 +183,22 @@ function deerApp() {
                 confetti({ particleCount: 30, spread: 50, origin: { y: 0.5 } }); 
             } 
         },
-        // 🎤 語音輸入邏輯
         startVoiceInput() {
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
                 this.showNotification("您的瀏覽器不支援語音輸入 😢");
                 return;
             }
-            
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const recognition = new SpeechRecognition();
-            
-            recognition.lang = 'zh-TW'; // 設定語言為繁體中文
+            recognition.lang = 'zh-TW'; 
             recognition.interimResults = false;
-            
-            recognition.onstart = () => {
-                this.isListening = true;
-                this.showNotification("正在聆聽中... 👂");
-            };
-            
-            recognition.onend = () => {
-                this.isListening = false;
-            };
-            
+            recognition.onstart = () => { this.isListening = true; this.showNotification("正在聆聽中... 👂"); };
+            recognition.onend = () => { this.isListening = false; };
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
                 this.chatInput = transcript;
-                this.sendMessage(); // 辨識完直接送出
+                this.sendMessage(); 
             };
-            
             recognition.start();
         },
         sendMessage() { 
@@ -244,22 +232,20 @@ function deerApp() {
             this.$nextTick(() => { document.getElementById('chatContainer').scrollTop = 99999; }); 
         },
 
-        // --- 📸 真．圖片生成 (解決無法右鍵另存問題) ---
+        // --- 圖片生成 (修復版) ---
         generateImageFromTemplate(templateId) {
             this.showShareModal = true;
             const container = document.getElementById('shareResultContainer');
-            // 清空並顯示 Loading
             container.innerHTML = '<div class="flex flex-col items-center justify-center h-64"><div class="w-8 h-8 border-4 border-theme border-t-transparent rounded-full animate-spin mb-4"></div><div class="text-gray-400 font-bold animate-pulse">正在沖洗照片... ✨</div></div>';
             
             setTimeout(() => {
                 const el = document.getElementById(templateId);
-                // 暫時顯示模板以便截圖，但要移到視窗外
                 el.style.display = 'flex'; 
                 
                 html2canvas(el, { 
                     backgroundColor: null, 
                     useCORS: true, 
-                    scale: 3, // 提高解析度
+                    scale: 3, 
                     logging: false,
                     allowTaint: true
                 }).then(canvas => {
@@ -267,11 +253,8 @@ function deerApp() {
                     const img = new Image();
                     img.src = canvas.toDataURL("image/png");
                     img.className = "w-full h-auto rounded-xl shadow-lg object-contain max-h-[70vh]";
-                    // 加上長按提示
                     img.alt = "長按儲存圖片";
                     container.appendChild(img);
-                    
-                    // 截圖完隱藏模板
                     el.style.display = 'none';
                     this.addXP(20);
                 }).catch(err => { 
@@ -292,43 +275,35 @@ function deerApp() {
             this.generateImageFromTemplate('shareCardTemplate');
         },
 
-        // --- 🎓 大會考 2.0 (隨機題庫 + 考卷) ---
+        // --- 大會考 2.0 (隨機題庫 + 名字檢查) ---
         startQuizMode() { this.changeTab('quiz'); this.quizStarted = false; this.quizEnded = false; },
         startQuiz() { 
+            if (!this.quizTakerName || this.quizTakerName.trim() === '') {
+                this.showNotification("請先輸入你的名字！✍️");
+                return;
+            }
+
             this.quizStarted = true; 
             this.quizEnded = false; 
             this.currentQuizIndex = 0; 
             this.quizScore = 0;
             
-            // 隨機抽取 10 題
             if (this.allQuizData.length > 0) {
-                this.currentQuizSet = this.allQuizData
-                    .sort(() => 0.5 - Math.random())
-                    .slice(0, 10);
+                this.currentQuizSet = this.allQuizData.sort(() => 0.5 - Math.random()).slice(0, 10);
             } else {
-                // 如果沒有題庫檔，用 QA 資料庫產生假題目
-                this.currentQuizSet = this.allData
-                    .sort(() => 0.5 - Math.random())
-                    .slice(0, 10)
-                    .map(item => ({
-                        q: item.q,
-                        a: item.short || item.a,
-                        options: [item.short || item.a, '不知道', '秘密', '去問AI'].sort(() => 0.5 - Math.random())
-                    }));
+                this.currentQuizSet = this.allData.sort(() => 0.5 - Math.random()).slice(0, 10).map(item => ({
+                    q: item.q, a: item.short || item.a,
+                    options: [item.short || item.a, '不知道', '秘密', '去問AI'].sort(() => 0.5 - Math.random())
+                }));
             }
             this.prepareQuestion(); 
         },
         prepareQuestion() { 
             this.hasAnswered = false; 
-            // 確保選項每次都隨機排列
-            // 如果題庫裡本來就有 options 就用，沒有就隨機生
             const q = this.currentQuestion;
             if (!q.options) {
-                // 相容舊格式
                 this.currentOptions = [q.a, 'AOV', 'Sleep', 'Pink'].sort(() => 0.5 - Math.random());
             } else {
-                // 這裡要注意：如果不打亂原始 options，每次A都是答案。
-                // 我們複製一份來打亂
                 this.currentOptions = [...q.options].sort(() => 0.5 - Math.random());
             }
         },
@@ -352,11 +327,8 @@ function deerApp() {
         endQuiz() {
             this.quizEnded = true;
             if(this.quizScore === this.currentQuizSet.length) this.addXP(100);
-            // 準備考卷資料
             this.randomShareBg = this.backgrounds[Math.floor(Math.random() * this.backgrounds.length)];
             this.examDate = new Date().toISOString().split('T')[0];
-            
-            // 自動生成考卷
             setTimeout(() => {
                 this.generateImageFromTemplate('examPaperTemplate');
             }, 1000);

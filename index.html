@@ -18,7 +18,8 @@
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     
     <script src="./deer_db.js"></script>
-    <script src="./quiz_db.js"></script> <script src="./app.js"></script> 
+    <script src="./quiz_db.js"></script> 
+    <script src="./app.js"></script> 
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <script>
@@ -61,7 +62,6 @@
         body { background-color: #fdf2f8; transition: background-color 0.5s; }
         .dark body { background-color: #0f172a; }
         
-        /* 升級版毛玻璃效果 */
         .glass-premium { 
             background: rgba(255, 255, 255, 0.65); 
             backdrop-filter: blur(24px) saturate(180%); 
@@ -75,13 +75,13 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
         }
 
-    .glass { 
-    background: rgba(255, 255, 255, 0.65); 
-    backdrop-filter: blur(24px) saturate(180%); 
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.6); 
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-    }
+        .glass { 
+            background: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: blur(20px) saturate(180%); 
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.5); 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
 
         .ios-btn { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; }
         .ios-btn:active { transform: scale(0.94); }
@@ -99,7 +99,6 @@
             transition: all 0.5s ease;
         }
         
-        /* 動態背景 */
         .animated-bg {
             background: linear-gradient(120deg, var(--theme-light) 0%, #fdf2f8 50%, var(--theme-light) 100%);
             background-size: 200% 200%;
@@ -299,11 +298,21 @@
         </div>
 
         <div x-show="currentTab === 'quiz'" x-cloak class="max-w-2xl mx-auto">
-            <div x-show="!quizStarted && !quizEnded" class="text-center py-16 glass-premium rounded-[32px] p-10 shadow-2xl animate-pop-in">
-                <div class="text-8xl mb-6 animate-float drop-shadow-xl">🎓</div>
-                <h2 class="text-4xl font-black mb-4 text-gray-800 dark:text-white tracking-tight">麋鹿大會考 2.0</h2>
-                <p class="text-gray-600 dark:text-gray-300 mb-10 font-medium text-lg">隨機抽出 10 題挑戰，全對可獲得限定考卷！🏆</p>
-                <button @click="startQuiz" class="px-12 py-4 bg-gradient-to-r from-theme to-purple-600 text-white rounded-full font-black text-xl shadow-xl ios-btn">開始挑戰</button>
+            <div x-show="!quizStarted && !quizEnded" class="text-center py-12 glass-premium rounded-[32px] p-8 shadow-2xl animate-pop-in">
+                <div class="text-8xl mb-4 animate-float drop-shadow-xl">🎓</div>
+                <h2 class="text-4xl font-black mb-2 text-gray-800 dark:text-white tracking-tight">麋鹿大會考 2.0</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-8 font-medium text-lg">全對可獲得限定版 Gold Moose Medal！🏆</p>
+                
+                <div class="max-w-xs mx-auto mb-8 relative">
+                    <label class="block text-left text-xs font-bold text-gray-500 mb-2 ml-4 uppercase tracking-wider">考生姓名 / 暱稱</label>
+                    <input type="text" x-model="quizTakerName" placeholder="輸入名字開始考試..." 
+                           class="w-full px-6 py-4 rounded-2xl bg-white/50 dark:bg-black/30 border-2 border-gray-200 dark:border-gray-700 focus:border-theme focus:ring-4 focus:ring-theme/20 text-center text-xl font-bold transition-all outline-none placeholder-gray-400">
+                </div>
+
+                <button @click="startQuiz" class="w-full max-w-xs px-12 py-4 bg-gradient-to-r from-theme to-purple-600 text-white rounded-2xl font-black text-xl shadow-xl ios-btn hover:scale-105 transition-transform flex items-center justify-center mx-auto">
+                    <span>開始挑戰</span>
+                    <span class="ml-2">➜</span>
+                </button>
             </div>
             <div x-show="quizStarted && !quizEnded" class="animate-pop-in">
                 <div class="flex justify-between items-center mb-6 px-4">
@@ -330,7 +339,7 @@
             <div x-show="quizEnded" class="text-center py-10 glass-premium rounded-[32px] p-6 shadow-2xl relative animate-pop-in">
                 <h2 class="text-3xl font-black mb-4">考試結果出爐！📄</h2>
                 <div class="text-sm text-gray-500 mb-4">正在印製您的考卷...</div>
-                </div>
+            </div>
         </div>
 
         <div x-show="currentTab === 'idcard'" x-cloak class="max-w-2xl mx-auto">
@@ -382,37 +391,40 @@
         </div>
 
         <div id="examPaperTemplate" style="display: none;" class="fixed top-0 left-0 w-[375px] h-[600px] flex-col rounded-[24px] overflow-hidden font-sans bg-white relative">
-            <div class="bg-theme h-24 relative flex items-center justify-center">
-                 <div class="text-white text-3xl font-black tracking-widest">鹿🦌 EXAM</div>
-                 <div class="absolute -bottom-6 w-12 h-12 bg-white rounded-full p-1 border-4 border-theme shadow-md flex items-center justify-center text-2xl">📝</div>
+            <div class="bg-theme h-28 relative flex flex-col items-center justify-center overflow-visible">
+                    <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(white 2px, transparent 2px); background-size: 10px 10px;"></div>
+                    <div class="text-white/80 text-xs font-bold tracking-[0.5em] mb-1">OFFICIAL EXAM</div>
+                    <div class="text-white text-4xl font-black tracking-widest drop-shadow-md">麋鹿大會考</div>
+                    <div class="absolute -bottom-8 w-16 h-16 bg-white rounded-full p-1 border-[6px] border-theme shadow-lg flex items-center justify-center z-10">
+                        <span class="text-3xl">📝</span>
+                    </div>
             </div>
-            
-            <div class="p-8 pt-10 flex-1 flex flex-col items-center">
-                <div class="w-full border-b-2 border-dashed border-gray-300 pb-4 mb-4 flex justify-between items-end">
-                    <div class="text-gray-500 text-xs">DATE: <span x-text="examDate"></span></div>
-                    <div class="font-bold text-xl text-gray-800">麋鹿大會考</div>
+            <div class="p-8 pt-12 flex-1 flex flex-col items-center">
+                <div class="w-full border-b-2 border-dashed border-gray-300 pb-4 mb-6 flex justify-between items-end">
+                    <div class="text-gray-400 text-[10px] font-bold tracking-wider">DATE: <span x-text="examDate"></span></div>
+                    <div class="font-bold text-lg text-gray-800">成績通知單</div>
                 </div>
-
-                <div class="w-full bg-gray-100 rounded-xl p-4 mb-6 flex justify-between items-center">
+                <div class="w-full bg-gray-50 rounded-2xl p-5 mb-6 flex justify-between items-center border border-gray-100 shadow-inner">
                     <div class="text-left">
-                        <div class="text-xs text-gray-400">EXAMINEE</div>
-                        <div class="font-bold text-lg">忠實粉絲</div>
+                        <div class="text-[10px] text-gray-400 font-bold tracking-widest mb-1">CANDIDATE</div>
+                        <div class="font-black text-2xl text-gray-800 truncate max-w-[140px]" x-text="quizTakerName"></div>
                     </div>
                     <div class="text-right">
-                        <div class="text-xs text-gray-400">SCORE</div>
-                        <div class="font-black text-4xl text-theme" x-text="quizScore * 10"></div>
+                        <div class="text-[10px] text-gray-400 font-bold tracking-widest mb-1">SCORE</div>
+                        <div class="font-black text-5xl text-theme" x-text="quizScore * 10"></div>
                     </div>
                 </div>
-
-                <div class="w-full border-2 border-theme rounded-2xl p-6 text-center mb-6 relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-2 bg-theme"></div>
-                    <div class="text-6xl mb-2" x-text="quizScore === 10 ? '👑' : (quizScore >= 6 ? '👍' : '🤡')"></div>
+                <div class="w-full border-2 border-theme rounded-2xl p-6 text-center mb-6 relative overflow-hidden bg-white shadow-sm">
+                    <div class="absolute top-0 left-0 w-full h-3 bg-theme"></div>
+                    <div class="text-6xl mb-3 mt-2 transform hover:scale-110 transition-transform" x-text="quizScore === 10 ? '👑' : (quizScore >= 6 ? '👍' : '🤡')"></div>
                     <div class="font-bold text-xl text-gray-800" x-text="quizScore === 10 ? '太神啦！完美全對！' : (quizScore >= 6 ? '還不錯喔，繼續加油！' : '要再去複習QA喔！')"></div>
                 </div>
-
-                <div class="mt-auto w-full">
-                    <div class="w-full h-32 rounded-xl bg-cover bg-center opacity-80 grayscale" :style="`background-image: url(${randomShareBg})`"></div>
-                    <div class="text-center text-[10px] text-gray-400 mt-2 tracking-widest uppercase">Certified by Deer App</div>
+                <div class="mt-auto w-full relative group">
+                    <div class="w-full h-32 rounded-xl bg-cover bg-center shadow-md transition-all grayscale-[30%]" :style="`background-image: url(${randomShareBg})`"></div>
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-xl">
+                        <span class="text-white font-bold text-xs">Deer App Certification</span>
+                    </div>
+                    <div class="text-center text-[10px] text-gray-300 mt-2 tracking-[0.3em] uppercase">Certified by Deer App</div>
                 </div>
             </div>
         </div>
@@ -420,10 +432,7 @@
         <div x-show="showShareModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-6 backdrop-blur-md" x-cloak x-transition.opacity>
             <div class="bg-white dark:bg-gray-800 rounded-[32px] p-6 max-w-sm w-full flex flex-col items-center animate-pop-in relative">
                 <div class="absolute -top-12 text-white font-bold text-sm tracking-widest opacity-80">長按圖片儲存 📸</div>
-                
-                <div id="shareResultContainer" class="mb-6 shadow-2xl rounded-2xl overflow-hidden w-full bg-gray-100 min-h-[300px] flex items-center justify-center">
-                    </div>
-                
+                <div id="shareResultContainer" class="mb-6 shadow-2xl rounded-2xl overflow-hidden w-full bg-gray-100 min-h-[300px] flex items-center justify-center"></div>
                 <button @click="showShareModal = false" class="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-full font-bold text-sm transition-colors ios-btn">關閉</button>
             </div>
         </div>
@@ -431,11 +440,11 @@
         <div x-show="showUpdateModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" x-cloak x-transition.opacity>
             <div class="bg-white dark:bg-gray-800 w-full max-w-md rounded-3xl p-6 shadow-2xl border-2 border-theme animate-pop-in relative">
                 <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-theme text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg tracking-widest">UPDATE</div>
-                <h3 class="text-2xl font-black text-center mb-4 text-gray-800 dark:text-white">🎉 v5.0 Ultimate</h3>
+                <h3 class="text-2xl font-black text-center mb-4 text-gray-800 dark:text-white">🎉 v5.1 Ultimate</h3>
                 <div class="space-y-3 mb-6 text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
                     <p>🎤 <b>語音 AI：</b>按麥克風直接用講的！</p>
-                    <p>📸 <b>真．圖片生成：</b>現在長按圖片可以直接存檔了。</p>
-                    <p>🎓 <b>考卷模式：</b>考完試會發一張精美的成績單。</p>
+                    <p>🎓 <b>考卷模式：</b>新增姓名輸入，獎狀更漂亮。</p>
+                    <p>📸 <b>真．圖片生成：</b>修復無法存檔的問題。</p>
                 </div>
                 <button @click="closeUpdateModal" class="w-full py-3 bg-theme text-white rounded-full font-bold shadow-lg ios-btn">太棒了！</button>
             </div>
