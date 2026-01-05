@@ -75,7 +75,6 @@
         .ios-btn { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; }
         .ios-btn:active { transform: scale(0.94); }
         
-        /* 隱藏捲軸但允許滑動 */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
@@ -115,12 +114,10 @@
       :style="`--theme-color: ${currentTheme.color}; --theme-light: ${currentTheme.light}`">
 
     <script>
-        // 1. 初始化全域變數
         window.isMuted = false;
         window.dateInfo = window.dateInfo || { year: 2024, month: 1, day: 1, birthdayDiff: 0, daysTikTok: 0, daysIG: 0, isBirthdayClose: false };
         window.currentOptions = {};
 
-        // 2. 音效修復：瀏覽器內建音頻生成
         window.playSound = function() {
             if (window.isMuted) return;
             try {
@@ -142,7 +139,6 @@
         };
         window.playClickSound = window.playSound;
 
-        // 3. 完整邏輯整合
         function deerApp() {
             return {
                 currentTab: 'home',
@@ -164,7 +160,7 @@
                 currentPage: 1,
                 totalPages: 1,
                 flippedCards: [],
-                fanXP: 1500, // 模擬經驗值
+                fanXP: 1500,
                 xpPercentage: 75,
                 currentLevelInfo: { title: "黃金鹿粉" },
                 
@@ -198,13 +194,12 @@
                 selectedBg: '', 
                 generatedIdNumber: 'D1003' + Math.floor(Math.random()*9000+1000),
                 
-                // ★★★ 預設背景 (如果 API 失敗會用這些) ★★★
+                // ★★★ 背景圖片 (優先從 GitHub API 更新) ★★★
                 backgrounds: [
-                    './images/backgrounds/bg1.jpg',
-                    './images/backgrounds/bg2.jpg',
-                    './images/backgrounds/bg3.jpg'
+                    'https://images.unsplash.com/photo-1557683316-973673baf926?w=400&q=80', // 預設 1
+                    'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=400&q=80'  // 預設 2
                 ],
-                randomShareBg: './images/backgrounds/bg1.jpg', // 預設分享圖
+                randomShareBg: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=800&q=80',
 
                 // 分享與提示
                 showShareModal: false,
@@ -220,16 +215,13 @@
                 ],
                 currentTheme: {name: 'pink', color: '#ec4899', light: '#fce7f3'},
                 
-                // 備用資料
+                // 資料 (備用)
                 qaData: [
                     { q: "麋鹿的身高是多少？", a: "我是 170cm 喔！", tags: ["身高"] },
                     { q: "麋鹿的生日是什麼時候？", a: "我的生日是 10月3日，天秤座！", tags: ["生日"] },
                     { q: "有養寵物嗎？", a: "有喔！我有一隻英國短毛貓叫做「哺嚕」🐈", tags: ["寵物"] },
                     { q: "喜歡吃什麼？", a: "超愛甜點，特別是草莓蛋糕！", tags: ["食物"] },
-                    { q: "MBTI 是什麼？", a: "ENFP 快樂小狗！", tags: ["MBTI"] },
-                    { q: "有男朋友嗎？", a: "這是秘密喔 🤫 (其實目前單身)", tags: ["感情"] },
-                    { q: "喜歡什麼顏色？", a: "最喜歡粉紅色和淡紫色！", tags: ["顏色"] },
-                    { q: "平常休閒活動？", a: "睡覺、追劇、還有跟哺嚕玩！", tags: ["生活"] }
+                    { q: "MBTI 是什麼？", a: "ENFP 快樂小狗！", tags: ["MBTI"] }
                 ],
                 quizData: [
                     { q: "麋鹿的生日是幾號？", a: "10/03", options: ["10/03", "12/25", "01/01", "08/07"] },
@@ -239,17 +231,10 @@
                 ],
 
                 initApp() {
-                    // 1. 強制給予唯一 ID，解決 Duplicate key 錯誤
                     let rawData = window.qaData || this.qaData;
-                    this.qaData = rawData.map((item, index) => ({
-                        ...item,
-                        id: index + 1
-                    }));
-
-                    // 2. Fuse 搜尋設定
+                    this.qaData = rawData.map((item, index) => ({ ...item, id: index + 1 }));
                     this.fuseInstance = new Fuse(this.qaData, { includeScore: true, keys: ['q', 'tags'] });
                     
-                    // 3. 計算日期
                     const today = new Date();
                     const currentYear = today.getFullYear();
                     const nextBirthday = new Date(currentYear, 9, 3);
@@ -263,45 +248,34 @@
                     const igDate = new Date(2024, 5, 2);
                     this.dateInfo.daysIG = Math.floor((today - igDate) / (1000 * 60 * 60 * 24));
                     
-                    // 4. 初始化首頁卡片
                     this.updatePaginatedData();
-
-                    // 5. ★★★ 自動抓取 GitHub Repo 內的背景圖片 ★★★
-                    this.fetchRepoImages();
+                    this.fetchRepoImages(); // 抓取 GitHub 圖片
                 },
 
-                // ★★★ 新增功能：從 GitHub API 抓取圖片 ★★★
+                // ★★★ 自動抓取 GitHub Repo 圖片 ★★★
                 async fetchRepoImages() {
-                    // 設定你的 GitHub 資訊
-                    // ⚠️ 注意：這會消耗 GitHub API 額度 (60次/小時)，如果超過會自動用上面的預設圖片
-                    const owner = 'wangleoncom';  // 你的 GitHub 帳號
-                    const repo = 'ldweb';         // 你的 Repo 名稱 (如果不對請改成正確的，如 'wangleoncom.github.io')
-                    const path = 'images/backgrounds'; // 圖片資料夾路徑
-
+                    const owner = 'wangleoncom';  
+                    const repo = 'ldweb';         
+                    const path = 'images/backgrounds'; 
                     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 
                     try {
                         const response = await fetch(apiUrl);
                         if (response.ok) {
                             const data = await response.json();
-                            // 篩選出圖片檔 (jpg, png, jpeg)
                             const images = data
                                 .filter(file => file.name.match(/\.(jpg|jpeg|png|gif)$/i))
-                                .map(file => file.download_url); // 取得圖片的直連網址
+                                .map(file => file.download_url); // 取得直連網址
 
                             if (images.length > 0) {
                                 console.log("成功讀取背景圖片：", images);
-                                this.backgrounds = images; // 更新背景列表
-                                this.selectedBg = images[0]; // 預設選第一張
-                                this.randomShareBg = images[Math.floor(Math.random() * images.length)];
+                                this.backgrounds = images; 
+                                this.selectedBg = images[0]; // 更新身分證預設背景
+                                this.randomShareBg = images[Math.floor(Math.random() * images.length)]; // 更新QA/考卷預設背景
                             }
-                        } else {
-                            console.warn("API 請求失敗，使用預設圖片");
-                            // 如果 API 失敗，使用預設的第一張
-                            this.selectedBg = this.backgrounds[0];
                         }
                     } catch (error) {
-                        console.warn("無法連接 GitHub API，使用預設圖片", error);
+                        console.warn("無法連接 GitHub API，使用預設圖片");
                         this.selectedBg = this.backgrounds[0];
                     }
                 },
@@ -312,7 +286,7 @@
                     if(tab === 'quiz') this.quizStarted = false;
                 },
 
-                // --- AI 聊天邏輯 ---
+                // --- AI 聊天 ---
                 sendMessage() {
                     if (!this.chatInput.trim()) return;
                     this.chatHistory.push({ id: Date.now(), text: this.chatInput, isUser: true });
@@ -356,10 +330,10 @@
                     this.showMsgDetail = true;
                     window.playSound();
                 },
-                startVoiceInput() { alert("語音輸入功能模擬中 (需要瀏覽器權限)"); },
+                startVoiceInput() { alert("語音輸入功能模擬中"); },
                 wakeUpAI() { this.wakeUpCount++; if(this.wakeUpCount > 5) { this.aiStatus = 'online'; this.aiStatusText = 'Online'; } },
 
-                // --- 首頁卡片邏輯 ---
+                // --- 首頁 ---
                 toggleCard(id) {
                     if (this.flippedCards.includes(id)) {
                         this.flippedCards = this.flippedCards.filter(cid => cid !== id);
@@ -383,7 +357,7 @@
                 prevPage() { if(this.currentPage > 1) { this.currentPage--; this.updatePaginatedData(); } },
                 calculateLevel(xp) { return Math.floor(xp / 100); },
 
-                // --- 大會考邏輯 ---
+                // --- 大會考 ---
                 startQuizMode() { this.changeTab('quiz'); },
                 startQuiz() {
                     if(!this.quizTakerName) { alert("請輸入名字！"); return; }
@@ -416,21 +390,39 @@
                         this.loadQuestion();
                     } else {
                         this.quizEnded = true;
-                        setTimeout(() => {
-                            const element = document.getElementById('examPaperTemplate');
-                            if(element) element.style.display = 'flex';
-                        }, 500);
+                        // 考完自動生成圖片
+                        this.generateExamImage();
+                    }
+                },
+                // ★★★ 生成成績單圖片 (長按儲存) ★★★
+                generateExamImage() {
+                    // 隨機選一張鹿照片做背景
+                    if(this.backgrounds.length > 0) {
+                        this.randomShareBg = this.backgrounds[Math.floor(Math.random() * this.backgrounds.length)];
+                    }
+                    
+                    const element = document.getElementById('examPaperTemplate');
+                    if(element) {
+                        element.style.display = 'flex'; // 先顯示隱藏模板
+                        // useCORS: true 是關鍵，允許跨域抓取 GitHub 圖片
+                        html2canvas(element, { useCORS: true, allowTaint: true }).then(canvas => {
+                            element.style.display = 'none'; // 截完圖隱藏
+                            const img = canvas.toDataURL("image/png");
+                            const container = document.getElementById('shareResultContainer');
+                            container.innerHTML = `<img src="${img}" class="w-full h-full object-contain pointer-events-auto" style="max-height:80vh;">`;
+                            this.showShareModal = true;
+                        });
                     }
                 },
 
-                // --- 身分證邏輯 ---
+                // --- 身分證 ---
                 generateIDCard() {
                     if(!this.idCardName) { alert("請輸入暱稱！"); return; }
                     this.generatedIdNumber = 'D' + Math.floor(100000 + Math.random() * 900000);
                     const element = document.getElementById('idCardTemplate');
                     if(element) {
                         element.style.display = 'flex'; 
-                        html2canvas(element).then(canvas => {
+                        html2canvas(element, { useCORS: true, allowTaint: true }).then(canvas => {
                             element.style.display = 'none';
                             const img = canvas.toDataURL("image/png");
                             const container = document.getElementById('shareResultContainer');
@@ -440,15 +432,20 @@
                     }
                 },
 
-                // --- 分享邏輯 ---
+                // --- QA 分享 ---
                 openShareModal(item) {
+                    // 隨機選一張鹿照片
+                    if(this.backgrounds.length > 0) {
+                        this.randomShareBg = this.backgrounds[Math.floor(Math.random() * this.backgrounds.length)];
+                    }
+
                     const element = document.getElementById('shareCardTemplate');
                     document.getElementById('shareCardQ').innerText = item.q;
                     document.getElementById('shareCardA').innerText = item.a;
                     
                     if(element) {
                         element.style.display = 'flex';
-                        html2canvas(element).then(canvas => {
+                        html2canvas(element, { useCORS: true, allowTaint: true }).then(canvas => {
                             element.style.display = 'none';
                             const img = canvas.toDataURL("image/png");
                             const container = document.getElementById('shareResultContainer');
@@ -519,37 +516,10 @@
         <nav class="flex items-center gap-1 overflow-x-auto no-scrollbar 
                     bg-white/20 dark:bg-black/40 backdrop-blur-2xl border border-white/20 shadow-2xl 
                     rounded-[2rem] p-1.5 w-full max-w-md mx-auto ring-1 ring-white/10">
-            <button @click="changeTab('home'); window.playSound()" 
-                    :class="currentTab === 'home' 
-                        ? 'bg-white text-pink-600 font-bold shadow-md' 
-                        : 'text-gray-500 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'"
-                    class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">
-                首頁
-            </button>
-
-            <button @click="changeTab('ai'); window.playSound()" 
-                    :class="currentTab === 'ai' 
-                        ? 'bg-white text-pink-600 font-bold shadow-md' 
-                        : 'text-gray-500 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'"
-                    class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">
-                AI 聊天
-            </button>
-
-            <button @click="startQuizMode(); window.playSound()" 
-                    :class="currentTab === 'quiz' 
-                        ? 'bg-white text-pink-600 font-bold shadow-md' 
-                        : 'text-gray-500 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'"
-                    class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">
-                大會考
-            </button>
-            
-            <button @click="changeTab('idcard'); window.playSound()" 
-                    :class="currentTab === 'idcard' 
-                        ? 'bg-white text-pink-600 font-bold shadow-md' 
-                        : 'text-gray-500 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'"
-                    class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">
-                身分證
-            </button>
+            <button @click="changeTab('home'); window.playSound()" :class="currentTab === 'home' ? 'bg-white text-pink-600 font-bold shadow-md' : 'text-gray-500 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'" class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">首頁</button>
+            <button @click="changeTab('ai'); window.playSound()" :class="currentTab === 'ai' ? 'bg-white text-pink-600 font-bold shadow-md' : 'text-gray-500 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'" class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">AI 聊天</button>
+            <button @click="startQuizMode(); window.playSound()" :class="currentTab === 'quiz' ? 'bg-white text-pink-600 font-bold shadow-md' : 'text-gray-500 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'" class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">大會考</button>
+            <button @click="changeTab('idcard'); window.playSound()" :class="currentTab === 'idcard' ? 'bg-white text-pink-600 font-bold shadow-md' : 'text-gray-500 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'" class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">身分證</button>
         </nav>
     </div>
 
@@ -653,7 +623,7 @@
                         <div @click="openMsgDetail(msg)"
                              class="max-w-[85%] rounded-2xl px-5 py-3 shadow-sm text-[15px] leading-relaxed cursor-pointer transition-transform active:scale-95" 
                              :class="msg.isUser ? 'bg-gradient-to-br from-pink-500 to-rose-500 text-white rounded-br-none' : 'bg-white/90 dark:bg-gray-700/90 text-gray-800 dark:text-gray-100 rounded-bl-none border border-white/20 hover:bg-gray-50 dark:hover:bg-gray-600'">
-                             <p x-text="msg.text" class="whitespace-pre-line"></p>
+                            <p x-text="msg.text" class="whitespace-pre-line"></p>
                             <div x-show="!msg.isUser && msg.accuracy" class="text-[10px] text-gray-400 mt-1 text-right flex items-center justify-end gap-1"><span>ℹ️</span> 點擊查看來源</div>
                         </div>
                     </div>
@@ -726,7 +696,7 @@
             
             <div x-show="quizEnded" class="text-center py-10 glass-premium rounded-[32px] p-6 shadow-2xl relative animate-pop-in">
                 <h2 class="text-3xl font-black mb-4">考試結果出爐！📄</h2>
-                <div class="text-sm text-gray-500 mb-4">正在印製您的考卷... (下方自動顯示)</div>
+                <div class="text-sm text-gray-500 mb-4">正在為您印製成績單...</div>
             </div>
         </div>
 
@@ -738,9 +708,7 @@
                     <div><label class="block text-sm font-bold text-gray-500 mb-2 uppercase">選擇背景</label>
                         <div class="grid grid-cols-3 gap-3">
                             <template x-for="(bg, index) in backgrounds" :key="index">
-                                <div @click="selectedBg = bg; window.playSound()" class="aspect-[3/4] rounded-xl overflow-hidden cursor-pointer border-4 transition-all" :class="selectedBg === bg ? 'border-theme scale-95' : 'border-transparent opacity-80 hover:opacity-100'">
-                                    <div class="w-full h-full bg-cover bg-center" :style="`background-image: url(${bg})`"></div>
-                                </div>
+                                <div @click="selectedBg = bg; window.playSound()" class="aspect-[3/4] rounded-xl overflow-hidden cursor-pointer border-4 transition-all bg-cover bg-center" :class="selectedBg === bg ? 'border-theme scale-95' : 'border-transparent opacity-80 hover:opacity-100'" :style="`background-image: url(${bg})`"></div>
                             </template>
                         </div>
                     </div>
