@@ -193,16 +193,18 @@
                 selectedOption: null,
                 examDate: new Date().toLocaleDateString(),
 
-                // 身分證相關
+                // 身分證與背景圖相關
                 idCardName: '',
-                selectedBg: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=400&q=80',
+                selectedBg: '', 
                 generatedIdNumber: 'D1003' + Math.floor(Math.random()*9000+1000),
+                
+                // ★★★ 預設背景 (如果 API 失敗會用這些) ★★★
                 backgrounds: [
-                    'https://images.unsplash.com/photo-1557683316-973673baf926?w=400&q=80',
-                    'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=400&q=80',
-                    'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400&q=80'
+                    './images/backgrounds/bg1.jpg',
+                    './images/backgrounds/bg2.jpg',
+                    './images/backgrounds/bg3.jpg'
                 ],
-                randomShareBg: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=800&q=80',
+                randomShareBg: './images/backgrounds/bg1.jpg', // 預設分享圖
 
                 // 分享與提示
                 showShareModal: false,
@@ -220,14 +222,14 @@
                 
                 // 備用資料
                 qaData: [
-                    { id:1, q: "麋鹿的身高是多少？", a: "我是 170cm 喔！", tags: ["身高"] },
-                    { id:2, q: "麋鹿的生日是什麼時候？", a: "我的生日是 10月3日，天秤座！", tags: ["生日"] },
-                    { id:3, q: "有養寵物嗎？", a: "有喔！我有一隻英國短毛貓叫做「哺嚕」🐈", tags: ["寵物"] },
-                    { id:4, q: "喜歡吃什麼？", a: "超愛甜點，特別是草莓蛋糕！", tags: ["食物"] },
-                    { id:5, q: "MBTI 是什麼？", a: "ENFP 快樂小狗！", tags: ["MBTI"] },
-                    { id:6, q: "有男朋友嗎？", a: "這是秘密喔 🤫 (其實目前單身)", tags: ["感情"] },
-                    { id:7, q: "喜歡什麼顏色？", a: "最喜歡粉紅色和淡紫色！", tags: ["顏色"] },
-                    { id:8, q: "平常休閒活動？", a: "睡覺、追劇、還有跟哺嚕玩！", tags: ["生活"] }
+                    { q: "麋鹿的身高是多少？", a: "我是 170cm 喔！", tags: ["身高"] },
+                    { q: "麋鹿的生日是什麼時候？", a: "我的生日是 10月3日，天秤座！", tags: ["生日"] },
+                    { q: "有養寵物嗎？", a: "有喔！我有一隻英國短毛貓叫做「哺嚕」🐈", tags: ["寵物"] },
+                    { q: "喜歡吃什麼？", a: "超愛甜點，特別是草莓蛋糕！", tags: ["食物"] },
+                    { q: "MBTI 是什麼？", a: "ENFP 快樂小狗！", tags: ["MBTI"] },
+                    { q: "有男朋友嗎？", a: "這是秘密喔 🤫 (其實目前單身)", tags: ["感情"] },
+                    { q: "喜歡什麼顏色？", a: "最喜歡粉紅色和淡紫色！", tags: ["顏色"] },
+                    { q: "平常休閒活動？", a: "睡覺、追劇、還有跟哺嚕玩！", tags: ["生活"] }
                 ],
                 quizData: [
                     { q: "麋鹿的生日是幾號？", a: "10/03", options: ["10/03", "12/25", "01/01", "08/07"] },
@@ -237,9 +239,17 @@
                 ],
 
                 initApp() {
-                    const dataSrc = window.qaData || this.qaData;
-                    this.fuseInstance = new Fuse(dataSrc, { includeScore: true, keys: ['q', 'tags'] });
+                    // 1. 強制給予唯一 ID，解決 Duplicate key 錯誤
+                    let rawData = window.qaData || this.qaData;
+                    this.qaData = rawData.map((item, index) => ({
+                        ...item,
+                        id: index + 1
+                    }));
+
+                    // 2. Fuse 搜尋設定
+                    this.fuseInstance = new Fuse(this.qaData, { includeScore: true, keys: ['q', 'tags'] });
                     
+                    // 3. 計算日期
                     const today = new Date();
                     const currentYear = today.getFullYear();
                     const nextBirthday = new Date(currentYear, 9, 3);
@@ -253,7 +263,47 @@
                     const igDate = new Date(2024, 5, 2);
                     this.dateInfo.daysIG = Math.floor((today - igDate) / (1000 * 60 * 60 * 24));
                     
+                    // 4. 初始化首頁卡片
                     this.updatePaginatedData();
+
+                    // 5. ★★★ 自動抓取 GitHub Repo 內的背景圖片 ★★★
+                    this.fetchRepoImages();
+                },
+
+                // ★★★ 新增功能：從 GitHub API 抓取圖片 ★★★
+                async fetchRepoImages() {
+                    // 設定你的 GitHub 資訊
+                    // ⚠️ 注意：這會消耗 GitHub API 額度 (60次/小時)，如果超過會自動用上面的預設圖片
+                    const owner = 'wangleoncom';  // 你的 GitHub 帳號
+                    const repo = 'ldweb';         // 你的 Repo 名稱 (如果不對請改成正確的，如 'wangleoncom.github.io')
+                    const path = 'images/backgrounds'; // 圖片資料夾路徑
+
+                    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+
+                    try {
+                        const response = await fetch(apiUrl);
+                        if (response.ok) {
+                            const data = await response.json();
+                            // 篩選出圖片檔 (jpg, png, jpeg)
+                            const images = data
+                                .filter(file => file.name.match(/\.(jpg|jpeg|png|gif)$/i))
+                                .map(file => file.download_url); // 取得圖片的直連網址
+
+                            if (images.length > 0) {
+                                console.log("成功讀取背景圖片：", images);
+                                this.backgrounds = images; // 更新背景列表
+                                this.selectedBg = images[0]; // 預設選第一張
+                                this.randomShareBg = images[Math.floor(Math.random() * images.length)];
+                            }
+                        } else {
+                            console.warn("API 請求失敗，使用預設圖片");
+                            // 如果 API 失敗，使用預設的第一張
+                            this.selectedBg = this.backgrounds[0];
+                        }
+                    } catch (error) {
+                        console.warn("無法連接 GitHub API，使用預設圖片", error);
+                        this.selectedBg = this.backgrounds[0];
+                    }
                 },
 
                 changeTab(tab) {
@@ -318,7 +368,7 @@
                     }
                 },
                 updatePaginatedData() {
-                    const allData = window.qaData || this.qaData;
+                    const allData = this.qaData;
                     let filtered = allData;
                     if(this.search) {
                          if(this.fuseInstance) {
