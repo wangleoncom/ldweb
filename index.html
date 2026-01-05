@@ -411,11 +411,42 @@
         </div>
 
         <div x-show="showTutorial" class="fixed inset-0 z-[9000] flex flex-col items-center justify-center text-white text-center p-8 pointer-events-none" x-cloak x-transition.opacity>
+    <template x-if="tutorialStep > 0">
+        <div class="contents">
             <div class="pointer-events-auto bg-black/50 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl mb-8 max-w-xs animate-pop-in">
                 <div class="text-5xl mb-4">🦌</div>
-                <h2 class="text-2xl font-bold mb-2 text-theme-light" x-text="tutorialSteps[tutorialStep-1].title"></h2>
-                <p class="text-white/90 leading-relaxed" x-text="tutorialSteps[tutorialStep-1].desc"></p>
+                <h2 class="text-2xl font-bold mb-2 text-theme-light" x-text="tutorialSteps[tutorialStep-1]?.title || ''"></h2>
+                <p class="text-white/90 leading-relaxed" x-text="tutorialSteps[tutorialStep-1]?.desc || ''"></p>
             </div>
+            
+            <div x-show="showTutorial" class="fixed inset-0 z-[9000] flex flex-col items-center justify-center text-white text-center p-8 pointer-events-none" x-cloak x-transition.opacity>
+    <template x-if="tutorialStep > 0">
+        <div class="contents">
+            <div class="pointer-events-auto bg-black/50 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl mb-8 max-w-xs animate-pop-in">
+                <div class="text-5xl mb-4">🦌</div>
+                <h2 class="text-2xl font-bold mb-2 text-theme-light" x-text="tutorialSteps[tutorialStep-1]?.title || ''"></h2>
+                <p class="text-white/90 leading-relaxed" x-text="tutorialSteps[tutorialStep-1]?.desc || ''"></p>
+            </div>
+            
+            <div x-show="showTutorial" class="fixed inset-0 z-[9000] flex flex-col items-center justify-center text-white text-center p-8 pointer-events-none" x-cloak x-transition.opacity>
+    <template x-if="tutorialStep > 0">
+        <div class="contents">
+            <div class="pointer-events-auto bg-black/50 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl mb-8 max-w-xs animate-pop-in">
+                <div class="text-5xl mb-4">🦌</div>
+                <h2 class="text-2xl font-bold mb-2 text-theme-light" x-text="tutorialSteps[tutorialStep-1]?.title || ''"></h2>
+                <p class="text-white/90 leading-relaxed" x-text="tutorialSteps[tutorialStep-1]?.desc || ''"></p>
+            </div>
+            
+            <div class="pointer-events-auto flex gap-4">
+                <button @click="endTutorial" class="px-6 py-3 bg-white/10 text-white rounded-full font-bold hover:bg-white/20 backdrop-blur-md transition-colors text-sm">跳過</button>
+                <button @click="nextTutorialStep" class="px-8 py-3 bg-theme text-white rounded-full font-bold shadow-xl ios-btn hover:scale-105 transition-transform flex items-center">
+                    <span x-text="tutorialStep === tutorialSteps.length ? '開始使用' : '下一步'"></span>
+                    <span x-show="tutorialStep !== tutorialSteps.length" class="ml-2">➜</span>
+                </button>
+            </div>
+        </div>
+    </template>
+</div>
             
             <div class="pointer-events-auto flex gap-4">
                 <button @click="endTutorial" class="px-6 py-3 bg-white/10 text-white rounded-full font-bold hover:bg-white/20 backdrop-blur-md transition-colors text-sm">跳過</button>
