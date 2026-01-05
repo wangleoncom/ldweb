@@ -436,7 +436,7 @@
                 <div class="text-right"><div class="text-[10px] font-bold tracking-[0.2em] opacity-80 mb-1">OFFICIAL FAN</div><div class="font-bold text-xl tracking-widest text-white drop-shadow-md">麋鹿認證</div></div>
             </div>
             <div class="relative z-20 p-8 pb-12">
-                <div class="mb-6"><div class="text-[10px] font-bold tracking-[0.2em] opacity-70 mb-1">NAME</div><div class="text-4xl font-black tracking-tight" x-text="idCardName"></div></div>
+                <div class="mb-6"><div class="text-[10px] font-bold tracking-[0.2em] opacity-70 mb-1">姓名</div><div class="text-4xl font-black tracking-tight" x-text="idCardName"></div></div>
                 <div class="flex justify-between items-end border-t border-white/30 pt-4"><div><div class="text-[10px] font-bold tracking-[0.2em] opacity-70 mb-1">ID NUMBER</div><div class="text-xl font-mono font-bold" x-text="generatedIdNumber"></div></div><div class="text-right"><div class="text-[10px] font-bold tracking-[0.2em] opacity-70 mb-1">DATE</div><div class="text-sm font-mono opacity-90" x-text="new Date().toISOString().split('T')[0]"></div></div></div>
             </div>
         </div>
@@ -447,60 +447,63 @@
             <div class="relative z-20 w-full p-8 flex flex-col items-center">
                 <img src="./images/basic/icon.png" class="w-20 h-20 rounded-full border-4 border-white shadow-xl mb-6">
                 <div class="bg-white/95 p-8 rounded-[32px] w-full shadow-2xl backdrop-blur-md border border-white/50">
-                    <div class="text-xs font-black text-pink-500 uppercase tracking-widest mb-3">Question</div>
+                    <div class="text-xs font-black text-pink-500 uppercase tracking-widest mb-3">問題</div>
                     <p id="shareCardQ" class="font-bold text-gray-900 mb-6 text-xl leading-relaxed"></p>
                     <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-6"></div>
-                    <div class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Answer</div>
+                    <div class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">答案</div>
                     <p id="shareCardA" class="text-pink-600 font-bold text-2xl leading-relaxed"></p>
                 </div>
-                <div class="mt-8 text-white/80 text-[10px] font-mono border border-white/40 px-3 py-1 rounded-full bg-black/20">鹿🦌的QA網站</div>
+                <div class="mt-8 text-white/80 text-[10px] font-mono border border-white/40 px-3 py-1 rounded-full bg-black/20">wangleoncom.github.io/ldweb</div>
             </div>
         </div>
 
-        <div id="examPaperTemplate" style="display: none;" class="fixed top-0 left-0 w-[375px] h-[600px] flex-col rounded-[24px] overflow-hidden font-sans bg-white relative">
+        <div id="examPaperTemplate" style="display: none;" class="fixed top-0 left-0 w-[375px] h-[600px] flex flex-col bg-white overflow-hidden font-sans rounded-[24px]">
     
-    <div class="bg-theme h-36 relative flex flex-col items-center justify-start pt-8 overflow-visible shrink-0">
-            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(white 2px, transparent 2px); background-size: 10px 10px;"></div>
-            
-            <div class="text-white/90 text-[10px] font-bold tracking-[0.4em] mb-1">OFFICIAL EXAM</div>
-            <div class="text-white text-3xl font-black tracking-widest drop-shadow-md z-10">鹿🦌大會考</div>
-            
-            <div class="absolute -bottom-8 w-16 h-16 bg-white rounded-full p-1 border-[6px] border-theme shadow-lg flex items-center justify-center z-20">
-                <span class="text-3xl relative top-[2px] right-[1px]">📝</span>
-            </div>
-    </div>
-    
-    <div class="p-6 pt-12 flex-1 flex flex-col items-center w-full box-border">
+    <div class="bg-theme h-28 relative flex flex-col items-center justify-center shrink-0 z-10">
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(white 2px, transparent 2px); background-size: 10px 10px;"></div>
         
-        <div class="w-full border-b-2 border-dashed border-gray-300 pb-2 mb-2 flex justify-between items-end shrink-0">
-            <div class="text-gray-400 text-[10px] font-bold tracking-wider">DATE: <span x-text="examDate"></span></div>
-            <div class="font-bold text-lg text-gray-800">成績通知單</div>
+        <div class="z-10 text-center -mt-2">
+            <div class="text-white/90 text-[10px] font-bold tracking-[0.4em] mb-1">OFFICIAL EXAM</div>
+            <div class="text-white text-3xl font-black tracking-widest drop-shadow-md">鹿🦌大會考</div>
         </div>
 
-        <div class="w-full bg-gray-50 rounded-2xl p-3 mb-3 flex justify-between items-center border border-gray-100 shadow-inner shrink-0">
-            <div class="text-left overflow-hidden">
-                <div class="text-[10px] text-gray-400 font-bold tracking-widest mb-1">CANDIDATE</div>
-                <div class="font-black text-2xl text-gray-800 truncate max-w-[140px]" x-text="quizTakerName"></div>
+        <div class="absolute -bottom-8 w-16 h-16 bg-white rounded-full p-1 border-[5px] border-theme shadow-lg flex items-center justify-center">
+            <span class="text-3xl relative top-[1px]">📝</span>
+        </div>
+    </div>
+
+    <div class="flex-1 flex flex-col px-6 pt-10 pb-5 w-full bg-white relative z-0">
+        
+        <div class="flex justify-between items-end border-b-2 border-dashed border-gray-200 pb-2 mb-3 shrink-0">
+            <div class="text-gray-400 text-[10px] font-bold tracking-wider">日期： <span x-text="examDate"></span></div>
+            <div class="font-bold text-base text-gray-700">麋鹿成績單</div>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-3 mb-3 flex justify-between items-center border border-gray-100 shrink-0">
+            <div>
+                <div class="text-[9px] text-gray-400 font-bold tracking-widest mb-0.5">麋鹿名字</div>
+                <div class="font-black text-xl text-gray-800 truncate max-w-[140px]" x-text="quizTakerName"></div>
             </div>
             <div class="text-right">
-                <div class="text-[10px] text-gray-400 font-bold tracking-widest mb-1">SCORE</div>
-                <div class="font-black text-5xl text-theme" x-text="quizScore * 10"></div>
+                <div class="text-[9px] text-gray-400 font-bold tracking-widest mb-0.5">分數</div>
+                <div class="font-black text-4xl text-theme" x-text="quizScore * 10"></div>
             </div>
         </div>
 
-        <div class="w-full border-2 border-theme rounded-2xl p-2 mb-3 relative overflow-hidden bg-white shadow-sm flex flex-col justify-center items-center shrink-0 min-h-[100px]">
-            <div class="absolute top-0 left-0 w-full h-3 bg-theme"></div>
-            <div class="flex-1 flex items-center justify-center">
-                 <div class="text-5xl transform hover:scale-110 transition-transform pt-2" x-text="quizScore === 10 ? '👑' : (quizScore >= 6 ? '👍' : '🤡')"></div>
-            </div>
-            <div class="font-bold text-base text-gray-800 pb-2" x-text="quizScore === 10 ? '太神啦！完美全對！' : (quizScore >= 6 ? '還不錯喔，繼續加油！' : '要再去複習QA喔！')"></div>
+        <div class="border-2 border-theme/30 rounded-xl p-2 mb-3 relative overflow-hidden bg-white flex flex-col justify-center items-center shrink-0 min-h-[90px]">
+            <div class="absolute top-0 left-0 w-full h-1.5 bg-theme"></div>
+            <div class="text-4xl mb-1 mt-1 transform hover:scale-110 transition-transform" x-text="quizScore === 10 ? '👑' : (quizScore >= 6 ? '👍' : '🤡')"></div>
+            <div class="font-bold text-base text-gray-800" x-text="quizScore === 10 ? '太神啦！完美全對！' : (quizScore >= 6 ? '還不錯喔，繼續加油！' : '要再去複習QA喔！')"></div>
         </div>
 
-        <div class="w-full flex-1 flex flex-col min-h-0 mt-1">
-            <div class="w-full flex-1 rounded-xl bg-cover bg-center shadow-md transition-all grayscale-[30%] bg-no-repeat" 
-                 :style="`background-image: url(${randomShareBg}); background-position: center top;`"></div>
-            <div class="text-center text-[10px] text-gray-300 mt-2 tracking-[0.3em] uppercase shrink-0 pb-1">Certified by Deer App</div>
+        <div class="flex-1 w-full relative flex flex-col min-h-0 bg-gray-100 rounded-xl overflow-hidden shadow-inner border border-gray-100">
+             <div class="absolute inset-0 bg-cover bg-center transition-all grayscale-[20%]" 
+                 :style="`background-image: url(${randomShareBg});`">
+            </div>
+            <div class="absolute bottom-0 inset-x-0 h-10 bg-gradient-to-t from-black/40 to-transparent"></div>
         </div>
+        
+        <div class="text-center text-[9px] text-gray-300 mt-2 tracking-[0.3em] uppercase shrink-0">Certified by Deer App</div>
     </div>
 </div>
 
