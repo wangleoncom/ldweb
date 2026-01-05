@@ -102,47 +102,66 @@ function deerApp() {
             }
         },
 
-        // --- 核心功能：智慧模糊搜尋 (New) ---
-        smartSearch(query) {
-            if (!query) return [];
-            
-            // 1. 同義詞替換 (AI 理解邏輯)
-            let normalizedQuery = query.toLowerCase()
-                .replace(/主播|妳|你|她|老婆|姐姐|鹿鹿/g, '鹿') 
-                .replace(/男朋友|男友/g, '男朋友');
+        // --- 把這段程式碼貼到 app.js 覆蓋原本的 smartSearch ---
 
-            // 2. 使用 Fuse.js 進行模糊搜尋 (若未載入則回退到普通搜尋)
-            if (typeof Fuse !== 'undefined') {
-                const fuse = new Fuse(this.allData, {
-                    keys: [
-                        { name: 'tags', weight: 0.5 }, // 標籤最重要
-                        { name: 'q', weight: 0.3 },    // 問題次之
-                        { name: 'a', weight: 0.2 }     // 答案最後
-                    ],
-                    includeScore: true,
-                    threshold: 0.4, // 容錯率 (0.0 完全匹配, 1.0 任何都匹配)
-                    ignoreLocation: true
-                });
-                
-                const results = fuse.search(normalizedQuery);
-                return results.map(res => ({ ...res.item, score: 1 })); // 格式化回傳
-            } else {
-                // 回退邏輯 (若 CDN 失敗)
-                const terms = normalizedQuery.split(/\s+/).filter(t => t.length > 0);
-                return this.allData.map(item => {
-                    let score = 0;
-                    const qText = item.q.toLowerCase();
-                    const aText = item.a.toLowerCase();
-                    const tags = (item.tags || []).join(' ').toLowerCase();
-                    terms.forEach(term => {
-                        if (tags.includes(term)) score += 20;
-                        if (qText.includes(term)) score += 10;
-                        if (aText.includes(term)) score += 2;
-                    });
-                    return { ...item, score };
-                }).filter(item => item.score > 0).sort((a, b) => b.score - a.score);
-            }
-        },
+smartSearch(query) {
+    if (!query) return [];
+    
+    // 1. 預先處理：轉小寫
+    let rawQuery = query.toLowerCase();
+
+    // 2. 第一層過濾：移除「語助詞」與「無意義標點」 (雜訊過濾器)
+    // 讓 "主播幾歲啊" -> "主播幾歲"
+    // 讓 "傳主播幾歲???" -> "傳主播幾歲"
+    let cleanQuery = rawQuery
+        .replace(/[.,?!。，？！、]/g, '') // 移除標點符號
+        .replace(/啊|喔|哦|耶|吧|呢|嗎|嘛|哈|啦|欸|誒|阿|呀/g, '') // 移除語助詞
+        .replace(/請問|想問|有沒有|知道|覺得|各位|大家|幫我/g, ''); // 移除客套話
+
+    // 3. 第二層過濾：同義詞替換 (AI 理解邏輯)
+    // 讓 "主播幾歲" -> "鹿幾歲"
+    let normalizedQuery = cleanQuery
+        .replace(/主播|妳|你|她|老婆|姐姐|鹿鹿/g, '鹿') 
+        .replace(/男朋友|男友/g, '男朋友');
+
+    // 如果過濾完變空字串 (例如使用者只打 "啊？")，就回傳空
+    if (!normalizedQuery.trim()) return [];
+
+    console.log(`搜尋除錯: 原本[${query}] -> 過濾後[${cleanQuery}] -> 最終[${normalizedQuery}]`);
+
+    // 4. 使用 Fuse.js 進行模糊搜尋
+    if (typeof Fuse !== 'undefined') {
+        const fuse = new Fuse(this.allData, {
+            keys: [
+                { name: 'tags', weight: 0.6 }, // 提高標籤權重 (最準)
+                { name: 'q', weight: 0.3 },    // 問題次之
+                { name: 'a', weight: 0.1 }     // 答案最後
+            ],
+            includeScore: true,
+            threshold: 0.5, //稍微放寬一點標準 (原本0.4，改0.5讓模糊匹配更容易)
+            ignoreLocation: true,
+            useExtendedSearch: true
+        });
+        
+        const results = fuse.search(normalizedQuery);
+        return results.map(res => ({ ...res.item, score: 1 })); 
+    } else {
+        // 回退邏輯 (若 CDN 失敗)
+        const terms = normalizedQuery.split(/\s+/).filter(t => t.length > 0);
+        return this.allData.map(item => {
+            let score = 0;
+            const qText = item.q.toLowerCase();
+            const aText = item.a.toLowerCase();
+            const tags = (item.tags || []).join(' ').toLowerCase();
+            terms.forEach(term => {
+                if (tags.includes(term)) score += 30; // 加分加重
+                if (qText.includes(term)) score += 15;
+                if (aText.includes(term)) score += 5;
+            });
+            return { ...item, score };
+        }).filter(item => item.score > 0).sort((a, b) => b.score - a.score);
+    }
+},
 
         get filteredQuestions() { 
             if (this.search.trim() === '') return this.allData; 
