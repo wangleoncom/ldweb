@@ -12,6 +12,7 @@
     <link rel="apple-touch-icon" href="./images/basic/icon.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Rounded+Mplus+1c:wght@400;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -75,18 +76,21 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
         }
 
-        /* 將原本 glass-premium 的內容複製過來 */
-.glass { 
-    background: rgba(255, 255, 255, 0.65); 
-    backdrop-filter: blur(24px) saturate(180%); 
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.6); 
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-}
+        .glass { 
+            background: rgba(255, 255, 255, 0.65); 
+            backdrop-filter: blur(24px) saturate(180%); 
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.6); 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
 
         .ios-btn { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; }
         .ios-btn:active { transform: scale(0.94); }
+        
+        /* 隱藏捲軸但允許滑動 */
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
         .perspective-1000 { perspective: 1000px; }
         .transform-style-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; }
@@ -115,10 +119,16 @@
         }
     </style>
 </head>
-<body class="text-gray-800 transition-colors duration-300 dark:text-gray-100 font-sans min-h-screen overflow-x-hidden selection:bg-pink-200 selection:text-pink-900 animated-bg"
+<body class="text-gray-800 transition-colors duration-300 dark:text-gray-100 font-sans min-h-screen overflow-x-hidden selection:bg-pink-200 selection:text-pink-900 animated-bg pb-32"
       x-data="deerApp()" x-init="initApp()" @scroll.window="handleScroll" 
       :class="{'tutorial-active': showTutorial}"
       :style="`--theme-color: ${currentTheme.color}; --theme-light: ${currentTheme.light}`">
+
+    <script>
+        window.isMuted = false;
+        window.dateInfo = { year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() };
+        window.currentOptions = {};
+    </script>
 
     <div class="fixed inset-0 overflow-hidden -z-10 pointer-events-none">
         <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-400/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob"></div>
@@ -126,21 +136,13 @@
         <div class="absolute bottom-[-10%] left-[20%] w-[600px] h-[600px] bg-pink-400/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob animation-delay-4000"></div>
     </div>
 
-    <nav class="fixed top-0 w-full z-50 transition-all duration-500 border-b border-transparent"
+    <nav class="fixed top-0 w-full z-40 transition-all duration-500 border-b border-transparent"
          :class="scrollY > 20 ? 'glass-premium shadow-sm border-white/20' : 'bg-transparent'">
         <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
             
             <div class="flex items-center cursor-pointer ios-btn flex-shrink-0" @click="changeTab('home')">
                 <img src="./images/basic/icon.png" class="w-9 h-9 rounded-full mr-2 border-2 border-theme object-cover shadow-sm">
                 <span class="font-bold text-xl text-gray-800 dark:text-white tracking-wide">鹿 QA</span>
-            </div>
-            
-            <div class="flex space-x-1 bg-white/40 dark:bg-black/20 p-1 rounded-full backdrop-blur-md border border-white/10 overflow-x-auto no-scrollbar mx-2 rounded-xl"
-                 :class="{'spotlight-target ring-4 ring-theme': tutorialStep === 2}">
-                <button @click="changeTab('home')" :class="tabClass('home')">首頁</button>
-                <button @click="changeTab('ai')" :class="tabClass('ai')">AI 聊天</button>
-                <button @click="startQuizMode()" :class="tabClass('quiz')">大會考</button>
-                <button @click="changeTab('idcard')" :class="tabClass('idcard')">身分證</button>
             </div>
             
             <div class="flex items-center gap-2 flex-shrink-0" x-data="{ open: false }">
@@ -167,7 +169,47 @@
         </div>
     </nav>
 
-    <main class="pt-24 pb-20 px-4 max-w-6xl mx-auto min-h-screen">
+    <div class="fixed bottom-6 left-0 right-0 z-50 flex justify-center px-4 safe-area-bottom">
+        <nav class="flex items-center gap-1 overflow-x-auto no-scrollbar 
+                    bg-white/10 dark:bg-black/40 backdrop-blur-2xl border border-white/20 shadow-2xl 
+                    rounded-[2rem] p-1.5 w-full max-w-md mx-auto ring-1 ring-white/10"
+             :class="{'spotlight-target ring-4 ring-theme': tutorialStep === 2}">
+            
+            <button @click="changeTab('home')" 
+                    :class="currentTab === 'home' 
+                        ? 'bg-white text-black font-bold shadow-md' 
+                        : 'text-white/70 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'"
+                    class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">
+                首頁
+            </button>
+
+            <button @click="changeTab('ai')" 
+                    :class="currentTab === 'ai' 
+                        ? 'bg-white text-black font-bold shadow-md' 
+                        : 'text-white/70 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'"
+                    class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">
+                AI 聊天
+            </button>
+
+            <button @click="startQuizMode()" 
+                    :class="currentTab === 'quiz' 
+                        ? 'bg-white text-black font-bold shadow-md' 
+                        : 'text-white/70 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'"
+                    class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">
+                大會考
+            </button>
+            
+            <button @click="changeTab('idcard')" 
+                    :class="currentTab === 'idcard' 
+                        ? 'bg-white text-black font-bold shadow-md' 
+                        : 'text-white/70 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'"
+                    class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">
+                身分證
+            </button>
+        </nav>
+    </div>
+
+    <main class="pt-24 px-4 max-w-6xl mx-auto min-h-screen">
         
         <div x-show="installPrompt" x-transition class="mb-6 mx-auto max-w-md glass-premium p-4 rounded-2xl flex items-center justify-between border border-theme shadow-lg">
             <div class="flex items-center"><span class="text-3xl mr-3">📲</span><div><div class="font-bold text-gray-800 dark:text-white">安裝 鹿🦌APP</div><div class="text-xs text-gray-500">加入主畫面體驗更佳！</div></div></div>
@@ -266,7 +308,7 @@
                 </div>
             </div>
 
-            <div class="sticky top-20 z-40 mb-8 transition-all duration-500 ease-out" :class="scrollY > 150 ? 'pt-2 px-2' : ''">
+            <div class="sticky top-20 z-30 mb-8 transition-all duration-500 ease-out" :class="scrollY > 150 ? 'pt-2 px-2' : ''">
                 <div class="relative max-w-2xl mx-auto transition-all duration-300" 
                      :class="[
                         scrollY > 150 ? 'shadow-2xl scale-[0.98]' : 'shadow-lg',
@@ -315,7 +357,7 @@
             </div>
         </div>
 
-        <div x-show="currentTab === 'ai'" x-cloak class="max-w-2xl mx-auto h-[75vh] flex flex-col glass-premium rounded-[32px] overflow-hidden shadow-2xl relative border border-white/40 animate-pop-in"
+        <div x-show="currentTab === 'ai'" x-cloak class="max-w-2xl mx-auto h-[70vh] flex flex-col glass-premium rounded-[32px] overflow-hidden shadow-2xl relative border border-white/40 animate-pop-in"
              :class="{'spotlight-target ring-4 ring-theme': tutorialStep === 3}">
             <div class="absolute inset-0 z-0">
                 <div class="absolute inset-0 z-0 bg-cover bg-center transition-all duration-1000" :style="`background-image: url(${aiBackground})`"></div>
