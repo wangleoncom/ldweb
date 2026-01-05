@@ -18,10 +18,10 @@
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     
     <script src="./deer_db.js"></script>
-    <script src="./app.js"></script> <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="./quiz_db.js"></script> <script src="./app.js"></script> 
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <script>
-        // 簡單的 Console 屏蔽
         (function() {
             var nullFunc = function() {};
             console.log = nullFunc; console.warn = nullFunc; console.error = nullFunc;
@@ -35,13 +35,14 @@
                     animation: { 
                         'pop-in': 'popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards', 
                         'float': 'float 6s ease-in-out infinite',
-                        'pulse-slow': 'pulse 3s infinite',
-                        'blob': 'blob 7s infinite',
+                        'breathe': 'breathe 8s ease-in-out infinite',
+                        'blob': 'blob 10s infinite',
                         'tilt': 'tilt 10s infinite linear'
                     },
                     keyframes: {
                         popIn: { '0%': { opacity: '0', transform: 'scale(0.95) translateY(10px)' }, '100%': { opacity: '1', transform: 'scale(1) translateY(0)' } },
                         float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        breathe: { '0%, 100%': { opacity: '0.4' }, '50%': { opacity: '0.7' } },
                         blob: { "0%": { transform: "translate(0px, 0px) scale(1)" }, "33%": { transform: "translate(30px, -50px) scale(1.1)" }, "66%": { transform: "translate(-20px, 20px) scale(0.9)" }, "100%": { transform: "translate(0px, 0px) scale(1)" } },
                         tilt: { "0%, 50%, 100%": { transform: "rotate(0deg)" }, "25%": { transform: "rotate(1deg)" }, "75%": { transform: "rotate(-1deg)" } }
                     }
@@ -57,23 +58,32 @@
         .border-theme { border-color: var(--theme-color); }
         
         html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
-        body { background-color: #fdf2f8; transition: background-color 0.3s; }
+        body { background-color: #fdf2f8; transition: background-color 0.5s; }
         .dark body { background-color: #0f172a; }
         
-        .glass { 
-            background: rgba(255, 255, 255, 0.7); 
-            backdrop-filter: blur(20px) saturate(180%); 
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.5); 
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        /* 升級版毛玻璃效果 */
+        .glass-premium { 
+            background: rgba(255, 255, 255, 0.65); 
+            backdrop-filter: blur(24px) saturate(180%); 
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.6); 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
         }
-        .dark .glass { 
-            background: rgba(30, 30, 30, 0.7); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        .dark .glass-premium { 
+            background: rgba(30, 30, 30, 0.65); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
         }
 
-        .ios-btn { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .glass { 
+    background: rgba(255, 255, 255, 0.65); 
+    backdrop-filter: blur(24px) saturate(180%); 
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6); 
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    }
+
+        .ios-btn { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; }
         .ios-btn:active { transform: scale(0.94); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .perspective-1000 { perspective: 1000px; }
@@ -88,35 +98,47 @@
             pointer-events: auto;
             transition: all 0.5s ease;
         }
-        body.tutorial-active {
-            overflow: hidden;
+        
+        /* 動態背景 */
+        .animated-bg {
+            background: linear-gradient(120deg, var(--theme-light) 0%, #fdf2f8 50%, var(--theme-light) 100%);
+            background-size: 200% 200%;
+            animation: gradientBG 15s ease infinite;
+        }
+        .dark .animated-bg {
+            background: linear-gradient(120deg, #1e1b4b 0%, #0f172a 50%, #312e81 100%);
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
     </style>
 </head>
-<body class="text-gray-800 transition-colors duration-300 dark:text-gray-100 font-sans min-h-screen overflow-x-hidden selection:bg-pink-200 selection:text-pink-900"
+<body class="text-gray-800 transition-colors duration-300 dark:text-gray-100 font-sans min-h-screen overflow-x-hidden selection:bg-pink-200 selection:text-pink-900 animated-bg"
       x-data="deerApp()" x-init="initApp()" @scroll.window="handleScroll" 
       :class="{'tutorial-active': showTutorial}"
       :style="`--theme-color: ${currentTheme.color}; --theme-light: ${currentTheme.light}`">
 
     <div class="fixed inset-0 overflow-hidden -z-10 pointer-events-none">
-        <div class="absolute top-0 left-[-10%] w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-        <div class="absolute top-0 right-[-10%] w-96 h-96 bg-yellow-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-        <div class="absolute -bottom-32 left-20 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-400/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob"></div>
+        <div class="absolute top-[20%] right-[-10%] w-[400px] h-[400px] bg-yellow-300/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-[-10%] left-[20%] w-[600px] h-[600px] bg-pink-400/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob animation-delay-4000"></div>
     </div>
 
     <nav class="fixed top-0 w-full z-50 transition-all duration-500 border-b border-transparent"
-         :class="scrollY > 20 ? 'glass shadow-sm border-white/20' : 'bg-transparent'">
+         :class="scrollY > 20 ? 'glass-premium shadow-sm border-white/20' : 'bg-transparent'">
         <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
             
             <div class="flex items-center cursor-pointer ios-btn flex-shrink-0" @click="changeTab('home')">
                 <img src="./images/basic/icon.png" class="w-9 h-9 rounded-full mr-2 border-2 border-theme object-cover shadow-sm">
-                <span class="font-bold text-xl text-gray-800 dark:text-white tracking-wide">鹿🦌的QA網站</span>
+                <span class="font-bold text-xl text-gray-800 dark:text-white tracking-wide">鹿 QA</span>
             </div>
             
             <div class="flex space-x-1 bg-white/40 dark:bg-black/20 p-1 rounded-full backdrop-blur-md border border-white/10 overflow-x-auto no-scrollbar mx-2 rounded-xl"
                  :class="{'spotlight-target ring-4 ring-theme': tutorialStep === 2}">
                 <button @click="changeTab('home')" :class="tabClass('home')">首頁</button>
-                <button @click="changeTab('ai')" :class="tabClass('ai')">AI 麋鹿</button>
+                <button @click="changeTab('ai')" :class="tabClass('ai')">AI 聊天</button>
                 <button @click="startQuizMode()" :class="tabClass('quiz')">大會考</button>
                 <button @click="changeTab('idcard')" :class="tabClass('idcard')">身分證</button>
             </div>
@@ -144,45 +166,37 @@
 
     <main class="pt-24 pb-20 px-4 max-w-6xl mx-auto min-h-screen">
         
-        <div x-show="installPrompt" x-transition class="mb-6 mx-auto max-w-md glass p-4 rounded-2xl flex items-center justify-between border border-theme shadow-lg">
+        <div x-show="installPrompt" x-transition class="mb-6 mx-auto max-w-md glass-premium p-4 rounded-2xl flex items-center justify-between border border-theme shadow-lg">
             <div class="flex items-center"><span class="text-3xl mr-3">📲</span><div><div class="font-bold text-gray-800 dark:text-white">安裝 鹿🦌APP</div><div class="text-xs text-gray-500">加入主畫面體驗更佳！</div></div></div>
             <button @click="installPWA" class="px-5 py-2 bg-theme text-white rounded-full text-sm font-bold shadow-md hover:opacity-90 ios-btn">安裝</button>
         </div>
 
         <div x-show="currentTab === 'home'" x-transition.opacity.duration.300ms>
-            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="md:col-span-2 glass rounded-[32px] p-8 border border-white/40 flex flex-col sm:flex-row items-center gap-8 shadow-xl relative overflow-hidden animate-tilt">
+                <div class="md:col-span-2 glass-premium rounded-[32px] p-8 border border-white/40 flex flex-col sm:flex-row items-center gap-8 shadow-xl relative overflow-hidden animate-tilt">
                     <div class="relative group z-10">
                         <img src="./images/basic/icon.png" class="w-28 h-28 md:w-32 md:h-32 rounded-full object-cover shadow-2xl border-4 border-white dark:border-gray-700 ios-btn cursor-pointer flex-shrink-0" @click="triggerEasterEgg('profile')">
-                        <div class="absolute -bottom-2 -right-2 bg-green-400 w-6 h-6 rounded-full border-4 border-white dark:border-gray-800 animate-pulse"></div>
                     </div>
                     <div class="flex-1 text-center sm:text-left z-10">
                         <h2 class="text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">鹿🦌 <span class="text-lg font-normal text-gray-500"></span></h2>
                         <p class="text-gray-600 dark:text-gray-300 font-medium mb-4 leading-relaxed whitespace-pre-line">🎂 10/03 天秤座｜📏 170cm｜⚖️ 42kg
 🐈 貓咪：哺嚕 (英國短毛貓)</p>
                         <div class="flex justify-center sm:justify-start gap-3">
-                            <a href="https://www.tiktok.com/@ld.1003_" target="_blank" class="px-5 py-2 bg-black text-white rounded-full text-sm font-bold shadow-lg ios-btn flex items-center gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg> TikTok</a>
-                            <a href="https://www.instagram.com/ld.1003_/" target="_blank" class="px-5 py-2 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 text-white rounded-full text-sm font-bold shadow-lg ios-btn flex items-center gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg> IG</a>
+                            <a href="https://www.tiktok.com/@ld.1003_" target="_blank" class="px-5 py-2 bg-black text-white rounded-full text-sm font-bold shadow-lg ios-btn flex items-center gap-2">TikTok</a>
+                            <a href="https://www.instagram.com/ld.1003_/" target="_blank" class="px-5 py-2 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 text-white rounded-full text-sm font-bold shadow-lg ios-btn flex items-center gap-2">IG</a>
                         </div>
                     </div>
                 </div>
 
-                <div class="glass rounded-[32px] p-6 border border-white/40 shadow-xl flex flex-col justify-center items-center relative overflow-hidden">
+                <div class="glass-premium rounded-[32px] p-6 border border-white/40 shadow-xl flex flex-col justify-center items-center relative overflow-hidden">
                     <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">粉絲等級 (Fan Level)</div>
                     <div class="text-3xl font-black text-theme mb-1" x-text="currentLevelInfo.title"></div>
                     <div class="text-sm text-gray-500 font-mono mb-4">LV.<span x-text="calculateLevel(fanXP)"></span></div>
-                    
                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-2 overflow-hidden relative">
                         <div class="bg-theme h-4 rounded-full transition-all duration-1000 ease-out relative overflow-hidden" :style="`width: ${xpPercentage}%`">
                             <div class="absolute inset-0 bg-white/30 animate-[progress_2s_infinite_linear]" style="background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent); background-size: 1rem 1rem;"></div>
                         </div>
                     </div>
-                    <div class="text-xs text-gray-400 w-full flex justify-between">
-                        <span x-text="fanXP"></span>
-                        <span>下個等級: <span x-text="currentLevelInfo.next"></span></span>
-                    </div>
-                    <div class="mt-4 text-[10px] text-gray-400 text-center">每天登入、問 AI 問題、做測驗可獲得 XP！</div>
                 </div>
             </div>
 
@@ -203,7 +217,7 @@
                 <template x-for="(item, index) in paginatedData" :key="item.id">
                     <div class="group h-60 perspective-1000 cursor-pointer animate-pop-in" :style="`animation-delay: ${index * 40}ms`" @click="toggleCard(item.id)">
                         <div class="relative w-full h-full transform-style-3d transition-all duration-500 shadow-md hover:shadow-2xl rounded-[24px] ios-btn" :class="{ 'rotate-y-180': flippedCards.includes(item.id) }">
-                            <div class="absolute w-full h-full glass rounded-[24px] p-6 flex flex-col justify-between backface-hidden border-t-2 border-white/60 bg-gradient-to-br from-white/90 to-white/50 dark:from-gray-800/90 dark:to-gray-900/50">
+                            <div class="absolute w-full h-full glass-premium rounded-[24px] p-6 flex flex-col justify-between backface-hidden border-t-2 border-white/60 bg-gradient-to-br from-white/90 to-white/50 dark:from-gray-800/90 dark:to-gray-900/50">
                                 <div>
                                     <div class="flex items-center gap-2 mb-3">
                                         <span class="text-[10px] font-black tracking-widest text-white bg-theme px-2 py-1 rounded-md">Q.<span x-text="item.id"></span></span>
@@ -212,11 +226,10 @@
                                     <h3 class="text-lg font-bold leading-snug text-gray-800 dark:text-gray-100 line-clamp-3" x-text="item.q"></h3>
                                 </div>
                                 <div class="flex justify-between items-end">
-                                    <span x-show="search.length > 0 && item.score > 0" class="text-xs text-theme font-bold bg-theme-light dark:bg-gray-700 px-2 py-1 rounded">符合</span>
-                                    <div class="text-xs text-gray-400 font-bold uppercase tracking-wider flex items-center">翻轉 <span class="ml-1 text-lg">➜</span></div>
+                                    <div class="text-xs text-gray-400 font-bold uppercase tracking-wider flex items-center">Tap to Flip <span class="ml-1 text-lg">➜</span></div>
                                 </div>
                             </div>
-                            <div class="absolute w-full h-full glass rounded-[24px] p-6 flex flex-col backface-hidden rotate-y-180 bg-white dark:bg-gray-800 border-b-4 border-theme overflow-y-auto">
+                            <div class="absolute w-full h-full glass-premium rounded-[24px] p-6 flex flex-col backface-hidden rotate-y-180 bg-white dark:bg-gray-800 border-b-4 border-theme overflow-y-auto">
                                 <div class="flex-1 flex items-center justify-center">
                                     <p class="text-[17px] font-medium text-center leading-relaxed text-gray-700 dark:text-gray-200" x-text="item.a"></p>
                                 </div>
@@ -230,13 +243,13 @@
             </div>
             
             <div class="flex flex-wrap justify-center items-center mt-12 gap-3 pb-12" x-show="totalPages > 1">
-                <button @click="prevPage" :disabled="currentPage === 1" class="px-6 py-3 rounded-full glass font-bold hover:bg-theme hover:text-white disabled:opacity-30 ios-btn">◀</button>
+                <button @click="prevPage" :disabled="currentPage === 1" class="px-6 py-3 rounded-full glass-premium font-bold hover:bg-theme hover:text-white disabled:opacity-30 ios-btn">◀</button>
                 <span class="font-black text-theme px-4 text-xl"><span x-text="currentPage"></span> <span class="text-sm opacity-50">/</span> <span x-text="totalPages"></span></span>
-                <button @click="nextPage" :disabled="currentPage === totalPages" class="px-6 py-3 rounded-full glass font-bold hover:bg-theme hover:text-white disabled:opacity-30 ios-btn">▶</button>
+                <button @click="nextPage" :disabled="currentPage === totalPages" class="px-6 py-3 rounded-full glass-premium font-bold hover:bg-theme hover:text-white disabled:opacity-30 ios-btn">▶</button>
             </div>
         </div>
 
-        <div x-show="currentTab === 'ai'" x-cloak class="max-w-2xl mx-auto h-[75vh] flex flex-col glass rounded-[32px] overflow-hidden shadow-2xl relative border border-white/40 animate-pop-in"
+        <div x-show="currentTab === 'ai'" x-cloak class="max-w-2xl mx-auto h-[75vh] flex flex-col glass-premium rounded-[32px] overflow-hidden shadow-2xl relative border border-white/40 animate-pop-in"
              :class="{'spotlight-target ring-4 ring-theme': tutorialStep === 3}">
             <div class="absolute inset-0 z-0">
                 <div class="absolute inset-0 z-0 bg-cover bg-center transition-all duration-1000" :style="`background-image: url(${aiBackground})`"></div>
@@ -276,56 +289,52 @@
             
             <div class="relative z-10 p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-200/20">
                 <form @submit.prevent="sendMessage" class="flex gap-2">
-                    <input type="text" x-model="chatInput" :disabled="aiStatus !== 'online'" placeholder="問問關於鹿的事情... (試試: 主播幾歲)" class="flex-1 rounded-full bg-gray-100 dark:bg-gray-800 border-none focus:ring-2 focus:ring-theme px-5 py-3 transition-all disabled:opacity-50">
+                    <button type="button" @click="startVoiceInput" class="rounded-full w-12 h-12 flex items-center justify-center transition-all ios-btn" :class="isListening ? 'bg-red-500 animate-pulse text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500'">
+                        <span class="text-xl">🎙️</span>
+                    </button>
+                    <input type="text" x-model="chatInput" :disabled="aiStatus !== 'online'" placeholder="問問題或按麥克風..." class="flex-1 rounded-full bg-gray-100 dark:bg-gray-800 border-none focus:ring-2 focus:ring-theme px-5 py-3 transition-all disabled:opacity-50">
                     <button type="submit" :disabled="aiStatus !== 'online'" class="bg-theme hover:opacity-90 text-white rounded-full p-3 w-12 h-12 flex items-center justify-center shadow-lg disabled:opacity-50 ios-btn">➤</button>
                 </form>
             </div>
         </div>
 
         <div x-show="currentTab === 'quiz'" x-cloak class="max-w-2xl mx-auto">
-            <div x-show="!quizStarted && !quizEnded" class="text-center py-16 glass rounded-[32px] p-10 shadow-2xl animate-pop-in">
+            <div x-show="!quizStarted && !quizEnded" class="text-center py-16 glass-premium rounded-[32px] p-10 shadow-2xl animate-pop-in">
                 <div class="text-8xl mb-6 animate-float drop-shadow-xl">🎓</div>
-                <h2 class="text-4xl font-black mb-4 text-gray-800 dark:text-white tracking-tight">麋鹿大會考</h2>
-                <p class="text-gray-600 dark:text-gray-300 mb-10 font-medium text-lg">全對可獲得限定版 Gold Moose Medal！🏆</p>
+                <h2 class="text-4xl font-black mb-4 text-gray-800 dark:text-white tracking-tight">麋鹿大會考 2.0</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-10 font-medium text-lg">隨機抽出 10 題挑戰，全對可獲得限定考卷！🏆</p>
                 <button @click="startQuiz" class="px-12 py-4 bg-gradient-to-r from-theme to-purple-600 text-white rounded-full font-black text-xl shadow-xl ios-btn">開始挑戰</button>
             </div>
             <div x-show="quizStarted && !quizEnded" class="animate-pop-in">
                 <div class="flex justify-between items-center mb-6 px-4">
-                    <span class="font-bold text-white bg-theme px-4 py-1.5 rounded-full text-sm">Q.<span x-text="currentQuizIndex + 1"></span>/5</span>
+                    <span class="font-bold text-white bg-theme px-4 py-1.5 rounded-full text-sm">Q.<span x-text="currentQuizIndex + 1"></span>/<span x-text="currentQuizSet.length"></span></span>
                     <span class="text-sm font-bold bg-gray-200 dark:bg-gray-700 px-4 py-1.5 rounded-full">分數: <span x-text="quizScore"></span></span>
                 </div>
-                <div class="glass rounded-3xl p-8 mb-6 border-l-8 border-theme min-h-[180px] flex items-center justify-center relative shadow-lg">
+                <div class="glass-premium rounded-3xl p-8 mb-6 border-l-8 border-theme min-h-[180px] flex items-center justify-center relative shadow-lg">
                     <h3 class="text-2xl font-bold text-center leading-relaxed text-gray-800 dark:text-white" x-text="currentQuestion?.q"></h3>
                 </div>
                 <div class="grid grid-cols-1 gap-4">
                     <template x-for="(opt, idx) in currentOptions" :key="idx">
                         <button @click="checkAnswer(opt)" :disabled="hasAnswered" :class="getOptionClass(opt)" class="w-full p-5 rounded-2xl text-left font-bold transition-all border-2 shadow-sm flex items-center justify-between group ios-btn">
                             <div class="flex items-center"><span class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-sm mr-4 font-black" x-text="['A','B','C','D'][idx]"></span><span x-text="opt"></span></div>
-                            <span x-show="hasAnswered && opt === currentCorrectText" class="text-green-600 text-xl">✅</span>
-                            <span x-show="hasAnswered && opt !== currentCorrectText && selectedOption === opt" class="text-red-500 text-xl">❌</span>
+                            <span x-show="hasAnswered && opt === currentQuestion?.a" class="text-green-600 text-xl">✅</span>
+                            <span x-show="hasAnswered && opt !== currentQuestion?.a && selectedOption === opt" class="text-red-500 text-xl">❌</span>
                         </button>
                     </template>
                 </div>
-                <button x-show="hasAnswered" @click="nextQuestion" class="mt-8 w-full py-4 bg-gray-800 dark:bg-gray-700 text-white rounded-2xl font-bold shadow-lg ios-btn text-lg">下一題 ➜</button>
+                <button x-show="hasAnswered" @click="nextQuestion" class="mt-8 w-full py-4 bg-gray-800 dark:bg-gray-700 text-white rounded-2xl font-bold shadow-lg ios-btn text-lg">
+                    <span x-text="currentQuizIndex === currentQuizSet.length - 1 ? '查看成績' : '下一題'"></span> ➜
+                </button>
             </div>
-            <div x-show="quizEnded" class="text-center py-16 glass rounded-[32px] p-10 shadow-2xl relative overflow-hidden animate-pop-in">
-                <div x-show="quizScore === 5" class="mb-8 relative z-10">
-                    <div class="w-48 h-48 mx-auto rounded-full bg-gradient-to-tr from-yellow-300 to-yellow-600 p-1 animate-float shadow-2xl">
-                        <img src="./images/basic/icon.png" class="w-full h-full rounded-full object-cover border-4 border-white">
-                    </div>
-                    <div class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-orange-600 mt-6">Gold Moose Medal 🏆</div>
+            
+            <div x-show="quizEnded" class="text-center py-10 glass-premium rounded-[32px] p-6 shadow-2xl relative animate-pop-in">
+                <h2 class="text-3xl font-black mb-4">考試結果出爐！📄</h2>
+                <div class="text-sm text-gray-500 mb-4">正在印製您的考卷...</div>
                 </div>
-                <div x-show="quizScore < 5" class="text-8xl mb-6 transform rotate-12 inline-block"><span x-text="quizScore >= 3 ? '🥈' : '🤡'"></span></div>
-                <h2 class="text-6xl font-black text-gray-800 dark:text-white mb-2 tracking-tighter">總分: <span x-text="quizScore * 20" class="text-theme"></span></h2>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center mt-12">
-                    <button @click="startQuiz" class="px-8 py-3 bg-gray-200 dark:bg-gray-700 rounded-full font-bold ios-btn">再測一次</button>
-                    <button @click="shareResult" class="px-8 py-3 bg-theme text-white rounded-full font-bold shadow-lg ios-btn">分享成績</button>
-                </div>
-            </div>
         </div>
 
         <div x-show="currentTab === 'idcard'" x-cloak class="max-w-2xl mx-auto">
-            <div class="glass rounded-[32px] p-8 shadow-2xl animate-pop-in">
+            <div class="glass-premium rounded-[32px] p-8 shadow-2xl animate-pop-in">
                 <h2 class="text-3xl font-black mb-8 text-center text-theme">麋鹿認證中心 🪪</h2>
                 <div class="space-y-6 mb-10">
                     <div><label class="block text-sm font-bold text-gray-500 mb-2 uppercase">你的暱稱</label><input type="text" x-model="idCardName" placeholder="輸入暱稱..." class="w-full px-5 py-4 rounded-2xl bg-white/50 dark:bg-black/30 border border-gray-200 dark:border-gray-700 focus:border-theme focus:ring-0 text-lg"></div>
@@ -343,7 +352,7 @@
             </div>
         </div>
 
-        <div id="idCardTemplate" class="fixed top-0 left-[-9999px] w-[375px] h-[600px] flex flex-col justify-between rounded-[24px] overflow-hidden font-sans text-white">
+        <div id="idCardTemplate" style="display: none;" class="fixed top-0 left-0 w-[375px] h-[600px] flex-col justify-between rounded-[24px] overflow-hidden font-sans text-white">
             <div class="absolute inset-0 z-0 bg-cover bg-center" :style="`background-image: url(${selectedBg})`"></div>
             <div class="absolute inset-0 z-10 bg-gradient-to-b from-black/60 via-transparent to-black/80"></div>
             <div class="relative z-20 p-8 pt-10 flex justify-between items-start">
@@ -356,7 +365,7 @@
             </div>
         </div>
 
-        <div id="shareCardTemplate" class="fixed top-0 left-[-9999px] w-[375px] h-[600px] flex flex-col items-center justify-center rounded-[24px] overflow-hidden text-center font-sans">
+        <div id="shareCardTemplate" style="display: none;" class="fixed top-0 left-0 w-[375px] h-[600px] flex-col items-center justify-center rounded-[24px] overflow-hidden text-center font-sans">
             <div class="absolute inset-0 z-0 bg-cover bg-center" :style="`background-image: url(${randomShareBg})`"></div>
             <div class="absolute inset-0 z-10 bg-black/40 backdrop-blur-[6px]"></div>
             <div class="relative z-20 w-full p-8 flex flex-col items-center">
@@ -368,31 +377,53 @@
                     <div class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Answer</div>
                     <p id="shareCardA" class="text-pink-600 font-bold text-2xl leading-relaxed"></p>
                 </div>
-                <div class="mt-8 text-white/80 text-[10px] font-mono border border-white/40 px-3 py-1 rounded-full bg-black/20">https://wangleoncom.github.io/ldweb/</div>
+                <div class="mt-8 text-white/80 text-[10px] font-mono border border-white/40 px-3 py-1 rounded-full bg-black/20">鹿🦌的QA網站</div>
             </div>
         </div>
 
-        <div id="quizResultTemplate" class="fixed top-0 left-[-9999px] w-[375px] h-[600px] flex flex-col items-center justify-between rounded-[24px] overflow-hidden text-center font-sans">
-            <div class="absolute inset-0 z-0 bg-cover bg-center" :style="`background-image: url(${randomShareBg})`"></div>
-            <div class="absolute inset-0 z-10 bg-gradient-to-b from-black/70 via-black/20 to-black/80"></div>
-            <div class="relative z-20 p-10 w-full mt-4">
-                <img src="./images/basic/icon.png" class="w-20 h-20 mx-auto rounded-full border-4 border-white shadow-2xl mb-4">
-                <div class="text-white/80 text-xs font-bold tracking-[0.3em] uppercase">MOOSE EXAM</div>
-                <div class="text-white font-black text-3xl mt-2 drop-shadow-lg">麋鹿大會考</div>
+        <div id="examPaperTemplate" style="display: none;" class="fixed top-0 left-0 w-[375px] h-[600px] flex-col rounded-[24px] overflow-hidden font-sans bg-white relative">
+            <div class="bg-theme h-24 relative flex items-center justify-center">
+                 <div class="text-white text-3xl font-black tracking-widest">鹿🦌 EXAM</div>
+                 <div class="absolute -bottom-6 w-12 h-12 bg-white rounded-full p-1 border-4 border-theme shadow-md flex items-center justify-center text-2xl">📝</div>
             </div>
-            <div class="relative z-20 w-full">
-                <div class="text-white text-9xl font-black drop-shadow-2xl flex justify-center items-baseline" style="text-shadow: 0 4px 20px rgba(0,0,0,0.5);"><span id="shareScoreNum">100</span><span class="text-3xl font-medium ml-2 opacity-80">pts</span></div>
-                <div id="shareScoreTitle" class="text-yellow-400 font-bold text-2xl mt-4 tracking-wider filter drop-shadow-lg uppercase"></div>
-            </div>
-            <div class="relative z-20 p-10 w-full mb-4">
-                <div id="shareScoreComment" class="text-white text-sm font-bold bg-white/10 backdrop-blur-md py-4 px-6 rounded-2xl border border-white/20 shadow-lg"></div>
+            
+            <div class="p-8 pt-10 flex-1 flex flex-col items-center">
+                <div class="w-full border-b-2 border-dashed border-gray-300 pb-4 mb-4 flex justify-between items-end">
+                    <div class="text-gray-500 text-xs">DATE: <span x-text="examDate"></span></div>
+                    <div class="font-bold text-xl text-gray-800">麋鹿大會考</div>
+                </div>
+
+                <div class="w-full bg-gray-100 rounded-xl p-4 mb-6 flex justify-between items-center">
+                    <div class="text-left">
+                        <div class="text-xs text-gray-400">EXAMINEE</div>
+                        <div class="font-bold text-lg">忠實粉絲</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-gray-400">SCORE</div>
+                        <div class="font-black text-4xl text-theme" x-text="quizScore * 10"></div>
+                    </div>
+                </div>
+
+                <div class="w-full border-2 border-theme rounded-2xl p-6 text-center mb-6 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-2 bg-theme"></div>
+                    <div class="text-6xl mb-2" x-text="quizScore === 10 ? '👑' : (quizScore >= 6 ? '👍' : '🤡')"></div>
+                    <div class="font-bold text-xl text-gray-800" x-text="quizScore === 10 ? '太神啦！完美全對！' : (quizScore >= 6 ? '還不錯喔，繼續加油！' : '要再去複習QA喔！')"></div>
+                </div>
+
+                <div class="mt-auto w-full">
+                    <div class="w-full h-32 rounded-xl bg-cover bg-center opacity-80 grayscale" :style="`background-image: url(${randomShareBg})`"></div>
+                    <div class="text-center text-[10px] text-gray-400 mt-2 tracking-widest uppercase">Certified by Deer App</div>
+                </div>
             </div>
         </div>
 
         <div x-show="showShareModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-6 backdrop-blur-md" x-cloak x-transition.opacity>
-            <div class="bg-white rounded-[32px] p-6 max-w-sm w-full flex flex-col items-center animate-pop-in relative">
+            <div class="bg-white dark:bg-gray-800 rounded-[32px] p-6 max-w-sm w-full flex flex-col items-center animate-pop-in relative">
                 <div class="absolute -top-12 text-white font-bold text-sm tracking-widest opacity-80">長按圖片儲存 📸</div>
-                <div id="shareResultContainer" class="mb-6 shadow-2xl rounded-2xl overflow-hidden w-full bg-gray-100 min-h-[300px] flex items-center justify-center"></div>
+                
+                <div id="shareResultContainer" class="mb-6 shadow-2xl rounded-2xl overflow-hidden w-full bg-gray-100 min-h-[300px] flex items-center justify-center">
+                    </div>
+                
                 <button @click="showShareModal = false" class="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-full font-bold text-sm transition-colors ios-btn">關閉</button>
             </div>
         </div>
@@ -400,61 +431,33 @@
         <div x-show="showUpdateModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" x-cloak x-transition.opacity>
             <div class="bg-white dark:bg-gray-800 w-full max-w-md rounded-3xl p-6 shadow-2xl border-2 border-theme animate-pop-in relative">
                 <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-theme text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg tracking-widest">UPDATE</div>
-                <h3 class="text-2xl font-black text-center mb-4 text-gray-800 dark:text-white">🎉 網站大更新 v4.1</h3>
+                <h3 class="text-2xl font-black text-center mb-4 text-gray-800 dark:text-white">🎉 v5.0 Ultimate</h3>
                 <div class="space-y-3 mb-6 text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
-                    <p>🔍 <b>智慧搜尋：</b>打錯字也能找到！例如「傳說隊決」->「傳說對決」。</p>
-                    <p>⚡ <b>效能優化：</b>網站載入速度更快了。</p>
-                    <p>🐛 <b>Bug 修復：</b>修復了手機鍵盤擋住輸入框的問題。</p>
+                    <p>🎤 <b>語音 AI：</b>按麥克風直接用講的！</p>
+                    <p>📸 <b>真．圖片生成：</b>現在長按圖片可以直接存檔了。</p>
+                    <p>🎓 <b>考卷模式：</b>考完試會發一張精美的成績單。</p>
                 </div>
                 <button @click="closeUpdateModal" class="w-full py-3 bg-theme text-white rounded-full font-bold shadow-lg ios-btn">太棒了！</button>
             </div>
         </div>
 
         <div x-show="showTutorial" class="fixed inset-0 z-[9000] flex flex-col items-center justify-center text-white text-center p-8 pointer-events-none" x-cloak x-transition.opacity>
-    <template x-if="tutorialStep > 0">
-        <div class="contents">
-            <div class="pointer-events-auto bg-black/50 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl mb-8 max-w-xs animate-pop-in">
-                <div class="text-5xl mb-4">🦌</div>
-                <h2 class="text-2xl font-bold mb-2 text-theme-light" x-text="tutorialSteps[tutorialStep-1]?.title || ''"></h2>
-                <p class="text-white/90 leading-relaxed" x-text="tutorialSteps[tutorialStep-1]?.desc || ''"></p>
-            </div>
-            
-            <div x-show="showTutorial" class="fixed inset-0 z-[9000] flex flex-col items-center justify-center text-white text-center p-8 pointer-events-none" x-cloak x-transition.opacity>
-    <template x-if="tutorialStep > 0">
-        <div class="contents">
-            <div class="pointer-events-auto bg-black/50 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl mb-8 max-w-xs animate-pop-in">
-                <div class="text-5xl mb-4">🦌</div>
-                <h2 class="text-2xl font-bold mb-2 text-theme-light" x-text="tutorialSteps[tutorialStep-1]?.title || ''"></h2>
-                <p class="text-white/90 leading-relaxed" x-text="tutorialSteps[tutorialStep-1]?.desc || ''"></p>
-            </div>
-            
-            <div x-show="showTutorial" class="fixed inset-0 z-[9000] flex flex-col items-center justify-center text-white text-center p-8 pointer-events-none" x-cloak x-transition.opacity>
-    <template x-if="tutorialStep > 0">
-        <div class="contents">
-            <div class="pointer-events-auto bg-black/50 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl mb-8 max-w-xs animate-pop-in">
-                <div class="text-5xl mb-4">🦌</div>
-                <h2 class="text-2xl font-bold mb-2 text-theme-light" x-text="tutorialSteps[tutorialStep-1]?.title || ''"></h2>
-                <p class="text-white/90 leading-relaxed" x-text="tutorialSteps[tutorialStep-1]?.desc || ''"></p>
-            </div>
-            
-            <div class="pointer-events-auto flex gap-4">
-                <button @click="endTutorial" class="px-6 py-3 bg-white/10 text-white rounded-full font-bold hover:bg-white/20 backdrop-blur-md transition-colors text-sm">跳過</button>
-                <button @click="nextTutorialStep" class="px-8 py-3 bg-theme text-white rounded-full font-bold shadow-xl ios-btn hover:scale-105 transition-transform flex items-center">
-                    <span x-text="tutorialStep === tutorialSteps.length ? '開始使用' : '下一步'"></span>
-                    <span x-show="tutorialStep !== tutorialSteps.length" class="ml-2">➜</span>
-                </button>
-            </div>
-        </div>
-    </template>
-</div>
-            
-            <div class="pointer-events-auto flex gap-4">
-                <button @click="endTutorial" class="px-6 py-3 bg-white/10 text-white rounded-full font-bold hover:bg-white/20 backdrop-blur-md transition-colors text-sm">跳過</button>
-                <button @click="nextTutorialStep" class="px-8 py-3 bg-theme text-white rounded-full font-bold shadow-xl ios-btn hover:scale-105 transition-transform flex items-center">
-                    <span x-text="tutorialStep === tutorialSteps.length ? '開始使用' : '下一步'"></span>
-                    <span x-show="tutorialStep !== tutorialSteps.length" class="ml-2">➜</span>
-                </button>
-            </div>
+             <template x-if="tutorialStep > 0">
+                <div class="contents">
+                    <div class="pointer-events-auto bg-black/50 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl mb-8 max-w-xs animate-pop-in">
+                        <div class="text-5xl mb-4">🦌</div>
+                        <h2 class="text-2xl font-bold mb-2 text-theme-light" x-text="tutorialSteps[tutorialStep-1]?.title || ''"></h2>
+                        <p class="text-white/90 leading-relaxed" x-text="tutorialSteps[tutorialStep-1]?.desc || ''"></p>
+                    </div>
+                    <div class="pointer-events-auto flex gap-4">
+                        <button @click="endTutorial" class="px-6 py-3 bg-white/10 text-white rounded-full font-bold hover:bg-white/20 backdrop-blur-md transition-colors text-sm">跳過</button>
+                        <button @click="nextTutorialStep" class="px-8 py-3 bg-theme text-white rounded-full font-bold shadow-xl ios-btn hover:scale-105 transition-transform flex items-center">
+                            <span x-text="tutorialStep === tutorialSteps.length ? '開始使用' : '下一步'"></span>
+                            <span x-show="tutorialStep !== tutorialSteps.length" class="ml-2">➜</span>
+                        </button>
+                    </div>
+                </div>
+            </template>
         </div>
 
         <div x-show="showToast" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-y-10 opacity-0" x-transition:enter-end="translate-y-0 opacity-100" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-full text-sm z-[110] shadow-2xl font-bold flex items-center border border-white/10">
