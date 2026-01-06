@@ -143,19 +143,45 @@
     </div>
 
     <div id="examPaperTemplate" style="display: none;" class="fixed top-0 left-0 w-[375px] h-[600px] flex flex-col bg-white overflow-hidden font-sans rounded-[24px]">
-        <div class="bg-theme h-28 relative flex flex-col items-center justify-center shrink-0 z-10">
-            <div class="z-10 text-center -mt-2"><div class="text-white/90 text-[10px] font-bold tracking-[0.4em] mb-1">OFFICIAL EXAM</div><div class="text-white text-3xl font-black tracking-widest drop-shadow-md">鹿🦌大會考</div></div>
-            <div class="absolute -bottom-8 w-16 h-16 bg-white rounded-full p-1 border-[5px] border-theme shadow-lg flex items-center justify-center"><span class="text-3xl relative top-[1px]">📝</span></div>
-        </div>
-        <div class="flex-1 flex flex-col px-6 pt-10 pb-5 w-full bg-white relative z-0">
-            <div class="flex justify-between items-end border-b-2 border-dashed border-gray-200 pb-2 mb-3 shrink-0"><div class="text-gray-400 text-[10px] font-bold tracking-wider">日期： <span x-text="examDate"></span></div><div class="font-bold text-base text-gray-700">成績單</div></div>
-            <div class="bg-gray-50 rounded-xl p-3 mb-3 flex justify-between items-center border border-gray-100 shrink-0"><div><div class="text-[9px] text-gray-400 font-bold tracking-widest mb-0.5">姓名</div><div class="font-black text-xl text-gray-800 truncate max-w-[140px]" x-text="quizTakerName"></div></div><div class="text-right"><div class="text-[9px] text-gray-400 font-bold tracking-widest mb-0.5">分數</div><div class="font-black text-4xl text-theme" x-text="quizScore * 10"></div></div></div>
-            <div class="border-2 border-theme/30 rounded-xl p-2 mb-3 relative overflow-hidden bg-white flex flex-col justify-center items-center shrink-0 min-h-[90px]"><div class="text-4xl mb-1 mt-1 transform hover:scale-110 transition-transform" x-text="quizScore === 5 ? '👑' : (quizScore >= 3 ? '👍' : '🤡')"></div><div class="font-bold text-base text-gray-800" x-text="quizScore === 5 ? '太神啦！完美全對！' : (quizScore >= 3 ? '還不錯喔，繼續加油！' : '要再去複習QA喔！')"></div></div>
-            <div class="flex-1 w-full relative flex flex-col min-h-0 bg-gray-100 rounded-xl overflow-hidden shadow-inner border border-gray-100">
-                <img :src="randomShareBg" class="absolute inset-0 w-full h-full object-cover z-0 grayscale-[20%]" crossorigin="anonymous">
+            
+            <div class="bg-theme h-32 relative flex flex-col items-center justify-center shrink-0 z-10">
+                <div class="z-10 text-center -mt-4">
+                    <div class="text-white/90 text-[10px] font-bold tracking-[0.4em] mb-1">OFFICIAL EXAM</div>
+                    <div class="text-white text-4xl font-black tracking-widest drop-shadow-md">鹿🦌大會考</div>
+                </div>
+                <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-white rounded-full p-1 border-[5px] border-theme shadow-lg flex items-center justify-center z-20">
+                    <span class="text-3xl pb-1">📝</span>
+                </div>
+            </div>
+
+            <div class="flex-1 flex flex-col px-6 pt-12 pb-6 w-full bg-white relative z-0">
+                
+                <div class="flex justify-between items-end border-b-2 border-dashed border-gray-200 pb-2 mb-4 shrink-0">
+                    <div class="text-gray-400 text-[10px] font-bold tracking-wider">日期： <span x-text="examDate"></span></div>
+                    <div class="font-bold text-base text-gray-700">成績單</div>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-4 mb-4 flex justify-between items-center border border-gray-100 shrink-0 shadow-sm">
+                    <div class="flex-1 pr-2">
+                        <div class="text-[10px] text-gray-400 font-bold tracking-widest mb-1">姓名</div>
+                        <div class="font-black text-2xl text-gray-800 break-words leading-tight" x-text="quizTakerName"></div>
+                    </div>
+                    <div class="text-right pl-2 border-l border-gray-200">
+                        <div class="text-[10px] text-gray-400 font-bold tracking-widest mb-1 pl-2">分數</div>
+                        <div class="font-black text-5xl text-theme pl-2" x-text="quizScore * 10"></div>
+                    </div>
+                </div>
+
+                <div class="border-2 border-theme/30 rounded-xl p-2 mb-4 relative overflow-hidden bg-white flex flex-col justify-center items-center shrink-0 min-h-[80px]">
+                    <div class="text-3xl mb-1 mt-1 transform hover:scale-110 transition-transform" x-text="quizScore === 5 ? '👑' : (quizScore >= 3 ? '👍' : '🤡')"></div>
+                    <div class="font-bold text-base text-gray-800" x-text="quizScore === 5 ? '太神啦！完美全對！' : (quizScore >= 3 ? '還不錯喔，繼續加油！' : '要再去複習QA喔！')"></div>
+                </div>
+
+                <div class="flex-1 w-full relative flex flex-col min-h-[150px] bg-gray-100 rounded-xl overflow-hidden shadow-inner border border-gray-100">
+                    <img :src="randomShareBg" class="absolute inset-0 w-full h-full object-cover object-top z-0" crossorigin="anonymous">
+                </div>
             </div>
         </div>
-    </div>
 
     <script>
         // 初始化全域變數
