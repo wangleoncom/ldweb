@@ -1,4 +1,4 @@
-const CACHE_NAME = 'deer-qa-v5.9'; 
+const CACHE_NAME = 'deer-qa-v5.5.1'; 
 const ASSETS = [
   './',
   './index.html',
