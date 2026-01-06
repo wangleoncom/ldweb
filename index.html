@@ -75,7 +75,6 @@
         .ios-btn { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; }
         .ios-btn:active { transform: scale(0.94); }
         
-        /* 隱藏捲軸但允許滑動 */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
@@ -143,53 +142,57 @@
     </div>
 
     <div id="examPaperTemplate" style="display: none;" class="fixed top-0 left-0 w-[375px] h-[600px] flex flex-col bg-white overflow-hidden font-sans rounded-[24px]">
-            
-            <div class="bg-theme h-32 relative flex flex-col items-center justify-center shrink-0 z-10">
-                <div class="z-10 text-center -mt-4">
-                    <div class="text-white/90 text-[10px] font-bold tracking-[0.4em] mb-1">OFFICIAL EXAM</div>
-                    <div class="text-white text-4xl font-black tracking-widest drop-shadow-md">鹿🦌大會考</div>
-                </div>
-                <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-white rounded-full p-1 border-[5px] border-theme shadow-lg flex items-center justify-center z-20">
-                    <span class="text-3xl pb-1">📝</span>
-                </div>
+        
+        <div class="bg-theme h-32 relative flex flex-col items-center justify-center shrink-0 z-10">
+            <div class="z-10 text-center -mt-4">
+                <div class="text-white/90 text-[10px] font-bold tracking-[0.4em] mb-1">OFFICIAL EXAM</div>
+                <div class="text-white text-4xl font-black tracking-widest drop-shadow-md">鹿🦌大會考</div>
+            </div>
+            <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-white rounded-full p-1 border-[5px] border-theme shadow-lg flex items-center justify-center z-20">
+                <span class="text-3xl pb-1">📝</span>
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col px-6 pt-12 pb-6 w-full relative z-0">
+            <div class="absolute inset-0 z-0">
+                 <img :src="randomShareBg" class="w-full h-full object-cover object-center opacity-20" crossorigin="anonymous">
+                 <div class="absolute inset-0 bg-white/40 backdrop-blur-[2px]"></div>
             </div>
 
-            <div class="flex-1 flex flex-col px-6 pt-12 pb-6 w-full bg-white relative z-0">
-                
-                <div class="flex justify-between items-end border-b-2 border-dashed border-gray-200 pb-2 mb-4 shrink-0">
-                    <div class="text-gray-400 text-[10px] font-bold tracking-wider">日期： <span x-text="examDate"></span></div>
+            <div class="relative z-10 flex flex-col h-full">
+                <div class="flex justify-between items-end border-b-2 border-dashed border-gray-400/30 pb-2 mb-4 shrink-0">
+                    <div class="text-gray-500 text-[10px] font-bold tracking-wider">日期： <span x-text="examDate"></span></div>
                     <div class="font-bold text-base text-gray-700">成績單</div>
                 </div>
 
-                <div class="bg-gray-50 rounded-2xl p-4 mb-4 flex justify-between items-center border border-gray-100 shrink-0 shadow-sm">
-                    <div class="flex-1 pr-2">
-                        <div class="text-[10px] text-gray-400 font-bold tracking-widest mb-1">姓名</div>
+                <div class="bg-white/80 backdrop-blur-md rounded-2xl p-5 mb-4 flex justify-between items-center border border-white/50 shadow-sm">
+                    <div class="flex-1 pr-2 min-w-0">
+                        <div class="text-[10px] text-gray-400 font-bold tracking-widest mb-1 uppercase">Name</div>
                         <div class="font-black text-2xl text-gray-800 break-words leading-tight" x-text="quizTakerName"></div>
                     </div>
-                    <div class="text-right pl-2 border-l border-gray-200">
-                        <div class="text-[10px] text-gray-400 font-bold tracking-widest mb-1 pl-2">分數</div>
-                        <div class="font-black text-5xl text-theme pl-2" x-text="quizScore * 10"></div>
+                    <div class="text-right pl-4 border-l-2 border-gray-100">
+                        <div class="text-[10px] text-gray-400 font-bold tracking-widest mb-1 uppercase">Score</div>
+                        <div class="font-black text-5xl text-theme" x-text="quizScore * 10"></div>
                     </div>
                 </div>
 
-                <div class="border-2 border-theme/30 rounded-xl p-2 mb-4 relative overflow-hidden bg-white flex flex-col justify-center items-center shrink-0 min-h-[80px]">
-                    <div class="text-3xl mb-1 mt-1 transform hover:scale-110 transition-transform" x-text="quizScore === 5 ? '👑' : (quizScore >= 3 ? '👍' : '🤡')"></div>
-                    <div class="font-bold text-base text-gray-800" x-text="quizScore === 5 ? '太神啦！完美全對！' : (quizScore >= 3 ? '還不錯喔，繼續加油！' : '要再去複習QA喔！')"></div>
+                <div class="bg-white/80 backdrop-blur-md border-2 border-theme/20 rounded-xl p-3 mb-4 relative overflow-hidden flex flex-col justify-center items-center shrink-0 min-h-[90px] shadow-sm">
+                    <div class="text-4xl mb-2 mt-1 transform hover:scale-110 transition-transform" x-text="quizScore === 5 ? '👑' : (quizScore >= 3 ? '👍' : '🤡')"></div>
+                    <div class="font-bold text-base text-gray-800 text-center px-2" x-text="quizScore === 5 ? '太神啦！完美全對！' : (quizScore >= 3 ? '還不錯喔，繼續加油！' : '要再去複習QA喔！')"></div>
                 </div>
 
-                <div class="flex-1 w-full relative flex flex-col min-h-[150px] bg-gray-100 rounded-xl overflow-hidden shadow-inner border border-gray-100">
+                <div class="flex-1 w-full relative min-h-[180px] bg-gray-100 rounded-xl overflow-hidden shadow-inner border border-gray-200/50">
                     <img :src="randomShareBg" class="absolute inset-0 w-full h-full object-cover object-top z-0" crossorigin="anonymous">
                 </div>
             </div>
         </div>
+    </div>
 
     <script>
-        // 初始化全域變數
         window.isMuted = false;
         window.dateInfo = window.dateInfo || { year: 2024, month: 1, day: 1, birthdayDiff: 0, daysTikTok: 0, daysIG: 0, isBirthdayClose: false };
         window.currentOptions = {};
 
-        // 內建音效生成器
         window.playSound = function() {
             if (window.isMuted) return;
             try {
@@ -222,27 +225,27 @@
                 installPrompt: null,
                 scrollY: 0,
                 
-                // 身分證與背景圖相關
+                // ID Card & Background
                 idCardName: '',
                 selectedBg: '', 
                 generatedIdNumber: 'D1003' + Math.floor(Math.random()*9000+1000),
                 
-                // 背景圖片庫 (備用)
                 backgrounds: [
                     'https://images.unsplash.com/photo-1557683316-973673baf926?w=400&q=80',
                     'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=400&q=80'
                 ],
-                randomShareBg: '', // 稍後初始化
+                randomShareBg: '', // Initialized later
 
-                // 其他變數
+                // UI States
                 showShareModal: false,
                 showUpdateModal: false,
                 showToast: false,
+                showBgSelectorModal: false, // New: Background Selector
                 toastMessage: '',
                 themes: [{name: 'pink', color: '#ec4899', light: '#fce7f3'}],
                 currentTheme: {name: 'pink', color: '#ec4899', light: '#fce7f3'},
                 
-                // 資料 (備用)
+                // Data (Fallback)
                 qaData: [
                     { q: "麋鹿的身高是多少？", a: "我是 170cm 喔！", tags: ["身高"] },
                     { q: "麋鹿的生日是什麼時候？", a: "我的生日是 10月3日，天秤座！", tags: ["生日"] },
@@ -256,6 +259,8 @@
                     { q: "麋鹿的身高是？", a: "170cm", options: ["160cm", "165cm", "170cm", "175cm"] },
                     { q: "麋鹿的 MBTI 是？", a: "ENFP", options: ["INTJ", "ENFP", "ISFP", "ENTP"] }
                 ],
+                
+                // App State
                 dateInfo: {},
                 paginatedData: [],
                 currentPage: 1,
@@ -286,21 +291,17 @@
                 fuseInstance: null,
 
                 initApp() {
-                    // 確保 ID 唯一
                     let rawData = window.qaData || this.qaData;
                     this.qaData = rawData.map((item, index) => ({ ...item, id: index + 1 }));
                     
-                    // 初始化 Fuse
                     if(typeof Fuse !== 'undefined') {
                         this.fuseInstance = new Fuse(this.qaData, { includeScore: true, keys: ['q', 'tags'] });
                     }
 
-                    // 初始化日期與預設背景
                     this.examDate = new Date().toLocaleDateString();
                     this.randomShareBg = this.backgrounds[0];
                     this.selectedBg = this.backgrounds[0];
                     
-                    // 計算重要日期
                     const today = new Date();
                     const currentYear = today.getFullYear();
                     const nextBirthday = new Date(currentYear, 9, 3);
@@ -311,12 +312,11 @@
                     this.dateInfo.daysIG = Math.floor((today - new Date(2024, 5, 2)) / (1000 * 60 * 60 * 24));
 
                     this.updatePaginatedData();
-                    this.fetchRepoImages(); // 開始抓圖
+                    this.fetchRepoImages(); 
                 },
 
                 handleScroll() { this.scrollY = window.scrollY; },
 
-                // ★★★ 關鍵技術：圖片轉 Base64 以解決跨域截圖空白問題 ★★★
                 async imageUrlToBase64(url) {
                     try {
                         const response = await fetch(url);
@@ -327,12 +327,11 @@
                             reader.readAsDataURL(blob);
                         });
                     } catch (e) {
-                        console.error("圖片轉換失敗，將使用原始網址", e);
+                        console.error("Image convert failed", e);
                         return url;
                     }
                 },
 
-                // ★★★ 抓取 GitHub 圖片 ★★★
                 async fetchRepoImages() {
                     const owner = 'wangleoncom';  
                     const repo = 'ldweb';         
@@ -348,76 +347,64 @@
                                 .map(file => file.download_url);
 
                             if (images.length > 0) {
-                                console.log("GitHub 圖片載入成功:", images);
                                 this.backgrounds = images;
                                 this.selectedBg = images[0]; 
                                 this.randomShareBg = images[Math.floor(Math.random() * images.length)];
                             }
                         }
-                    } catch (e) {
-                        console.warn("無法連接 GitHub API，使用預設圖片");
-                    }
+                    } catch (e) { console.warn("GitHub API failed"); }
                 },
 
-                // --- 統一的截圖生成函式 ---
                 async captureElement(elementId, bgUrl) {
-                    // 1. 先將圖片轉 Base64
                     let finalBg = bgUrl;
                     if (bgUrl.startsWith('http')) {
                         finalBg = await this.imageUrlToBase64(bgUrl);
                     }
 
-                    // 2. 暫時替換變數，讓 Template 吃到 Base64 圖片
                     const originalShareBg = this.randomShareBg;
                     const originalSelectedBg = this.selectedBg;
                     
                     if (elementId === 'idCardTemplate') this.selectedBg = finalBg;
-                    else this.randomShareBg = finalBg; // 給 QA卡 或 成績單 用
+                    else this.randomShareBg = finalBg;
 
-                    // 3. 等待 Vue/Alpine 渲染更新
                     await new Promise(r => setTimeout(r, 100));
 
                     const element = document.getElementById(elementId);
                     if(element) {
-                        element.style.display = 'flex'; // 顯示隱藏元素
+                        element.style.display = 'flex';
                         try {
                             const canvas = await html2canvas(element, { 
                                 useCORS: true, 
                                 allowTaint: true,
                                 backgroundColor: null,
-                                scale: 2 // 提升清晰度
+                                scale: 2 
                             });
                             const img = canvas.toDataURL("image/png");
-                            
-                            // 顯示結果 Modal
-                            document.getElementById('shareResultContainer').innerHTML = 
-                                `<img src="${img}" class="w-full h-full object-contain pointer-events-auto" style="max-height:80vh;">`;
+                            document.getElementById('shareResultContainer').innerHTML = `<img src="${img}" class="w-full h-full object-contain pointer-events-auto" style="max-height:80vh;">`;
                             this.showShareModal = true;
                         } catch(e) {
-                            alert("圖片生成失敗，請稍後再試");
-                            console.error(e);
+                            alert("Generate failed");
                         } finally {
-                            element.style.display = 'none'; // 隱藏回去
-                            // 恢復原始網址變數
+                            element.style.display = 'none';
                             this.randomShareBg = originalShareBg;
                             this.selectedBg = originalSelectedBg;
                         }
                     }
                 },
 
-                // --- 觸發點 ---
+                // --- Features ---
                 
-                // 成績單生成
-                async generateExamImage() {
-                    // 隨機選一張鹿照片
-                    let targetBg = this.backgrounds.length > 0 
-                        ? this.backgrounds[Math.floor(Math.random() * this.backgrounds.length)]
-                        : this.randomShareBg;
-                    
-                    await this.captureElement('examPaperTemplate', targetBg);
+                // Show Background Selector for Exam
+                promptBgSelection() {
+                    this.showBgSelectorModal = true;
                 },
 
-                // QA 分享卡生成
+                // Actually Generate Image after selection
+                async confirmExamImage(bgUrl) {
+                    this.showBgSelectorModal = false;
+                    await this.captureElement('examPaperTemplate', bgUrl);
+                },
+
                 async openShareModal(item) {
                     let targetBg = this.backgrounds.length > 0 
                         ? this.backgrounds[Math.floor(Math.random() * this.backgrounds.length)]
@@ -425,33 +412,37 @@
 
                     document.getElementById('shareCardQ').innerText = item.q;
                     document.getElementById('shareCardA').innerText = item.a;
-                    
                     await this.captureElement('shareCardTemplate', targetBg);
                 },
 
-                // 身分證生成
                 async generateIDCard() {
-                    if(!this.idCardName) { alert("請輸入暱稱！"); return; }
+                    if(!this.idCardName) { alert("Please enter name!"); return; }
                     this.generatedIdNumber = 'D' + Math.floor(100000 + Math.random() * 900000);
-                    // selectedBg 已經是用戶選好的 (可能是 GitHub 網址)
                     await this.captureElement('idCardTemplate', this.selectedBg);
                 },
 
-                // ... 其他基本邏輯 (保持不變) ...
                 toggleCard(id) { if (this.flippedCards.includes(id)) { this.flippedCards = this.flippedCards.filter(cid => cid !== id); } else { this.flippedCards.push(id); } },
                 updatePaginatedData() { this.paginatedData = this.qaData.slice(0, 6); }, 
-                nextPage() { /* 翻頁邏輯略 */ },
-                prevPage() { /* 翻頁邏輯略 */ },
+                nextPage() { /* ... */ },
+                prevPage() { /* ... */ },
                 calculateLevel(xp) { return Math.floor(xp / 100); },
                 startQuizMode() { this.changeTab('quiz'); },
                 startQuiz() { if(!this.quizTakerName) { alert("請輸入名字！"); return; } this.quizStarted = true; this.quizEnded = false; this.quizScore = 0; this.currentQuizIndex = 0; this.currentQuizSet = (window.quizData||this.quizData).sort(()=>0.5-Math.random()).slice(0,5); this.loadQuestion(); },
                 loadQuestion() { this.currentQuestion = this.currentQuizSet[this.currentQuizIndex]; this.currentOptions = this.currentQuestion.options.sort(()=>0.5-Math.random()); this.hasAnswered = false; this.selectedOption = null; },
                 checkAnswer(opt) { if(this.hasAnswered) return; this.hasAnswered = true; this.selectedOption = opt; if(opt === this.currentQuestion.a) { this.quizScore++; } },
-                nextQuestion() { if(this.currentQuizIndex < this.currentQuizSet.length - 1) { this.currentQuizIndex++; this.loadQuestion(); } else { this.quizEnded = true; this.generateExamImage(); } },
+                nextQuestion() { 
+                    if(this.currentQuizIndex < this.currentQuizSet.length - 1) { 
+                        this.currentQuizIndex++; this.loadQuestion(); 
+                    } else { 
+                        this.quizEnded = true; 
+                        // Instead of auto-generating, prompt for background selection
+                        this.promptBgSelection();
+                    } 
+                },
                 changeTab(tab) { this.currentTab = tab; window.scrollTo({top: 0, behavior: 'smooth'}); if(tab === 'quiz') this.quizStarted = false; },
-                sendMessage() { /* 略 */ },
+                sendMessage() { /* ... */ },
                 openMsgDetail(msg) { this.selectedMsg = msg; this.showMsgDetail = true; },
-                startVoiceInput() { alert("語音功能模擬中"); },
+                startVoiceInput() { alert("Voice feature simulated"); },
                 wakeUpAI() { this.wakeUpCount++; },
                 toggleMute() { this.isMuted = !this.isMuted; },
                 toggleDarkMode() { document.documentElement.classList.toggle('dark'); },
@@ -601,7 +592,7 @@
             </div>
             <div x-show="quizEnded" class="text-center py-10 glass-premium rounded-[32px] p-6 shadow-2xl relative animate-pop-in">
                 <h2 class="text-3xl font-black mb-4">考試結果出爐！📄</h2>
-                <div class="text-sm text-gray-500 mb-4">正在為您印製成績單...</div>
+                <div class="text-sm text-gray-500 mb-4">請選擇一張喜歡的背景...</div>
             </div>
         </div>
 
@@ -617,6 +608,20 @@
                     </div>
                 </div>
                 <button @click="generateIDCard; window.playSound()" class="w-full py-4 bg-gradient-to-r from-theme to-pink-600 text-white rounded-2xl font-bold shadow-xl ios-btn text-lg flex items-center justify-center"><span class="mr-2">✨</span> 生成身分證</button>
+            </div>
+        </div>
+
+        <div x-show="showBgSelectorModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-6 backdrop-blur-md" x-cloak x-transition.opacity>
+            <div class="bg-white dark:bg-gray-800 rounded-[32px] p-6 max-w-sm w-full flex flex-col items-center animate-pop-in relative">
+                <div class="text-xl font-bold text-gray-800 mb-4">選擇成績單照片 📸</div>
+                <div class="grid grid-cols-2 gap-3 w-full mb-6 max-h-[50vh] overflow-y-auto p-1">
+                    <template x-for="bg in backgrounds" :key="bg">
+                        <div @click="confirmExamImage(bg)" class="aspect-[3/4] rounded-xl overflow-hidden cursor-pointer border-2 border-transparent hover:border-theme transition-all shadow-md">
+                            <img :src="bg" class="w-full h-full object-cover">
+                        </div>
+                    </template>
+                </div>
+                <button @click="showBgSelectorModal = false" class="text-sm text-gray-500 hover:text-gray-800">取消</button>
             </div>
         </div>
 
