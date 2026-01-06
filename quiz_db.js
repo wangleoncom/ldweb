@@ -1,4 +1,4 @@
-window.qaData = [
+window.deerQuiz_DB = [
     {
         "q": "鹿🦌的社群帳號有哪些？",
         "options": ["TikTok、IG、快手", "FB、IG、Threads", "YT、Twitch、IG", "OnlyFans、Twitter"],
