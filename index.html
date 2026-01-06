@@ -3,280 +3,493 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>鹿🦌的QA網站</title>
+    <title>鹿🦌的QA網站 (2026 全新介面)</title>
     <link rel="icon" href="./images/basic/icon.png" type="image/png">
-    <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#fdf2f8">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#fce7f3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="./images/basic/icon.png">
 
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Rounded+Mplus+1c:wght@400;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Rounded+Mplus+1c:wght@400;700;900&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    
-    <script src="./deer_db.js"></script>
-    <script src="./quiz_db.js"></script> 
-    <script src="./app.js"></script> 
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <script>
-        (function() { var nullFunc = function() {}; })(); 
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['"Rounded Mplus 1c"', '"Noto Sans TC"', '"Inter"', '-apple-system', 'sans-serif'] },
-                    animation: { 
-                        'pop-in': 'popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards', 
+                    fontFamily: { sans: ['"Rounded Mplus 1c"', '"Noto Sans TC"', 'sans-serif'] },
+                    animation: {
                         'float': 'float 6s ease-in-out infinite',
-                        'breathe': 'breathe 8s ease-in-out infinite',
-                        'blob': 'blob 10s infinite',
-                        'tilt': 'tilt 10s infinite linear'
+                        'blob': 'blob 7s infinite',
+                        'spin-slow': 'spin 3s linear infinite',
                     },
                     keyframes: {
-                        popIn: { '0%': { opacity: '0', transform: 'scale(0.95) translateY(10px)' }, '100%': { opacity: '1', transform: 'scale(1) translateY(0)' } },
                         float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
-                        breathe: { '0%, 100%': { opacity: '0.4' }, '50%': { opacity: '0.7' } },
-                        blob: { "0%": { transform: "translate(0px, 0px) scale(1)" }, "33%": { transform: "translate(30px, -50px) scale(1.1)" }, "66%": { transform: "translate(-20px, 20px) scale(0.9)" }, "100%": { transform: "translate(0px, 0px) scale(1)" } },
-                        tilt: { "0%, 50%, 100%": { transform: "rotate(0deg)" }, "25%": { transform: "rotate(1deg)" }, "75%": { transform: "rotate(-1deg)" } }
+                        blob: {
+                            "0%": { transform: "translate(0px, 0px) scale(1)" },
+                            "33%": { transform: "translate(30px, -50px) scale(1.1)" },
+                            "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
+                            "100%": { transform: "translate(0px, 0px) scale(1)" }
+                        }
                     }
                 }
             }
         }
     </script>
+
     <style>
-        :root { --theme-color: #ec4899; --theme-light: #fce7f3; }
-        .text-theme { color: var(--theme-color); }
-        .bg-theme { background-color: var(--theme-color); }
-        .bg-theme-light { background-color: var(--theme-light); }
-        .border-theme { border-color: var(--theme-color); }
-        
-        html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
-        body { background-color: #fdf2f8; transition: background-color 0.5s; }
-        .dark body { background-color: #0f172a; }
-        
-        .glass-premium { 
-            background: rgba(255, 255, 255, 0.65); 
-            backdrop-filter: blur(24px) saturate(180%); 
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.6); 
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-        }
-        .dark .glass-premium { 
-            background: rgba(30, 30, 30, 0.65); 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        body {
+            font-family: 'Rounded Mplus 1c', sans-serif;
+            background-color: #fdf2f8;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .ios-btn { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; }
-        .ios-btn:active { transform: scale(0.94); }
+        .liquid-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1;
+            background: linear-gradient(135deg, #fce7f3 0%, #e0e7ff 100%);
+            overflow: hidden;
+        }
+        .liquid-blob {
+            position: absolute;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: blob 10s infinite alternate;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
         
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(25px) saturate(200%);
+            -webkit-backdrop-filter: blur(25px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
+        }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
+
         .perspective-1000 { perspective: 1000px; }
         .transform-style-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
 
-        .spotlight-target {
-            position: relative;
-            z-index: 9999 !important;
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85);
-            pointer-events: auto;
-            transition: all 0.5s ease;
-        }
-        
-        .animated-bg {
-            background: linear-gradient(120deg, var(--theme-light) 0%, #fdf2f8 50%, var(--theme-light) 100%);
-            background-size: 200% 200%;
-            animation: gradientBG 15s ease infinite;
-        }
-        .dark .animated-bg {
-            background: linear-gradient(120deg, #1e1b4b 0%, #0f172a 50%, #312e81 100%);
-        }
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
         .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
     </style>
 </head>
-<body class="text-gray-800 transition-colors duration-300 dark:text-gray-100 font-sans min-h-screen overflow-x-hidden selection:bg-pink-200 selection:text-pink-900 animated-bg pb-32"
-      x-data="deerApp()" x-init="initApp()" @scroll.window="handleScroll" 
-      :class="{'tutorial-active': showTutorial}"
-      :style="`--theme-color: ${currentTheme.color}; --theme-light: ${currentTheme.light}`">
+<body class="text-gray-800 pb-32 transition-colors duration-500"
+      x-data="deerApp()" x-init="initApp()"
+      @scroll.window="handleScroll">
 
-    <div id="idCardTemplate" style="display: none;" class="fixed top-0 left-0 w-[375px] h-[600px] flex-col justify-between rounded-[24px] overflow-hidden font-sans text-white">
-        <img :src="selectedBg" class="absolute inset-0 w-full h-full object-cover z-0" crossorigin="anonymous">
-        <div class="absolute inset-0 z-10 bg-gradient-to-b from-black/60 via-transparent to-black/80"></div>
-        <div class="relative z-20 p-8 pt-10 flex justify-between items-start">
-            <img src="./images/basic/icon.png" class="w-16 h-16 rounded-full border-2 border-white/80 shadow-md">
-            <div class="text-right"><div class="text-[10px] font-bold tracking-[0.2em] opacity-80 mb-1">OFFICIAL FAN</div><div class="font-bold text-xl tracking-widest text-white drop-shadow-md">麋鹿認證</div></div>
-        </div>
-        <div class="relative z-20 p-8 pb-12">
-            <div class="mb-6"><div class="text-[10px] font-bold tracking-[0.2em] opacity-70 mb-1">姓名</div><div class="text-4xl font-black tracking-tight" x-text="idCardName"></div></div>
-            <div class="flex justify-between items-end border-t border-white/30 pt-4"><div><div class="text-[10px] font-bold tracking-[0.2em] opacity-70 mb-1">ID NUMBER</div><div class="text-xl font-mono font-bold" x-text="generatedIdNumber"></div></div><div class="text-right"><div class="text-[10px] font-bold tracking-[0.2em] opacity-70 mb-1">DATE</div><div class="text-sm font-mono opacity-90" x-text="new Date().toISOString().split('T')[0]"></div></div></div>
-        </div>
+    <div x-show="isGenerating" 
+         class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/60 backdrop-blur-xl transition-opacity duration-300"
+         x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         x-cloak>
+        <div class="w-16 h-16 border-4 border-pink-200 border-t-pink-500 rounded-full animate-spin mb-4"></div>
+        <div class="text-pink-600 font-bold text-lg animate-pulse">正在印製中...</div>
     </div>
 
-    <div id="shareCardTemplate" style="display: none;" class="fixed top-0 left-0 w-[375px] h-[600px] flex-col items-center justify-center rounded-[24px] overflow-hidden text-center font-sans">
-        <img :src="randomShareBg" class="absolute inset-0 w-full h-full object-cover z-0" crossorigin="anonymous">
-        <div class="absolute inset-0 z-10 bg-black/40 backdrop-blur-[6px]"></div>
-        <div class="relative z-20 w-full p-8 flex flex-col items-center">
-            <img src="./images/basic/icon.png" class="w-20 h-20 rounded-full border-4 border-white shadow-xl mb-6">
-            <div class="bg-white/95 p-8 rounded-[32px] w-full shadow-2xl backdrop-blur-md border border-white/50">
-                <div class="text-xs font-black text-pink-500 uppercase tracking-widest mb-3">問題</div>
-                <p id="shareCardQ" class="font-bold text-gray-900 mb-6 text-xl leading-relaxed"></p>
-                <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-6"></div>
-                <div class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">答案</div>
-                <p id="shareCardA" class="text-pink-600 font-bold text-2xl leading-relaxed"></p>
-            </div>
-        </div>
+    <div class="liquid-bg">
+        <div class="liquid-blob bg-pink-300 w-96 h-96 rounded-full top-[-10%] left-[-10%]"></div>
+        <div class="liquid-blob bg-purple-300 w-80 h-80 rounded-full top-[40%] right-[-10%] animation-delay-2000"></div>
+        <div class="liquid-blob bg-blue-300 w-80 h-80 rounded-full bottom-[-10%] left-[20%] animation-delay-4000"></div>
     </div>
 
-    <div id="examPaperTemplate" style="display: none;" class="fixed top-0 left-0 w-[375px] h-[600px] flex flex-col bg-white overflow-hidden font-sans rounded-[24px]">
-        
-        <div class="bg-theme h-32 relative flex flex-col items-center justify-center shrink-0 z-10">
-            <div class="z-10 text-center -mt-4">
-                <div class="text-white/90 text-[10px] font-bold tracking-[0.4em] mb-1">OFFICIAL EXAM</div>
-                <div class="text-white text-4xl font-black tracking-widest drop-shadow-md">鹿🦌大會考</div>
+    <nav class="fixed top-0 w-full z-40 transition-all duration-300 border-b border-transparent"
+         :class="scrollY > 20 ? 'glass-nav py-2' : 'bg-transparent py-4'">
+        <div class="max-w-6xl mx-auto px-6 flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer transition-transform hover:scale-105 active:scale-95" @click="changeTab('home'); playSound('click')">
+                <img src="./images/basic/icon.png" class="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover">
+                <span class="font-black text-2xl text-gray-800 tracking-tight">鹿 QA</span>
             </div>
-            <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-white rounded-full p-1 border-[5px] border-theme shadow-lg flex items-center justify-center z-20">
-                <span class="text-3xl pb-1">📝</span>
-            </div>
+            
+            <button @click="toggleMute" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-xl hover:bg-white transition-colors active:scale-90">
+                <span x-text="isMuted ? '🔇' : '🔊'"></span>
+            </button>
         </div>
+    </nav>
 
-        <div class="flex-1 flex flex-col px-6 pt-12 pb-6 w-full relative z-0">
-            <div class="absolute inset-0 z-0">
-                 <img :src="randomShareBg" class="w-full h-full object-cover object-center opacity-20" crossorigin="anonymous">
-                 <div class="absolute inset-0 bg-white/40 backdrop-blur-[2px]"></div>
-            </div>
+    <div class="fixed bottom-6 left-0 right-0 z-40 flex justify-center px-4 safe-area-bottom pointer-events-none">
+        <nav class="pointer-events-auto flex items-center gap-2 p-2 rounded-[2rem] glass-nav shadow-2xl overflow-x-auto no-scrollbar max-w-full">
+            <template x-for="tab in tabs" :key="tab.id">
+                <button @click="changeTab(tab.id); playSound('click')"
+                        class="relative px-6 py-3 rounded-[1.5rem] text-sm font-bold transition-all duration-300 whitespace-nowrap flex-shrink-0"
+                        :class="currentTab === tab.id 
+                            ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg scale-105' 
+                            : 'text-gray-500 hover:bg-white/50 hover:text-gray-800'">
+                    <span x-text="tab.label"></span>
+                </button>
+            </template>
+        </nav>
+    </div>
 
-            <div class="relative z-10 flex flex-col h-full">
-                <div class="flex justify-between items-end border-b-2 border-dashed border-gray-400/30 pb-2 mb-4 shrink-0">
-                    <div class="text-gray-500 text-[10px] font-bold tracking-wider">日期： <span x-text="examDate"></span></div>
-                    <div class="font-bold text-base text-gray-700">成績單</div>
-                </div>
+    <main class="pt-28 px-4 max-w-3xl mx-auto min-h-screen">
 
-                <div class="bg-white/80 backdrop-blur-md rounded-2xl p-5 mb-4 flex justify-between items-center border border-white/50 shadow-sm">
-                    <div class="flex-1 pr-2 min-w-0">
-                        <div class="text-[10px] text-gray-400 font-bold tracking-widest mb-1 uppercase">Name</div>
-                        <div class="font-black text-2xl text-gray-800 break-words leading-tight" x-text="quizTakerName"></div>
+        <div x-show="currentTab === 'home'" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+            <div class="glass-panel rounded-[32px] p-8 mb-8 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-pink-400/20 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                
+                <div class="flex flex-col sm:flex-row items-center gap-6 relative z-10">
+                    <div class="relative">
+                        <img src="./images/basic/icon.png" class="w-28 h-28 rounded-full border-4 border-white shadow-xl object-cover transform transition-transform group-hover:scale-105 duration-500">
+                        <div class="absolute bottom-0 right-0 bg-green-400 w-6 h-6 rounded-full border-4 border-white"></div>
                     </div>
-                    <div class="text-right pl-4 border-l-2 border-gray-100">
-                        <div class="text-[10px] text-gray-400 font-bold tracking-widest mb-1 uppercase">Score</div>
-                        <div class="font-black text-5xl text-theme" x-text="quizScore * 10"></div>
+                    <div class="text-center sm:text-left flex-1">
+                        <h2 class="text-4xl font-black text-gray-800 mb-2 tracking-tight">鹿🦌</h2>
+                        <p class="text-gray-600 font-medium leading-relaxed mb-4">
+                            🎂 10/03 天秤座｜📏 170cm｜⚖️ 42kg<br>
+                            🐈 貓咪：哺嚕 (英國短毛貓)
+                        </p>
+                        <div class="flex justify-center sm:justify-start gap-3">
+                            <a href="https://www.tiktok.com/@ld.1003_" target="_blank" class="glass-panel px-4 py-2 rounded-full flex items-center gap-2 hover:bg-black hover:text-white transition-all duration-300 group/btn">
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+                                <span class="text-sm font-bold">TikTok</span>
+                            </a>
+                            <a href="https://www.instagram.com/ld.1003_/" target="_blank" class="glass-panel px-4 py-2 rounded-full flex items-center gap-2 hover:bg-gradient-to-tr hover:from-yellow-400 hover:via-red-500 hover:to-purple-600 hover:text-white transition-all duration-300 group/btn">
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+                                <span class="text-sm font-bold">Instagram</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="bg-white/80 backdrop-blur-md border-2 border-theme/20 rounded-xl p-3 mb-4 relative overflow-hidden flex flex-col justify-center items-center shrink-0 min-h-[90px] shadow-sm">
-                    <div class="text-4xl mb-2 mt-1 transform hover:scale-110 transition-transform" x-text="quizScore === 5 ? '👑' : (quizScore >= 3 ? '👍' : '🤡')"></div>
-                    <div class="font-bold text-base text-gray-800 text-center px-2" x-text="quizScore === 5 ? '太神啦！完美全對！' : (quizScore >= 3 ? '還不錯喔，繼續加油！' : '要再去複習QA喔！')"></div>
+            <div class="relative mb-8 group">
+                <div class="absolute inset-0 bg-white/40 rounded-2xl blur-md group-hover:bg-white/60 transition-colors"></div>
+                <input type="text" x-model="search" @input="filterQA" placeholder="🔍 搜尋問題... (例如: 身高)" 
+                       class="relative w-full px-6 py-4 rounded-2xl bg-white/50 border border-white/50 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all text-lg placeholder-gray-400 text-gray-800 backdrop-blur-sm">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pb-20">
+                <template x-for="item in paginatedData" :key="item.id">
+                    <div class="group h-48 perspective-1000 cursor-pointer" @click="toggleCard(item.id); playSound('flip')">
+                        <div class="relative w-full h-full transform-style-3d transition-transform duration-700 shadow-xl hover:shadow-2xl rounded-[24px]"
+                             :class="{ 'rotate-y-180': flippedCards.includes(item.id) }">
+                            
+                            <div class="absolute w-full h-full glass-panel rounded-[24px] p-6 flex flex-col justify-between backface-hidden border-t border-white/80">
+                                <div>
+                                    <span class="inline-block px-2 py-1 bg-pink-100 text-pink-600 text-xs font-bold rounded-md mb-2">Q.</span>
+                                    <h3 class="text-lg font-bold text-gray-800 leading-snug line-clamp-3" x-text="item.q"></h3>
+                                </div>
+                                <div class="text-right text-xs text-gray-400 font-bold uppercase tracking-wider flex items-center justify-end gap-1">
+                                    點擊翻轉 <span>↺</span>
+                                </div>
+                            </div>
+
+                            <div class="absolute w-full h-full glass-panel rounded-[24px] p-6 flex flex-col justify-center items-center backface-hidden rotate-y-180 bg-white/90 border border-pink-200">
+                                <p class="text-lg font-medium text-center text-gray-700 leading-relaxed" x-text="item.a"></p>
+                                <button @click.stop="openShareModal(item); playSound('click')" class="mt-4 px-4 py-2 bg-gray-100 rounded-full text-xs font-bold text-gray-500 hover:bg-pink-100 hover:text-pink-600 transition-colors">
+                                    📸 分享QA卡片
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <div x-show="currentTab === 'ai'" x-cloak class="h-[75vh] flex flex-col glass-panel rounded-[32px] overflow-hidden shadow-2xl relative border border-white/50"
+             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
+            
+            <div class="bg-white/60 backdrop-blur-md p-4 border-b border-white/30 flex items-center gap-3 z-10">
+                <div class="relative">
+                    <img src="./images/basic/AI.png" class="w-10 h-10 rounded-full object-cover border border-white shadow-sm">
+                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
                 </div>
+                <div>
+                    <h3 class="font-bold text-gray-800">AI 麋鹿</h3>
+                    <div class="text-xs text-gray-500">2026 人工智慧模型・在線中</div>
+                </div>
+            </div>
 
-                <div class="flex-1 w-full relative min-h-[180px] bg-gray-100 rounded-xl overflow-hidden shadow-inner border border-gray-200/50">
-                    <img :src="randomShareBg" class="absolute inset-0 w-full h-full object-cover object-top z-0" crossorigin="anonymous">
+            <div id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-4 bg-white/30">
+                <template x-for="msg in chatHistory" :key="msg.id">
+                    <div class="flex w-full animate-float" :class="msg.isUser ? 'justify-end' : 'justify-start'">
+                        <div class="max-w-[85%] px-5 py-3 rounded-2xl shadow-sm text-[15px] leading-relaxed relative group cursor-pointer transition-all hover:-translate-y-1"
+                             @click="!msg.isUser && openMsgDetail(msg)"
+                             :class="msg.isUser ? 'bg-gradient-to-br from-pink-500 to-rose-500 text-white rounded-br-none' : 'bg-white/90 text-gray-800 rounded-bl-none border border-white/50'">
+                            <p x-text="msg.text" class="whitespace-pre-line"></p>
+                            <div x-show="!msg.isUser && msg.accuracy" class="text-[10px] opacity-50 mt-1 text-right flex items-center justify-end gap-1">
+                                <span>ℹ️</span> 點擊查看思考
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                <div x-show="isTyping" class="flex justify-start">
+                    <div class="bg-white/80 px-4 py-3 rounded-2xl rounded-bl-none flex gap-1 shadow-sm">
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-white/70 backdrop-blur-md border-t border-white/30 z-10">
+                <div class="flex gap-2">
+                    <input type="text" x-model="chatInput" @keydown.enter="sendMessage" 
+                           placeholder="輸入問題，按 Enter 發送..." 
+                           class="flex-1 px-5 py-3 rounded-full bg-white border-none focus:ring-2 focus:ring-pink-300 shadow-inner text-gray-700 placeholder-gray-400 transition-all">
+                    <button @click="sendMessage" class="bg-gray-900 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:bg-pink-600 transition-colors active:scale-90">
+                        ➤
+                    </button>
                 </div>
             </div>
         </div>
-    </div>
+
+        <div x-show="currentTab === 'quiz'" x-cloak class="max-w-2xl mx-auto" x-transition:enter="transition ease-out duration-500">
+            <div x-show="!quizStarted && !quizEnded" class="text-center py-12 glass-panel rounded-[40px] p-8 shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-400 to-purple-500"></div>
+                <div class="text-7xl mb-6 animate-bounce">🎓</div>
+                <h2 class="text-4xl font-black text-gray-800 mb-4 tracking-tight">麋鹿大會考 2.0</h2>
+                <div class="max-w-xs mx-auto mb-8">
+                    <label class="block text-left text-xs font-bold text-gray-500 mb-2 uppercase ml-4">考生姓名</label>
+                    <input type="text" x-model="quizTakerName" placeholder="輸入名字開始..." 
+                           class="w-full px-6 py-4 rounded-2xl bg-white/50 border-2 border-white/50 focus:border-pink-400 focus:ring-4 focus:ring-pink-100 text-center text-xl font-bold transition-all outline-none">
+                </div>
+                <button @click="startQuiz" class="w-full max-w-xs px-12 py-4 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-2xl font-black text-xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 active:scale-95 flex items-center justify-center mx-auto">
+                    開始挑戰 ➜
+                </button>
+            </div>
+
+            <div x-show="quizStarted && !quizEnded" class="glass-panel rounded-[32px] p-6 shadow-xl border border-white/60">
+                <div class="flex justify-between items-center mb-6">
+                    <span class="bg-gray-900 text-white px-3 py-1 rounded-lg text-xs font-bold tracking-widest">Q.<span x-text="currentQuizIndex + 1"></span></span>
+                    <div class="h-2 w-32 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-pink-500 transition-all duration-500" :style="`width: ${(currentQuizIndex / 5) * 100}%`"></div>
+                    </div>
+                </div>
+                <h3 class="text-2xl font-bold text-center text-gray-800 mb-8 min-h-[80px] flex items-center justify-center" x-text="currentQuestion?.q"></h3>
+                <div class="grid gap-3">
+                    <template x-for="(opt, idx) in currentOptions" :key="idx">
+                        <button @click="checkAnswer(opt); playSound('click')" :disabled="hasAnswered"
+                                class="w-full p-5 rounded-2xl text-left font-bold transition-all border-2 flex items-center group relative overflow-hidden"
+                                :class="hasAnswered 
+                                    ? (opt === currentQuestion.a ? 'bg-green-100 border-green-400 text-green-800' : (selectedOption === opt ? 'bg-red-100 border-red-400 text-red-800' : 'bg-gray-50 border-transparent opacity-50'))
+                                    : 'bg-white border-white hover:border-pink-300 hover:bg-pink-50 text-gray-700 shadow-sm hover:shadow-md'">
+                            <span class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs mr-4 group-hover:bg-white transition-colors" x-text="['A','B','C','D'][idx]"></span>
+                            <span x-text="opt"></span>
+                        </button>
+                    </template>
+                </div>
+                <button x-show="hasAnswered" @click="nextQuestion; playSound('click')" class="mt-8 w-full py-4 bg-gray-900 text-white rounded-2xl font-bold shadow-lg hover:bg-gray-700 transition-all active:scale-95">
+                    <span x-text="currentQuizIndex === 4 ? '查看成績單' : '下一題'"></span> ➜
+                </button>
+            </div>
+        </div>
+
+        <div x-show="currentTab === 'idcard'" x-cloak class="glass-panel rounded-[40px] p-8 shadow-2xl text-center max-w-md mx-auto">
+            <h2 class="text-3xl font-black mb-8 text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600">麋鹿認證中心</h2>
+            <div class="space-y-6 mb-8 text-left">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider pl-2">你的暱稱</label>
+                    <input type="text" x-model="idCardName" placeholder="輸入暱稱..." class="w-full px-5 py-4 rounded-2xl bg-white/60 border border-white/50 focus:border-pink-400 outline-none transition-all font-bold text-lg">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider pl-2">選擇背景 (點擊預覽)</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <template x-for="(bg, index) in backgrounds" :key="index">
+                            <div @click="selectedBg = bg; playSound('click')" 
+                                 class="aspect-[3/4] rounded-xl overflow-hidden cursor-pointer border-4 transition-all shadow-sm hover:shadow-md"
+                                 :class="selectedBg === bg ? 'border-pink-500 scale-95 ring-2 ring-pink-200' : 'border-white opacity-80 hover:opacity-100'">
+                                <img :src="bg" class="w-full h-full object-cover">
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+            <button @click="generateIDCard; playSound('success')" class="w-full py-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-2xl font-bold shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-2">
+                <span>✨</span> 生成身分證
+            </button>
+        </div>
+
+        <div id="idCardTemplate" style="display: none;" class="fixed top-0 left-0 w-[375px] h-[600px] flex-col justify-between rounded-[24px] overflow-hidden font-sans text-white">
+            <img :src="selectedBg" class="absolute inset-0 w-full h-full object-cover z-0" crossorigin="anonymous">
+            <div class="absolute inset-0 z-10 bg-gradient-to-b from-black/30 via-transparent to-black/90"></div>
+            <div class="relative z-20 p-8 pt-12 flex justify-between items-start">
+                <img src="./images/basic/icon.png" class="w-16 h-16 rounded-full border-2 border-white/80 shadow-md">
+                <div class="text-right">
+                    <div class="text-[10px] font-bold tracking-[0.3em] opacity-80 mb-1">OFFICIAL FAN</div>
+                    <div class="font-bold text-2xl tracking-widest text-white drop-shadow-lg">麋鹿認證</div>
+                </div>
+            </div>
+            <div class="relative z-20 p-8 pb-16">
+                <div class="mb-8">
+                    <div class="text-[10px] font-bold tracking-[0.2em] opacity-60 mb-1 uppercase">Name</div>
+                    <div class="text-5xl font-black tracking-tight drop-shadow-md" x-text="idCardName"></div>
+                </div>
+                <div class="flex justify-between items-end border-t border-white/30 pt-4">
+                    <div><div class="text-[10px] font-bold tracking-[0.2em] opacity-60 mb-1">ID 號碼</div><div class="text-xl font-mono font-bold tracking-widest" x-text="generatedIdNumber"></div></div>
+                    <div class="text-right"><div class="text-[10px] font-bold tracking-[0.2em] opacity-60 mb-1">日期</div><div class="text-sm font-mono opacity-90" x-text="new Date().toISOString().split('T')[0]"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="examPaperTemplate" style="display: none;" class="fixed top-0 left-0 w-[375px] h-[600px] flex-col bg-white overflow-hidden font-sans rounded-[24px]">
+            <div class="bg-gradient-to-br from-pink-500 to-rose-600 h-32 relative flex flex-col items-center justify-center shrink-0 z-10">
+                <div class="z-10 text-center -mt-4 text-white">
+                    <div class="text-[10px] font-bold tracking-[0.4em] mb-1 opacity-90">OFFICIAL EXAM</div>
+                    <div class="text-4xl font-black tracking-widest drop-shadow-md">鹿🦌大會考</div>
+                </div>
+                <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-white rounded-full p-1 border-[5px] border-rose-500 shadow-lg flex items-center justify-center z-20">
+                    <span class="text-3xl pb-1">📝</span>
+                </div>
+            </div>
+            <div class="flex-1 flex flex-col px-6 pt-12 pb-6 w-full relative z-0">
+                <div class="absolute inset-0 z-0">
+                     <img :src="randomShareBg" class="w-full h-full object-cover object-center opacity-20 filter blur-[2px]" crossorigin="anonymous">
+                     <div class="absolute inset-0 bg-white/60"></div>
+                </div>
+                <div class="relative z-10 flex flex-col h-full">
+                    <div class="flex justify-between items-end border-b-2 border-dashed border-gray-300 pb-2 mb-4 shrink-0">
+                        <div class="text-gray-500 text-[10px] font-bold tracking-wider">日期： <span x-text="examDate"></span></div>
+                        <div class="font-bold text-base text-gray-800">成績單</div>
+                    </div>
+                    <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-5 mb-4 flex justify-between items-center border border-white shadow-sm">
+                        <div class="flex-1 pr-2 min-w-0">
+                            <div class="text-[10px] text-gray-400 font-bold tracking-widest mb-1 uppercase">姓名</div>
+                            <div class="font-black text-3xl text-gray-800 break-words leading-tight" x-text="quizTakerName"></div>
+                        </div>
+                        <div class="text-right pl-4 border-l-2 border-gray-100">
+                            <div class="text-[10px] text-gray-400 font-bold tracking-widest mb-1 uppercase">分數</div>
+                            <div class="font-black text-6xl text-rose-500" x-text="quizScore * 10"></div>
+                        </div>
+                    </div>
+                    <div class="bg-white/80 backdrop-blur-sm border-2 border-rose-100 rounded-xl p-3 mb-4 flex flex-col justify-center items-center shrink-0 min-h-[90px] shadow-sm">
+                        <div class="text-4xl mb-2 mt-1 transform hover:scale-110 transition-transform" x-text="quizScore === 5 ? '👑' : (quizScore >= 3 ? '👍' : '🤡')"></div>
+                        <div class="font-bold text-base text-gray-800 text-center px-2" x-text="quizScore === 5 ? '太神啦！完美全對！' : (quizScore >= 3 ? '還不錯喔，繼續加油！' : '要再去複習QA喔！')"></div>
+                    </div>
+                    <div class="flex-1 w-full relative min-h-[180px] bg-gray-100 rounded-xl overflow-hidden shadow-inner border-4 border-white">
+                        <img :src="randomShareBg" class="absolute inset-0 w-full h-full object-cover object-top z-0" crossorigin="anonymous">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="shareCardTemplate" style="display: none;" class="fixed top-0 left-0 w-[375px] h-[600px] flex-col items-center justify-center rounded-[24px] overflow-hidden text-center font-sans bg-gray-900">
+            <img :src="randomShareBg" class="absolute inset-0 w-full h-full object-cover z-0 opacity-60" crossorigin="anonymous">
+            <div class="absolute inset-0 z-10 bg-black/20 backdrop-blur-[4px]"></div>
+            <div class="relative z-20 w-full p-8 flex flex-col items-center">
+                <img src="./images/basic/icon.png" class="w-24 h-24 rounded-full border-4 border-white shadow-2xl mb-8">
+                <div class="bg-white/95 p-8 rounded-[32px] w-full shadow-2xl backdrop-blur-md border border-white/50">
+                    <div class="text-xs font-black text-pink-500 uppercase tracking-widest mb-3">Q: 問題</div>
+                    <p id="shareCardQ" class="font-bold text-gray-900 mb-6 text-xl leading-relaxed"></p>
+                    <div class="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-6"></div>
+                    <div class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">A: 答案</div>
+                    <p id="shareCardA" class="text-rose-600 font-bold text-3xl leading-relaxed"></p>
+                </div>
+                <div class="mt-8 text-white/80 text-[10px] font-mono tracking-widest border border-white/30 px-4 py-2 rounded-full bg-black/40">Deer QA Official</div>
+            </div>
+        </div>
+
+        <div x-show="showBgSelectorModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-6" x-cloak>
+            <div class="bg-white rounded-[32px] p-6 max-w-sm w-full animate-blob">
+                <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">選擇一張喜歡的照片當背景 📸</h3>
+                <div class="grid grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto p-1 mb-4">
+                    <template x-for="bg in backgrounds" :key="bg">
+                        <div @click="confirmExamImage(bg); playSound('click')" class="aspect-[3/4] rounded-xl overflow-hidden cursor-pointer border-4 border-transparent hover:border-pink-500 transition-all shadow-md">
+                            <img :src="bg" class="w-full h-full object-cover">
+                        </div>
+                    </template>
+                </div>
+                <button @click="showBgSelectorModal = false" class="w-full py-3 bg-gray-100 hover:bg-gray-200 rounded-full font-bold text-gray-500">取消</button>
+            </div>
+        </div>
+
+        <div x-show="showShareModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-6" x-transition.opacity x-cloak>
+            <div class="bg-white rounded-[32px] p-6 max-w-sm w-full flex flex-col items-center relative shadow-2xl">
+                <div class="absolute -top-12 text-white font-bold text-sm tracking-widest opacity-90 animate-pulse">長按圖片即可儲存 📸</div>
+                <div id="shareResultContainer" class="mb-6 shadow-xl rounded-2xl overflow-hidden w-full bg-gray-100 min-h-[300px] flex items-center justify-center"></div>
+                <button @click="showShareModal = false; playSound('click')" class="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-full font-bold text-sm transition-colors">關閉</button>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="text-center pb-24 text-[10px] text-gray-400 font-medium">
+        <p>如果網站有問題請聯絡直播管理員「王岦恩」</p>
+        <p class="opacity-50 mt-1">© 2026 Deer QA System. All rights reserved.</p>
+    </footer>
 
     <script>
-        window.isMuted = false;
-        window.dateInfo = window.dateInfo || { year: 2024, month: 1, day: 1, birthdayDiff: 0, daysTikTok: 0, daysIG: 0, isBirthdayClose: false };
-        window.currentOptions = {};
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+        
+        function playTone(freq, type, duration) {
+            if(window.isMuted) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
 
-        window.playSound = function() {
-            if (window.isMuted) return;
-            try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (!AudioContext) return;
-                const ctx = new AudioContext();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(800, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.1);
-            } catch (e) {}
+        window.isMuted = false;
+        window.playSound = function(type) {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            if(window.isMuted) return;
+            
+            switch(type) {
+                case 'click': playTone(800, 'sine', 0.1); break;
+                case 'success': 
+                    playTone(600, 'sine', 0.1);
+                    setTimeout(() => playTone(900, 'sine', 0.2), 100);
+                    break;
+                case 'flip': playTone(400, 'triangle', 0.15); break;
+                default: playTone(800, 'sine', 0.1);
+            }
         };
-        window.playClickSound = window.playSound;
 
         function deerApp() {
             return {
                 currentTab: 'home',
-                isDark: false,
                 isMuted: false,
-                showTutorial: false,
-                tutorialStep: 0,
                 search: '',
-                installPrompt: null,
+                isGenerating: false,
                 scrollY: 0,
-                
-                // ID Card & Background
+
+                tabs: [
+                    {id: 'home', label: '首頁'},
+                    {id: 'ai', label: 'AI 聊天'},
+                    {id: 'quiz', label: '大會考'},
+                    {id: 'idcard', label: '身分證'}
+                ],
+
                 idCardName: '',
                 selectedBg: '', 
                 generatedIdNumber: 'D1003' + Math.floor(Math.random()*9000+1000),
-                
                 backgrounds: [
                     'https://images.unsplash.com/photo-1557683316-973673baf926?w=400&q=80',
                     'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=400&q=80'
                 ],
-                randomShareBg: '', // Initialized later
+                randomShareBg: '',
 
-                // UI States
-                showShareModal: false,
-                showUpdateModal: false,
-                showToast: false,
-                showBgSelectorModal: false, // New: Background Selector
-                toastMessage: '',
-                themes: [{name: 'pink', color: '#ec4899', light: '#fce7f3'}],
-                currentTheme: {name: 'pink', color: '#ec4899', light: '#fce7f3'},
-                
-                // Data (Fallback)
-                qaData: [
-                    { q: "麋鹿的身高是多少？", a: "我是 170cm 喔！", tags: ["身高"] },
-                    { q: "麋鹿的生日是什麼時候？", a: "我的生日是 10月3日，天秤座！", tags: ["生日"] },
-                    { q: "有養寵物嗎？", a: "有喔！我有一隻英國短毛貓叫做「哺嚕」🐈", tags: ["寵物"] },
-                    { q: "喜歡吃什麼？", a: "超愛甜點，特別是草莓蛋糕！", tags: ["食物"] },
-                    { q: "MBTI 是什麼？", a: "ENFP 快樂小狗！", tags: ["MBTI"] }
-                ],
-                quizData: [
-                    { q: "麋鹿的生日是幾號？", a: "10/03", options: ["10/03", "12/25", "01/01", "08/07"] },
-                    { q: "麋鹿的貓咪叫什麼名字？", a: "哺嚕", options: ["咪咪", "哺嚕", "球球", "豆豆"] },
-                    { q: "麋鹿的身高是？", a: "170cm", options: ["160cm", "165cm", "170cm", "175cm"] },
-                    { q: "麋鹿的 MBTI 是？", a: "ENFP", options: ["INTJ", "ENFP", "ISFP", "ENTP"] }
-                ],
-                
-                // App State
-                dateInfo: {},
                 paginatedData: [],
                 currentPage: 1,
-                totalPages: 1,
                 flippedCards: [],
-                fanXP: 1500,
                 xpPercentage: 75,
-                currentLevelInfo: { title: "黃金鹿粉" },
                 chatInput: '',
-                chatHistory: [{ id: 1, text: "哈囉！我是 AI 麋鹿 🦌\n你可以問我任何關於鹿的問題喔！", isUser: false, originalQ: "System Welcome", accuracy: 100 }],
+                chatHistory: [{ id: 1, text: "哈囉！我是 AI 麋鹿 🦌\n你可以問我任何關於鹿🦌的問題！", isUser: false, originalQ: "System", accuracy: 100 }],
                 isTyping: false,
-                aiStatus: 'online',
-                wakeUpCount: 0,
-                isListening: false,
-                showMsgDetail: false,
-                selectedMsg: {},
                 quizStarted: false,
                 quizEnded: false,
                 quizTakerName: '',
@@ -286,354 +499,169 @@
                 currentQuestion: null,
                 currentOptions: [],
                 hasAnswered: false,
-                selectedOption: null,
                 examDate: '',
-                fuseInstance: null,
+                showShareModal: false,
+                showBgSelectorModal: false,
+                selectedMsg: {},
+                showMsgDetail: false,
 
                 initApp() {
                     let rawData = window.qaData || this.qaData;
                     this.qaData = rawData.map((item, index) => ({ ...item, id: index + 1 }));
-                    
-                    if(typeof Fuse !== 'undefined') {
-                        this.fuseInstance = new Fuse(this.qaData, { includeScore: true, keys: ['q', 'tags'] });
-                    }
-
+                    this.fuseInstance = new Fuse(this.qaData, { includeScore: true, keys: ['q', 'tags'] });
                     this.examDate = new Date().toLocaleDateString();
-                    this.randomShareBg = this.backgrounds[0];
-                    this.selectedBg = this.backgrounds[0];
-                    
-                    const today = new Date();
-                    const currentYear = today.getFullYear();
-                    const nextBirthday = new Date(currentYear, 9, 3);
-                    if (today > nextBirthday) nextBirthday.setFullYear(currentYear + 1);
-                    this.dateInfo.birthdayDiff = Math.ceil(Math.abs(nextBirthday - today) / (1000 * 60 * 60 * 24)); 
-                    this.dateInfo.isBirthdayClose = this.dateInfo.birthdayDiff < 30;
-                    this.dateInfo.daysTikTok = Math.floor((today - new Date(2024, 7, 7)) / (1000 * 60 * 60 * 24));
-                    this.dateInfo.daysIG = Math.floor((today - new Date(2024, 5, 2)) / (1000 * 60 * 60 * 24));
-
                     this.updatePaginatedData();
-                    this.fetchRepoImages(); 
+                    this.fetchRepoImages();
                 },
 
                 handleScroll() { this.scrollY = window.scrollY; },
+                toggleMute() { this.isMuted = !this.isMuted; },
+
+                async fetchRepoImages() {
+                    const owner = 'wangleoncom'; const repo = 'ldweb'; const path = 'images/backgrounds';
+                    try {
+                        const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`);
+                        if(res.ok) {
+                            const data = await res.json();
+                            const images = data.filter(f => f.name.match(/\.(jpg|jpeg|png)$/i)).map(f => f.download_url);
+                            if(images.length > 0) {
+                                this.backgrounds = images;
+                                this.selectedBg = images[0];
+                                this.randomShareBg = images[0];
+                            }
+                        }
+                    } catch(e){}
+                },
 
                 async imageUrlToBase64(url) {
                     try {
-                        const response = await fetch(url);
-                        const blob = await response.blob();
-                        return new Promise((resolve) => {
+                        const res = await fetch(url);
+                        const blob = await res.blob();
+                        return new Promise(resolve => {
                             const reader = new FileReader();
                             reader.onloadend = () => resolve(reader.result);
                             reader.readAsDataURL(blob);
                         });
-                    } catch (e) {
-                        console.error("Image convert failed", e);
-                        return url;
-                    }
-                },
-
-                async fetchRepoImages() {
-                    const owner = 'wangleoncom';  
-                    const repo = 'ldweb';         
-                    const path = 'images/backgrounds'; 
-                    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
-
-                    try {
-                        const response = await fetch(apiUrl);
-                        if (response.ok) {
-                            const data = await response.json();
-                            const images = data
-                                .filter(file => file.name.match(/\.(jpg|jpeg|png|gif)$/i))
-                                .map(file => file.download_url);
-
-                            if (images.length > 0) {
-                                this.backgrounds = images;
-                                this.selectedBg = images[0]; 
-                                this.randomShareBg = images[Math.floor(Math.random() * images.length)];
-                            }
-                        }
-                    } catch (e) { console.warn("GitHub API failed"); }
+                    } catch(e) { return url; }
                 },
 
                 async captureElement(elementId, bgUrl) {
+                    this.isGenerating = true;
                     let finalBg = bgUrl;
-                    if (bgUrl.startsWith('http')) {
-                        finalBg = await this.imageUrlToBase64(bgUrl);
-                    }
+                    if(bgUrl.startsWith('http')) finalBg = await this.imageUrlToBase64(bgUrl);
 
                     const originalShareBg = this.randomShareBg;
                     const originalSelectedBg = this.selectedBg;
                     
-                    if (elementId === 'idCardTemplate') this.selectedBg = finalBg;
+                    if(elementId === 'idCardTemplate') this.selectedBg = finalBg;
                     else this.randomShareBg = finalBg;
 
-                    await new Promise(r => setTimeout(r, 100));
+                    await new Promise(r => setTimeout(r, 300));
 
                     const element = document.getElementById(elementId);
                     if(element) {
                         element.style.display = 'flex';
                         try {
-                            const canvas = await html2canvas(element, { 
-                                useCORS: true, 
-                                allowTaint: true,
-                                backgroundColor: null,
-                                scale: 2 
-                            });
+                            const canvas = await html2canvas(element, { useCORS: true, allowTaint: true, scale: 2 });
                             const img = canvas.toDataURL("image/png");
-                            document.getElementById('shareResultContainer').innerHTML = `<img src="${img}" class="w-full h-full object-contain pointer-events-auto" style="max-height:80vh;">`;
+                            document.getElementById('shareResultContainer').innerHTML = `<img src="${img}" class="w-full h-full object-contain pointer-events-auto shadow-lg rounded-xl">`;
                             this.showShareModal = true;
-                        } catch(e) {
-                            alert("Generate failed");
-                        } finally {
+                            playSound('success');
+                        } catch(e) { alert("生成失敗"); } 
+                        finally {
                             element.style.display = 'none';
                             this.randomShareBg = originalShareBg;
                             this.selectedBg = originalSelectedBg;
+                            this.isGenerating = false;
                         }
                     }
                 },
 
-                // --- Features ---
+                changeTab(tab) { this.currentTab = tab; window.scrollTo({top:0, behavior:'smooth'}); if(tab==='quiz') this.quizStarted=false; },
                 
-                // Show Background Selector for Exam
-                promptBgSelection() {
-                    this.showBgSelectorModal = true;
+                toggleCard(id) {
+                    if(this.flippedCards.includes(id)) this.flippedCards = this.flippedCards.filter(cid=>cid!==id);
+                    else this.flippedCards.push(id);
                 },
+                
+                updatePaginatedData() {
+                    let filtered = this.qaData;
+                    if(this.search) filtered = this.fuseInstance.search(this.search).map(r=>r.item);
+                    this.paginatedData = filtered.slice(0, 50);
+                },
+                filterQA() { this.currentPage=1; this.updatePaginatedData(); },
 
-                // Actually Generate Image after selection
+                sendMessage() {
+                    if(!this.chatInput.trim()) return;
+                    playSound('click');
+                    this.chatHistory.push({id: Date.now(), text: this.chatInput, isUser: true});
+                    const q = this.chatInput;
+                    this.chatInput = '';
+                    this.isTyping = true;
+                    setTimeout(() => document.getElementById('chatContainer').scrollTop = 9999, 10);
+
+                    setTimeout(() => {
+                        let reply = "抱歉，我好像沒聽懂...🤔";
+                        let origQ = "無匹配";
+                        let acc = 0;
+                        const results = this.fuseInstance.search(q);
+                        if(results.length > 0) {
+                            const best = results[0];
+                            acc = Math.round((1 - best.score) * 100);
+                            reply = acc > 40 ? best.item.a : "雖然不確定，但我猜你想問：「"+best.item.q+"」？\n"+best.item.a;
+                            origQ = best.item.q;
+                        }
+                        this.isTyping = false;
+                        this.chatHistory.push({id: Date.now()+1, text: reply, isUser: false, originalQ: origQ, accuracy: acc});
+                        playSound('success');
+                        setTimeout(() => document.getElementById('chatContainer').scrollTop = 9999, 10);
+                    }, 800);
+                },
+                
+                openMsgDetail(msg) { this.selectedMsg = msg; this.showMsgDetail = true; playSound('click'); },
+
+                startQuiz() {
+                    if(!this.quizTakerName) { alert("請輸入名字！"); return; }
+                    this.quizStarted = true; this.quizEnded = false; this.quizScore = 0; this.currentQuizIndex = 0;
+                    this.currentQuizSet = (window.quizData||this.quizData).sort(()=>0.5-Math.random()).slice(0,5);
+                    this.loadQuestion();
+                    playSound('success');
+                },
+                loadQuestion() {
+                    this.currentQuestion = this.currentQuizSet[this.currentQuizIndex];
+                    this.currentOptions = this.currentQuestion.options.sort(()=>0.5-Math.random());
+                    this.hasAnswered = false;
+                },
+                checkAnswer(opt) {
+                    if(this.hasAnswered) return;
+                    this.hasAnswered = true; this.selectedOption = opt;
+                    if(opt === this.currentQuestion.a) { this.quizScore++; playSound('success'); confetti({origin:{y:0.7}}); }
+                },
+                nextQuestion() {
+                    if(this.currentQuizIndex < this.currentQuizSet.length-1) {
+                        this.currentQuizIndex++; this.loadQuestion();
+                    } else {
+                        this.quizEnded = true;
+                        this.showBgSelectorModal = true;
+                    }
+                },
+                
                 async confirmExamImage(bgUrl) {
                     this.showBgSelectorModal = false;
                     await this.captureElement('examPaperTemplate', bgUrl);
                 },
-
-                async openShareModal(item) {
-                    let targetBg = this.backgrounds.length > 0 
-                        ? this.backgrounds[Math.floor(Math.random() * this.backgrounds.length)]
-                        : this.randomShareBg;
-
-                    document.getElementById('shareCardQ').innerText = item.q;
-                    document.getElementById('shareCardA').innerText = item.a;
-                    await this.captureElement('shareCardTemplate', targetBg);
-                },
-
                 async generateIDCard() {
-                    if(!this.idCardName) { alert("Please enter name!"); return; }
-                    this.generatedIdNumber = 'D' + Math.floor(100000 + Math.random() * 900000);
+                    if(!this.idCardName) { alert("請輸入暱稱！"); return; }
                     await this.captureElement('idCardTemplate', this.selectedBg);
                 },
-
-                toggleCard(id) { if (this.flippedCards.includes(id)) { this.flippedCards = this.flippedCards.filter(cid => cid !== id); } else { this.flippedCards.push(id); } },
-                updatePaginatedData() { this.paginatedData = this.qaData.slice(0, 6); }, 
-                nextPage() { /* ... */ },
-                prevPage() { /* ... */ },
-                calculateLevel(xp) { return Math.floor(xp / 100); },
-                startQuizMode() { this.changeTab('quiz'); },
-                startQuiz() { if(!this.quizTakerName) { alert("請輸入名字！"); return; } this.quizStarted = true; this.quizEnded = false; this.quizScore = 0; this.currentQuizIndex = 0; this.currentQuizSet = (window.quizData||this.quizData).sort(()=>0.5-Math.random()).slice(0,5); this.loadQuestion(); },
-                loadQuestion() { this.currentQuestion = this.currentQuizSet[this.currentQuizIndex]; this.currentOptions = this.currentQuestion.options.sort(()=>0.5-Math.random()); this.hasAnswered = false; this.selectedOption = null; },
-                checkAnswer(opt) { if(this.hasAnswered) return; this.hasAnswered = true; this.selectedOption = opt; if(opt === this.currentQuestion.a) { this.quizScore++; } },
-                nextQuestion() { 
-                    if(this.currentQuizIndex < this.currentQuizSet.length - 1) { 
-                        this.currentQuizIndex++; this.loadQuestion(); 
-                    } else { 
-                        this.quizEnded = true; 
-                        // Instead of auto-generating, prompt for background selection
-                        this.promptBgSelection();
-                    } 
-                },
-                changeTab(tab) { this.currentTab = tab; window.scrollTo({top: 0, behavior: 'smooth'}); if(tab === 'quiz') this.quizStarted = false; },
-                sendMessage() { /* ... */ },
-                openMsgDetail(msg) { this.selectedMsg = msg; this.showMsgDetail = true; },
-                startVoiceInput() { alert("Voice feature simulated"); },
-                wakeUpAI() { this.wakeUpCount++; },
-                toggleMute() { this.isMuted = !this.isMuted; },
-                toggleDarkMode() { document.documentElement.classList.toggle('dark'); },
-                setTheme(t) { this.currentTheme = t; },
-                triggerEasterEgg() {},
-                installPWA() {},
-                closeUpdateModal() {},
-                endTutorial() {},
-                nextTutorialStep() {}
+                async openShareModal(item) {
+                    let bg = this.backgrounds.length > 0 ? this.backgrounds[Math.floor(Math.random()*this.backgrounds.length)] : this.randomShareBg;
+                    document.getElementById('shareCardQ').innerText = item.q;
+                    document.getElementById('shareCardA').innerText = item.a;
+                    await this.captureElement('shareCardTemplate', bg);
+                }
             }
         }
     </script>
-
-    <div class="fixed inset-0 overflow-hidden -z-10 pointer-events-none">
-        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-400/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob"></div>
-        <div class="absolute top-[20%] right-[-10%] w-[400px] h-[400px] bg-yellow-300/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob animation-delay-2000"></div>
-        <div class="absolute bottom-[-10%] left-[20%] w-[600px] h-[600px] bg-pink-400/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob animation-delay-4000"></div>
-    </div>
-
-    <nav class="fixed top-0 w-full z-40 transition-all duration-500 border-b border-transparent"
-         :class="scrollY > 20 ? 'glass-premium shadow-sm border-white/20' : 'bg-transparent'">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
-            <div class="flex items-center cursor-pointer ios-btn flex-shrink-0" @click="changeTab('home'); window.playSound()">
-                <img src="./images/basic/icon.png" class="w-9 h-9 rounded-full mr-2 border-2 border-theme object-cover shadow-sm">
-                <span class="font-bold text-xl text-gray-800 dark:text-white tracking-wide">鹿 QA</span>
-            </div>
-            <div class="flex items-center gap-2 flex-shrink-0">
-                <button @click="toggleMute; window.playSound()" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 ios-btn transition-colors" :class="{'opacity-50': isMuted}"><span x-text="isMuted ? '🔇' : '🔊'"></span></button>
-                <button @click="toggleDarkMode; window.playSound()" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 ios-btn transition-colors"><span x-text="isDark ? '☀️' : '🌙'"></span></button>
-            </div>
-        </div>
-    </nav>
-
-    <div class="fixed bottom-6 left-0 right-0 z-50 flex justify-center px-4 safe-area-bottom">
-        <nav class="flex items-center gap-1 overflow-x-auto no-scrollbar bg-white/20 dark:bg-black/40 backdrop-blur-2xl border border-white/20 shadow-2xl rounded-[2rem] p-1.5 w-full max-w-md mx-auto ring-1 ring-white/10">
-            <button @click="changeTab('home'); window.playSound()" :class="currentTab === 'home' ? 'bg-white text-pink-600 font-bold shadow-md' : 'text-gray-500 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'" class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">首頁</button>
-            <button @click="changeTab('ai'); window.playSound()" :class="currentTab === 'ai' ? 'bg-white text-pink-600 font-bold shadow-md' : 'text-gray-500 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'" class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">AI 聊天</button>
-            <button @click="startQuizMode(); window.playSound()" :class="currentTab === 'quiz' ? 'bg-white text-pink-600 font-bold shadow-md' : 'text-gray-500 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'" class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">大會考</button>
-            <button @click="changeTab('idcard'); window.playSound()" :class="currentTab === 'idcard' ? 'bg-white text-pink-600 font-bold shadow-md' : 'text-gray-500 dark:text-white/60 hover:bg-white/10 hover:text-white font-medium'" class="ios-btn flex-shrink-0 px-6 py-3 rounded-[1.5rem] transition-all duration-300 whitespace-nowrap text-sm">身分證</button>
-        </nav>
-    </div>
-
-    <main class="pt-24 px-4 max-w-6xl mx-auto min-h-screen">
-        <div x-show="installPrompt" x-transition class="mb-6 mx-auto max-w-md glass-premium p-4 rounded-2xl flex items-center justify-between border border-theme shadow-lg">
-            <div class="flex items-center"><span class="text-3xl mr-3">📲</span><div><div class="font-bold text-gray-800 dark:text-white">安裝 鹿🦌APP</div><div class="text-xs text-gray-500">加入主畫面體驗更佳！</div></div></div>
-            <button @click="installPWA" class="px-5 py-2 bg-theme text-white rounded-full text-sm font-bold shadow-md hover:opacity-90 ios-btn">安裝</button>
-        </div>
-
-        <div x-show="currentTab === 'home'" x-transition.opacity.duration.300ms>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="md:col-span-2 glass-premium rounded-[32px] p-8 border border-white/40 flex flex-col sm:flex-row items-center gap-8 shadow-xl relative overflow-hidden animate-tilt">
-                    <div class="relative group z-10"><img src="./images/basic/icon.png" class="w-28 h-28 md:w-32 md:h-32 rounded-full object-cover shadow-2xl border-4 border-white dark:border-gray-700 ios-btn cursor-pointer flex-shrink-0" @click="triggerEasterEgg('profile')"></div>
-                    <div class="flex-1 text-center sm:text-left z-10">
-                        <h2 class="text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">鹿🦌</h2>
-                        <p class="text-gray-600 dark:text-gray-300 font-medium mb-4 leading-relaxed whitespace-pre-line">🎂 10/03 天秤座｜📏 170cm｜⚖️ 42kg</p>
-                        <div class="flex justify-center sm:justify-start gap-3">
-                            <a href="#" class="px-5 py-2 bg-black text-white rounded-full text-sm font-bold shadow-lg ios-btn flex items-center gap-2 hover:bg-gray-800">TikTok</a>
-                            <a href="#" class="px-5 py-2 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 text-white rounded-full text-sm font-bold shadow-lg ios-btn flex items-center gap-2 hover:opacity-90">Instagram</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex flex-col gap-6">
-                    <div class="glass-premium rounded-[32px] p-6 border border-white/40 shadow-xl flex flex-col justify-center items-center relative overflow-hidden">
-                        <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">粉絲等級</div>
-                        <div class="text-3xl font-black text-theme mb-1">黃金鹿粉</div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-2 overflow-hidden relative"><div class="bg-theme h-4 rounded-full transition-all duration-1000 ease-out relative overflow-hidden" :style="`width: ${xpPercentage}%`"></div></div>
-                    </div>
-                </div>
-            </div>
-            <div class="sticky top-20 z-30 mb-8 transition-all duration-500 ease-out" :class="scrollY > 150 ? 'pt-2 px-2' : ''">
-                <div class="relative max-w-2xl mx-auto transition-all duration-300" :class="scrollY > 150 ? 'shadow-2xl scale-[0.98]' : 'shadow-lg'">
-                    <div class="absolute inset-0 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl transition-all duration-500"></div>
-                    <input type="text" x-model="search" @input="currentPage = 1; updatePaginatedData()" placeholder="🔍 搜尋問題..." class="relative w-full pl-6 pr-6 py-4 rounded-2xl bg-transparent border-2 border-transparent focus:border-theme focus:ring-0 text-lg transition-all placeholder-gray-400 dark:text-white">
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 min-h-[400px]">
-                <template x-for="(item, index) in paginatedData" :key="item.id">
-                    <div class="group h-60 perspective-1000 cursor-pointer animate-pop-in" :style="`animation-delay: ${index * 40}ms`" @click="toggleCard(item.id); window.playSound()">
-                        <div class="relative w-full h-full transform-style-3d transition-all duration-500 shadow-md hover:shadow-2xl rounded-[24px] ios-btn" :class="{ 'rotate-y-180': flippedCards.includes(item.id) }">
-                            <div class="absolute w-full h-full glass-premium rounded-[24px] p-6 flex flex-col justify-between backface-hidden border-t-2 border-white/60 bg-gradient-to-br from-white/90 to-white/50 dark:from-gray-800/90 dark:to-gray-900/50">
-                                <div>
-                                    <div class="flex items-center gap-2 mb-3"><span class="text-[10px] font-black tracking-widest text-white bg-theme px-2 py-1 rounded-md">Q.<span x-text="item.id"></span></span><span x-show="item.tags && item.tags[0]" class="text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-500 px-2 py-1 rounded-md" x-text="item.tags ? item.tags[0] : ''"></span></div>
-                                    <h3 class="text-lg font-bold leading-snug text-gray-800 dark:text-gray-100 line-clamp-3" x-text="item.q"></h3>
-                                </div>
-                                <div class="flex justify-between items-end"><div class="text-xs text-gray-400 font-bold uppercase tracking-wider flex items-center">Tap to Flip <span class="ml-1 text-lg">➜</span></div></div>
-                            </div>
-                            <div class="absolute w-full h-full glass-premium rounded-[24px] p-6 flex flex-col backface-hidden rotate-y-180 bg-white dark:bg-gray-800 border-b-4 border-theme overflow-y-auto">
-                                <div class="flex-1 flex items-center justify-center"><p class="text-[17px] font-medium text-center leading-relaxed text-gray-700 dark:text-gray-200" x-text="item.a"></p></div>
-                                <button @click.stop="openShareModal(item); window.playSound()" class="w-full mt-3 flex justify-center items-center gap-2 text-xs text-theme bg-theme-light dark:bg-gray-700 px-4 py-3 rounded-xl font-bold hover:opacity-80 transition-colors ios-btn"><span class="text-lg">📸</span> 生成美圖分享</button>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-            </div>
-        </div>
-
-        <div x-show="currentTab === 'ai'" x-cloak class="max-w-2xl mx-auto h-[70vh] flex flex-col glass-premium rounded-[32px] overflow-hidden shadow-2xl relative border border-white/40 animate-pop-in">
-            <div class="absolute inset-0 z-0 bg-white/70 dark:bg-gray-900/80 backdrop-blur-[8px]"></div>
-            <div class="relative z-10 bg-white/60 dark:bg-black/40 backdrop-blur-md p-4 flex items-center border-b border-gray-200/20">
-                <img src="./images/basic/AI.png" class="w-10 h-10 rounded-full object-cover mr-3 bg-white p-0.5 shadow-md flex-shrink-0">
-                <div><h3 class="font-bold text-gray-800 dark:text-gray-100">AI 麋鹿</h3><div class="text-xs text-green-500 font-bold flex items-center"><span class="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span> Online</div></div>
-            </div>
-            <div class="relative z-10 flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth" id="chatContainer">
-                <template x-for="msg in chatHistory" :key="msg.id">
-                    <div class="flex w-full animate-pop-in" :class="msg.isUser ? 'justify-end' : 'justify-start'">
-                        <div @click="openMsgDetail(msg)" class="max-w-[85%] rounded-2xl px-5 py-3 shadow-sm text-[15px] leading-relaxed cursor-pointer transition-transform active:scale-95" :class="msg.isUser ? 'bg-gradient-to-br from-pink-500 to-rose-500 text-white rounded-br-none' : 'bg-white/90 dark:bg-gray-700/90 text-gray-800 dark:text-gray-100 rounded-bl-none border border-white/20 hover:bg-gray-50 dark:hover:bg-gray-600'">
-                            <p x-text="msg.text" class="whitespace-pre-line"></p>
-                            <div x-show="!msg.isUser && msg.accuracy" class="text-[10px] text-gray-400 mt-1 text-right flex items-center justify-end gap-1"><span>ℹ️</span> 點擊查看來源</div>
-                        </div>
-                    </div>
-                </template>
-            </div>
-            <div class="relative z-10 p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-200/20">
-                <form @submit.prevent="sendMessage; window.playSound()" class="flex gap-2">
-                    <button type="button" @click="startVoiceInput; window.playSound()" class="rounded-full w-12 h-12 flex items-center justify-center transition-all ios-btn bg-gray-200 dark:bg-gray-700 text-gray-500"><span class="text-xl">🎙️</span></button>
-                    <input type="text" x-model="chatInput" placeholder="問問題或按麥克風..." class="flex-1 rounded-full bg-gray-100 dark:bg-gray-800 border-none focus:ring-2 focus:ring-theme px-5 py-3 transition-all">
-                    <button type="submit" class="bg-theme hover:opacity-90 text-white rounded-full p-3 w-12 h-12 flex items-center justify-center shadow-lg ios-btn">➤</button>
-                </form>
-            </div>
-            <div x-show="showMsgDetail" class="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-6" x-transition.opacity x-cloak @click.self="showMsgDetail = false">
-                <div class="bg-white dark:bg-gray-800 rounded-[24px] p-6 w-full max-w-sm shadow-2xl border border-white/20 animate-pop-in relative">
-                    <button @click="showMsgDetail = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">✕</button>
-                    <h3 class="text-lg font-black text-theme mb-4 flex items-center gap-2"><span>🤖</span> AI 思考邏輯</h3>
-                    <div class="space-y-4">
-                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl"><div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">匹配到的原始問題 (Q)</div><p class="font-bold text-gray-800 dark:text-white text-lg" x-text="selectedMsg.originalQ || 'N/A'"></p></div>
-                        <div class="flex items-center gap-4"><div class="flex-1 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl"><div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">AI 信心指數</div><div class="flex items-end gap-1"><span class="font-black text-3xl text-theme" x-text="selectedMsg.accuracy || 0"></span><span class="text-sm font-bold text-gray-500 mb-1">%</span></div></div></div>
-                    </div>
-                    <button @click="showMsgDetail = false" class="w-full mt-6 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-full font-bold text-sm transition-colors ios-btn">了解！</button>
-                </div>
-            </div>
-        </div>
-
-        <div x-show="currentTab === 'quiz'" x-cloak class="max-w-2xl mx-auto">
-            <div x-show="!quizStarted && !quizEnded" class="text-center py-12 glass-premium rounded-[32px] p-8 shadow-2xl animate-pop-in">
-                <div class="text-8xl mb-4 animate-float drop-shadow-xl">🎓</div>
-                <h2 class="text-4xl font-black mb-2 text-gray-800 dark:text-white tracking-tight">麋鹿大會考 2.0</h2>
-                <div class="max-w-xs mx-auto mb-8 relative"><label class="block text-left text-xs font-bold text-gray-500 mb-2 ml-4 uppercase tracking-wider">考生姓名</label><input type="text" x-model="quizTakerName" placeholder="輸入名字開始考試..." class="w-full px-6 py-4 rounded-2xl bg-white/50 dark:bg-black/30 border-2 border-gray-200 dark:border-gray-700 focus:border-theme focus:ring-4 focus:ring-theme/20 text-center text-xl font-bold transition-all outline-none placeholder-gray-400"></div>
-                <button @click="startQuiz; window.playSound()" class="w-full max-w-xs px-12 py-4 bg-gradient-to-r from-theme to-purple-600 text-white rounded-2xl font-black text-xl shadow-xl ios-btn hover:scale-105 transition-transform flex items-center justify-center mx-auto"><span>開始挑戰</span><span class="ml-2">➜</span></button>
-            </div>
-            <div x-show="quizStarted && !quizEnded" class="animate-pop-in">
-                <div class="flex justify-between items-center mb-6 px-4"><span class="font-bold text-white bg-theme px-4 py-1.5 rounded-full text-sm">Q.<span x-text="currentQuizIndex + 1"></span></span><span class="text-sm font-bold bg-gray-200 dark:bg-gray-700 px-4 py-1.5 rounded-full">分數: <span x-text="quizScore"></span></span></div>
-                <div class="glass-premium rounded-3xl p-8 mb-6 border-l-8 border-theme min-h-[180px] flex items-center justify-center relative shadow-lg"><h3 class="text-2xl font-bold text-center leading-relaxed text-gray-800 dark:text-white" x-text="currentQuestion?.q"></h3></div>
-                <div class="grid grid-cols-1 gap-4">
-                    <template x-for="(opt, idx) in currentOptions" :key="idx"><button @click="checkAnswer(opt); window.playSound()" :disabled="hasAnswered" class="w-full p-5 rounded-2xl text-left font-bold transition-all border-2 shadow-sm flex items-center justify-between group ios-btn" :class="hasAnswered ? (opt === currentQuestion.a ? 'border-green-500 bg-green-50 dark:bg-green-900/30' : (selectedOption === opt ? 'border-red-500 bg-red-50 dark:bg-red-900/30' : 'border-gray-200')) : 'border-gray-200 hover:border-theme bg-white/50'"><div class="flex items-center"><span class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-sm mr-4 font-black" x-text="['A','B','C','D'][idx]"></span><span x-text="opt"></span></div></button></template>
-                </div>
-                <button x-show="hasAnswered" @click="nextQuestion; window.playSound()" class="mt-8 w-full py-4 bg-gray-800 dark:bg-gray-700 text-white rounded-2xl font-bold shadow-lg ios-btn text-lg"><span x-text="currentQuizIndex === currentQuizSet.length - 1 ? '查看成績' : '下一題'"></span> ➜</button>
-            </div>
-            <div x-show="quizEnded" class="text-center py-10 glass-premium rounded-[32px] p-6 shadow-2xl relative animate-pop-in">
-                <h2 class="text-3xl font-black mb-4">考試結果出爐！📄</h2>
-                <div class="text-sm text-gray-500 mb-4">請選擇一張喜歡的背景...</div>
-            </div>
-        </div>
-
-        <div x-show="currentTab === 'idcard'" x-cloak class="max-w-2xl mx-auto">
-            <div class="glass-premium rounded-[32px] p-8 shadow-2xl animate-pop-in">
-                <h2 class="text-3xl font-black mb-8 text-center text-theme">麋鹿認證中心 🪪</h2>
-                <div class="space-y-6 mb-10">
-                    <div><label class="block text-sm font-bold text-gray-500 mb-2 uppercase">你的暱稱</label><input type="text" x-model="idCardName" placeholder="輸入暱稱..." class="w-full px-5 py-4 rounded-2xl bg-white/50 dark:bg-black/30 border border-gray-200 dark:border-gray-700 focus:border-theme focus:ring-0 text-lg"></div>
-                    <div><label class="block text-sm font-bold text-gray-500 mb-2 uppercase">選擇背景</label>
-                        <div class="grid grid-cols-3 gap-3">
-                            <template x-for="(bg, index) in backgrounds" :key="index"><div @click="selectedBg = bg; window.playSound()" class="aspect-[3/4] rounded-xl overflow-hidden cursor-pointer border-4 transition-all bg-cover bg-center" :class="selectedBg === bg ? 'border-theme scale-95' : 'border-transparent opacity-80 hover:opacity-100'" :style="`background-image: url(${bg})`"></div></template>
-                        </div>
-                    </div>
-                </div>
-                <button @click="generateIDCard; window.playSound()" class="w-full py-4 bg-gradient-to-r from-theme to-pink-600 text-white rounded-2xl font-bold shadow-xl ios-btn text-lg flex items-center justify-center"><span class="mr-2">✨</span> 生成身分證</button>
-            </div>
-        </div>
-
-        <div x-show="showBgSelectorModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-6 backdrop-blur-md" x-cloak x-transition.opacity>
-            <div class="bg-white dark:bg-gray-800 rounded-[32px] p-6 max-w-sm w-full flex flex-col items-center animate-pop-in relative">
-                <div class="text-xl font-bold text-gray-800 mb-4">選擇成績單照片 📸</div>
-                <div class="grid grid-cols-2 gap-3 w-full mb-6 max-h-[50vh] overflow-y-auto p-1">
-                    <template x-for="bg in backgrounds" :key="bg">
-                        <div @click="confirmExamImage(bg)" class="aspect-[3/4] rounded-xl overflow-hidden cursor-pointer border-2 border-transparent hover:border-theme transition-all shadow-md">
-                            <img :src="bg" class="w-full h-full object-cover">
-                        </div>
-                    </template>
-                </div>
-                <button @click="showBgSelectorModal = false" class="text-sm text-gray-500 hover:text-gray-800">取消</button>
-            </div>
-        </div>
-
-        <div x-show="showShareModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-6 backdrop-blur-md" x-cloak x-transition.opacity>
-            <div class="bg-white dark:bg-gray-800 rounded-[32px] p-6 max-w-sm w-full flex flex-col items-center animate-pop-in relative">
-                <div class="absolute -top-12 text-white font-bold text-sm tracking-widest opacity-80">長按圖片儲存 📸</div>
-                <div id="shareResultContainer" class="mb-6 shadow-2xl rounded-2xl overflow-hidden w-full bg-gray-100 min-h-[300px] flex items-center justify-center"></div>
-                <button @click="showShareModal = false; window.playSound()" class="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-full font-bold text-sm transition-colors ios-btn">關閉</button>
-            </div>
-        </div>
-    </main>
-    
-    <script>if ('serviceWorker' in navigator && location.protocol.startsWith('http')) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {})); }</script>
 </body>
 </html>
