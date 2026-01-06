@@ -120,11 +120,7 @@
                 <img src="./images/basic/icon.png" class="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover">
                 <span class="font-black text-2xl text-gray-800 tracking-tight">鹿 QA</span>
             </div>
-            
-            <button @click="toggleMute" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-xl hover:bg-white transition-colors active:scale-90">
-                <span x-text="isMuted ? '🔇' : '🔊'"></span>
-            </button>
-        </div>
+            </div>
     </nav>
 
     <div class="fixed bottom-6 left-0 right-0 z-40 flex justify-center px-4 safe-area-bottom pointer-events-none">
@@ -148,21 +144,28 @@
                 <div class="absolute top-0 right-0 w-32 h-32 bg-pink-400/20 rounded-full blur-2xl -mr-10 -mt-10"></div>
                 
                 <div class="flex flex-col sm:flex-row items-center gap-6 relative z-10">
-                    <div class="relative">
+                    <div class="relative flex-shrink-0">
                         <img src="./images/basic/icon.png" class="w-28 h-28 rounded-full border-4 border-white shadow-xl object-cover transform transition-transform group-hover:scale-105 duration-500">
                         <div class="absolute bottom-0 right-0 bg-green-400 w-6 h-6 rounded-full border-4 border-white"></div>
                     </div>
+                    
                     <div class="text-center sm:text-left flex-1">
-                        <h2 class="text-4xl font-black text-gray-800 mb-2 tracking-tight">鹿🦌</h2>
+                        <div class="flex items-center justify-center sm:justify-start gap-2 mb-2">
+                             <h2 class="text-4xl font-black text-gray-800 tracking-tight">鹿🦌</h2>
+                        </div>
+                        
                         <p class="text-gray-600 font-medium leading-relaxed mb-4">
                             🎂 10/03 天秤座｜📏 170cm｜⚖️ 42kg<br>
                             🐈 貓咪：哺嚕 (英國短毛貓)
                         </p>
+                        
                         <div class="flex justify-center sm:justify-start gap-3">
                             <a href="https://www.tiktok.com/@ld.1003_" target="_blank" class="glass-panel px-4 py-2 rounded-full flex items-center gap-2 hover:bg-black hover:text-white transition-all duration-300 group/btn">
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
                                 <span class="text-sm font-bold">TikTok</span>
                             </a>
                             <a href="https://www.instagram.com/ld.1003_/" target="_blank" class="glass-panel px-4 py-2 rounded-full flex items-center gap-2 hover:bg-gradient-to-tr hover:from-yellow-400 hover:via-red-500 hover:to-purple-600 hover:text-white transition-all duration-300 group/btn">
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
                                 <span class="text-sm font-bold">Instagram</span>
                             </a>
                         </div>
@@ -176,7 +179,7 @@
                        class="relative w-full px-6 py-4 rounded-2xl bg-white/50 border border-white/50 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all text-lg placeholder-gray-400 text-gray-800 backdrop-blur-sm">
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pb-20">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pb-6">
                 <template x-for="item in paginatedData" :key="item.id">
                     <div class="group h-48 perspective-1000 cursor-pointer" @click="toggleCard(item.id); playSound('flip')">
                         <div class="relative w-full h-full transform-style-3d transition-transform duration-700 shadow-xl hover:shadow-2xl rounded-[24px]"
@@ -201,6 +204,15 @@
                         </div>
                     </div>
                 </template>
+            </div>
+            
+            <div x-show="hasMoreData" class="flex justify-center pb-20">
+                <button @click="loadMoreQA; playSound('click')" class="px-8 py-3 bg-white/50 hover:bg-pink-100 text-pink-600 rounded-full font-bold shadow-sm transition-all flex items-center gap-2">
+                    <span>⬇️</span> 載入更多 QA
+                </button>
+            </div>
+            <div x-show="!hasMoreData && paginatedData.length > 0" class="text-center text-gray-400 text-xs pb-20 font-bold tracking-widest uppercase">
+                --- 已經到底囉 ---
             </div>
         </div>
 
@@ -242,7 +254,7 @@
 
             <div class="p-4 bg-white/70 backdrop-blur-md border-t border-white/30 z-10">
                 <div class="flex gap-2">
-                    <input type="text" x-model="chatInput" @keydown.enter="sendMessage" 
+                    <input type="text" x-model="chatInput" @keydown.enter="handleEnter($event)" 
                            placeholder="輸入問題，按 Enter 發送..." 
                            class="flex-1 px-5 py-3 rounded-full bg-white border-none focus:ring-2 focus:ring-pink-300 shadow-inner text-gray-700 placeholder-gray-400 transition-all">
                     <button @click="sendMessage" class="bg-gray-900 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:bg-pink-600 transition-colors active:scale-90">
@@ -343,6 +355,9 @@
                     <div class="text-right"><div class="text-[10px] font-bold tracking-[0.2em] opacity-60 mb-1">日期</div><div class="text-sm font-mono opacity-90" x-text="new Date().toISOString().split('T')[0]"></div></div>
                 </div>
             </div>
+            <div class="absolute bottom-4 w-full text-center z-30 opacity-60 text-[8px] tracking-widest text-white font-mono">
+                https://wangleoncom.github.io/ldweb
+            </div>
         </div>
 
         <div id="examPaperTemplate" style="display: none;" class="fixed top-0 left-0 w-[375px] h-[600px] flex-col bg-white overflow-hidden font-sans rounded-[24px]">
@@ -381,6 +396,9 @@
                     </div>
                     <div class="flex-1 w-full relative min-h-[180px] bg-gray-100 rounded-xl overflow-hidden shadow-inner border-4 border-white">
                         <img :src="randomShareBg" class="absolute inset-0 w-full h-full object-cover object-top z-0" crossorigin="anonymous">
+                        <div class="absolute bottom-2 w-full text-center z-30 opacity-50 text-[8px] tracking-widest text-white drop-shadow-md font-mono">
+                            https://wangleoncom.github.io/ldweb
+                        </div>
                     </div>
                 </div>
             </div>
@@ -398,7 +416,9 @@
                     <div class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">A: 答案</div>
                     <p id="shareCardA" class="text-rose-600 font-bold text-3xl leading-relaxed"></p>
                 </div>
-                <div class="mt-8 text-white/80 text-[10px] font-mono tracking-widest border border-white/30 px-4 py-2 rounded-full bg-black/40">Deer QA Official</div>
+                <div class="mt-8 text-white/80 text-[10px] font-mono tracking-widest border border-white/30 px-4 py-2 rounded-full bg-black/40">
+                    https://wangleoncom.github.io/ldweb
+                </div>
             </div>
         </div>
 
@@ -428,6 +448,7 @@
 
     <footer class="text-center pb-24 text-[10px] text-gray-400 font-medium">
         <p>如果網站有問題請聯絡直播管理員「王岦恩」</p>
+        <p class="opacity-50 mt-1">© 2026 Deer QA System. All rights reserved.</p>
     </footer>
 
     <script>
@@ -482,13 +503,16 @@
                 idCardName: '',
                 selectedBg: '', 
                 generatedIdNumber: 'D1003' + Math.floor(Math.random()*9000+1000),
-
-                backgrounds: [],
-                visibleBgCount: 10,
+                
+                backgrounds: [], 
+                visibleBgCount: 10, 
                 randomShareBg: '',
 
                 paginatedData: [],
                 currentPage: 1,
+                itemsPerPage: 20,
+                currentDisplayCount: 20,
+                
                 flippedCards: [],
                 chatInput: '',
                 chatHistory: [{ id: 1, text: "哈囉！我是 AI 麋鹿 🦌\n你可以問我任何關於鹿🦌的問題！", isUser: false, originalQ: "System", accuracy: 100 }],
@@ -512,30 +536,38 @@
                     return this.backgrounds.slice(0, this.visibleBgCount);
                 },
 
+                
                 loadMoreBgs() {
                     this.visibleBgCount += 10;
+                },
+
+                
+                get hasMoreData() {
+                    let filtered = this.qaData;
+                    if(this.search) filtered = this.fuseInstance.search(this.search).map(r=>r.item);
+                    return this.currentDisplayCount < filtered.length;
                 },
 
                 initApp() {
                     let rawData = window.deerQA_DB || [];
                     this.qaData = rawData.map((item, index) => ({ ...item, id: index + 1 }));
                     this.fuseInstance = new Fuse(this.qaData, { includeScore: true, keys: ['q', 'tags'] });
-
+                    
                     this.examDate = new Date().toLocaleDateString();
-
+            
                     this.updatePaginatedData();
-
+                    
                     this.detectLocalBackgrounds();
                 },
 
                 async detectLocalBackgrounds() {
                     const foundBgs = [];
-                    const maxChecks = 50;
+                    const maxChecks = 50; 
                     
                     const checkPromises = [];
 
                     for(let i = 1; i <= maxChecks; i++) {
-                        const path = `./images/backgrounds/bg${i}.jpg`;
+                        const path = `./images/backgrounds/bg${i}.jpg`; 
                         const p = new Promise(resolve => {
                             const img = new Image();
                             img.onload = () => resolve(path);
@@ -560,7 +592,6 @@
                 },
 
                 handleScroll() { this.scrollY = window.scrollY; },
-                toggleMute() { this.isMuted = !this.isMuted; },
 
                 async imageUrlToBase64(url) {
                     try {
@@ -576,14 +607,12 @@
 
                 async captureElement(elementId, bgUrl) {
                     this.isGenerating = true;
-                    
                     const originalShareBg = this.randomShareBg;
                     const originalSelectedBg = this.selectedBg;
                     
                     if(elementId === 'idCardTemplate') this.selectedBg = bgUrl;
                     else this.randomShareBg = bgUrl;
 
-                    // 等待 Vue 更新 DOM
                     await new Promise(r => setTimeout(r, 100));
 
                     const element = document.getElementById(elementId);
@@ -592,7 +621,7 @@
                         try {
                             const canvas = await html2canvas(element, { 
                                 useCORS: true, 
-                                allowTaint: false,
+                                allowTaint: false, 
                                 scale: 2 
                             });
                             const img = canvas.toDataURL("image/png");
@@ -619,27 +648,47 @@
                     else this.flippedCards.push(id);
                 },
                 
+                loadMoreQA() {
+                    this.currentDisplayCount += this.itemsPerPage;
+                    this.updatePaginatedData();
+                },
+
                 updatePaginatedData() {
                     let filtered = this.qaData;
                     if(this.search) filtered = this.fuseInstance.search(this.search).map(r=>r.item);
-                    this.paginatedData = filtered.slice(0, 50);
+                    this.paginatedData = filtered.slice(0, this.currentDisplayCount);
                 },
-                filterQA() { this.currentPage=1; this.updatePaginatedData(); },
+                
+                filterQA() { 
+                    this.currentDisplayCount = this.itemsPerPage;
+                    this.updatePaginatedData(); 
+                },
+
+                handleEnter(e) {
+                    if (e.isComposing || e.keyCode === 229) return;
+                    this.sendMessage();
+                },
 
                 sendMessage() {
                     if(!this.chatInput.trim()) return;
                     playSound('click');
-                    this.chatHistory.push({id: Date.now(), text: this.chatInput, isUser: true});
-                    const q = this.chatInput;
-                    this.chatInput = '';
+                    
+                    const userText = this.chatInput;
+                    this.chatInput = ''; 
+                    
+                    this.chatHistory.push({id: Date.now(), text: userText, isUser: true});
                     this.isTyping = true;
-                    setTimeout(() => document.getElementById('chatContainer').scrollTop = 9999, 10);
+                    
+                    setTimeout(() => {
+                        const container = document.getElementById('chatContainer');
+                        if(container) container.scrollTop = container.scrollHeight;
+                    }, 10);
 
                     setTimeout(() => {
                         let reply = "抱歉，我好像沒聽懂...🤔";
                         let origQ = "無匹配";
                         let acc = 0;
-                        const results = this.fuseInstance.search(q);
+                        const results = this.fuseInstance.search(userText);
                         if(results.length > 0) {
                             const best = results[0];
                             acc = Math.round((1 - best.score) * 100);
@@ -649,7 +698,10 @@
                         this.isTyping = false;
                         this.chatHistory.push({id: Date.now()+1, text: reply, isUser: false, originalQ: origQ, accuracy: acc});
                         playSound('success');
-                        setTimeout(() => document.getElementById('chatContainer').scrollTop = 9999, 10);
+                        setTimeout(() => {
+                            const container = document.getElementById('chatContainer');
+                            if(container) container.scrollTop = container.scrollHeight;
+                        }, 10);
                     }, 800);
                 },
                 
@@ -658,7 +710,6 @@
                 startQuiz() {
                     if(!this.quizTakerName) { alert("請輸入名字！"); return; }
                     
-                    // 使用外部 quiz_db.js 的資料
                     const allQuestions = window.deerQuiz_DB || [];
                     if(allQuestions.length < 5) {
                         alert("題庫題目不足 5 題，請增加題目！");
