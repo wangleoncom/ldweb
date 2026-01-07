@@ -1,7 +1,7 @@
 {
-  "name": "鹿🦌的QA網站",
-  "short_name": "鹿🦌的QA網站",
-  "description": "2026 全新系統：AI 麋鹿聊天、大會考挑戰、專屬身分證生成與更多互動體驗。",
+  "name": "鹿QA網頁",
+  "short_name": "鹿 QA",
+  "description": "粉絲自製的鹿主播專屬資訊站。2026 全新液態玻璃介面：AI 麋鹿聊天、大會考獎狀挑戰、專屬粉絲認證生成。",
   "id": "/ldweb/",
   "start_url": "./index.html",
   "scope": "./",
@@ -16,19 +16,13 @@
       "src": "./images/basic/icon.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "./images/basic/icon.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./images/basic/icon.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
   "screenshots": [
@@ -42,7 +36,7 @@
       "src": "./images/basic/AI.png",
       "sizes": "512x512",
       "type": "image/png",
-      "label": "AI 人工智慧聊天"
+      "label": "AI 智慧問答"
     }
   ]
 }
