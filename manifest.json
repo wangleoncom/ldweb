@@ -1,42 +1,33 @@
 {
-  "name": "鹿QA網頁",
+  "name": "鹿 QA",
   "short_name": "鹿 QA",
-  "description": "粉絲自製的鹿主播專屬資訊站。2026 全新液態玻璃介面：AI 麋鹿聊天、大會考獎狀挑戰、專屬粉絲認證生成。",
-  "id": "/ldweb/",
   "start_url": "./index.html",
-  "scope": "./",
   "display": "standalone",
   "background_color": "#fdf2f8",
   "theme_color": "#fdf2f8",
   "orientation": "portrait-primary",
-  "lang": "zh-TW",
-  "categories": ["entertainment", "social", "education"],
   "icons": [
     {
       "src": "./images/basic/icon.png",
       "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./images/basic/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "./images/basic/icon.png",
+      "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     },
     {
       "src": "./images/basic/icon.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "./images/basic/icon.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "label": "鹿 QA 首頁"
-    },
-    {
-      "src": "./images/basic/AI.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "label": "AI 智慧問答"
+      "purpose": "maskable"
     }
   ]
 }
