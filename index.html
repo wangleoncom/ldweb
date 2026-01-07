@@ -744,29 +744,42 @@
                     playSound('click'); 
                 },
 
-                startQuiz() {
-                    if(!this.quizTakerName) { alert("請輸入名字！"); return; }
-                    
-                    const allQuestions = window.deerQuiz_DB || [];
-                    if(allQuestions.length < 5) {
-                        alert("題庫題目不足 5 題，請增加題目！");
-                        return;
-                    }
+                // 放在 deerApp() 裡面的 startQuiz 函式
+startQuiz() {
+    if(!this.quizTakerName) { alert("請輸入名字！"); return; }
+    
+    // 1. 取得所有題目
+    let allQuestions = window.deerQuiz_DB || [];
+    
+    // 2. 檢查題目夠不夠 (如果要考 20 題，題庫至少要大於 20)
+    // 如果題庫少於 20 題，就只考題庫現有的數量
+    const questionCount = 20; 
+    
+    if(allQuestions.length < 5) {
+        alert("題庫嚴重不足！請至少準備 5 題以上！");
+        return;
+    }
 
-                    this.quizStarted = true; this.quizEnded = false; this.quizScore = 0; this.currentQuizIndex = 0;
-                    // 這裡如果要改考 20 題，邏輯是一樣的，但如果題庫少於 5 題會報錯。
-                    // 為了保險，我們取隨機 5 題（大會考通常題目不多）。
-                    // 如果您確定要 20 題，請把 slice(0, 5) 改成 slice(0, 20)
-                    // 下方我維持隨機 5 題機制，若要改數量請在此修改：
-                    this.currentQuizSet = [...allQuestions].sort(()=>0.5-Math.random()).slice(0, 5);
-                    this.loadQuestion();
-                    playSound('success');
-                },
-                loadQuestion() {
-                    this.currentQuestion = this.currentQuizSet[this.currentQuizIndex];
-                    this.currentOptions = [...this.currentQuestion.options].sort(()=>0.5-Math.random());
-                    this.hasAnswered = false;
-                },
+    // 3. 重置分數與狀態
+    this.quizStarted = true; 
+    this.quizEnded = false; 
+    this.quizScore = 0; 
+    this.currentQuizIndex = 0;
+
+    // 4. 使用 Fisher-Yates 洗牌法 (比原本的 sort 更隨機)
+    let shuffled = [...allQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    // 5. 取出前 20 題 (如果題庫只有 15 題，就只取 15 題)
+    this.currentQuizSet = shuffled.slice(0, questionCount);
+
+    // 6. 載入第一題
+    this.loadQuestion();
+    playSound('success');
+},
                 checkAnswer(opt) {
                     if(this.hasAnswered) return;
                     this.hasAnswered = true; this.selectedOption = opt;
