@@ -201,8 +201,8 @@ window.deerQuiz_DB = [
     },
     {
         "q": "鹿🦌用什麼手機？",
-        "options": ["iPhone 13 Pro", "iPhone 15 Pro", "iPhone 14", "Samsung S24"],
-        "a": "iPhone 13 Pro"
+        "options": ["iPhone 13 Pro", "iPhone 17 Pro", "iPhone 14", "Samsung S24"],
+        "a": "iPhone 17 Pro"
     },
     {
         "q": "鹿🦌是什麼星座？",

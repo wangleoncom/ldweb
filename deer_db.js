@@ -282,8 +282,8 @@ window.deerQA_DB = [
   { 
     "id": 41, 
     "q": "鹿🦌用什麼手機？", 
-    "a": "iPhone 13 Pro。（家人已經有買iPhone 17只是鹿🦌還沒有轉過去）",
-    "short": "iPhone 13 Pro",
+    "a": "iPhone 17 Pro",
+    "short": "iPhone 17 Pro",
     "tags": ["設備", "手機"]
   },
   { 
