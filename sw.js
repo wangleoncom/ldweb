@@ -1,4 +1,4 @@
-const CACHE_NAME = 'deer-qa-v3.1.0';
+const CACHE_NAME = 'deer-qa-v4.0.0';
 const ASSETS = [
   './',
   './index.html',
@@ -29,9 +29,26 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
+  if (e.request.method !== 'GET') return;
+  
   e.respondWith(
-    caches.match(e.request).then((res) => {
-      return res || fetch(e.request).catch(() => {});
+    caches.match(e.request).then((cachedRes) => {
+      if (cachedRes) return cachedRes;
+
+      return fetch(e.request).then((networkRes) => {
+        if (!networkRes || networkRes.status !== 200 || networkRes.type !== 'basic') {
+          return networkRes;
+        }
+
+        if (e.request.url.match(/\.(jpg|jpeg|png|gif|webp|mp3)$/i)) {
+          const resClone = networkRes.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, resClone);
+          });
+        }
+
+        return networkRes;
+      }).catch(() => {});
     })
   );
 });
