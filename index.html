@@ -10,206 +10,201 @@
     <meta name="theme-color" content="#fdf2f8">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="鹿 QA">
 
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Rounded+Mplus+1c:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Rounded+Mplus+1c:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
     <script src="./deer_db.js"></script>
     <script src="./quiz_db.js"></script>
     
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(() => {});
-            });
-        }
-        
-        console.log = function() {};
-        console.warn = function() {};
-        console.error = function() {};
+        // System Override
+        window.onerror = function(msg, url, line, col, error) {
+            const app = document.querySelector('[x-data]').__x.$data;
+            if(app) app.showHttpError(500, `Internal Server Error: ${msg}`);
+            return true;
+        };
+        console.log = () => {}; console.warn = () => {}; console.error = () => {};
 
+        // PWA Register
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+        }
+
+        // Tailwind Config
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { sans: ['"Rounded Mplus 1c"', '"Noto Sans TC"', 'sans-serif'] },
                     animation: {
-                        'float': 'float 6s ease-in-out infinite',
-                        'blob': 'blob 10s infinite',
-                        'spin-slow': 'spin 8s linear infinite',
-                        'popup': 'popup 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'float': 'float 8s ease-in-out infinite',
+                        'blob': 'blob 15s infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'popup': 'popup 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
                         'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                        'typing': 'typing 1s infinite ease-in-out',
+                        'slide-down': 'slideDown 0.3s ease-out',
                     },
                     colors: { 
-                        glass: { 100: 'rgba(255, 255, 255, 0.25)', 200: 'rgba(255, 255, 255, 0.45)' },
-                        dark: { bg: '#0f172a', panel: 'rgba(30, 41, 59, 0.7)', text: '#e2e8f0' }
+                        glass: { light: 'rgba(255, 255, 255, 0.7)', dark: 'rgba(30, 41, 59, 0.7)' },
+                        brand: { pink: '#ec4899', purple: '#8b5cf6' }
                     },
                     keyframes: {
-                        float: { '0%, 100%': { transform: 'translateY(0) rotate(0deg)' }, '50%': { transform: 'translateY(-15px) rotate(1deg)' } },
-                        blob: { "0%": { transform: "translate(0px, 0px) scale(1)" }, "33%": { transform: "translate(30px, -50px) scale(1.1)" }, "66%": { transform: "translate(-20px, 20px) scale(0.9)" }, "100%": { transform: "translate(0px, 0px) scale(1)" } },
-                        popup: { "0%": { transform: "scale(0.8) translateY(20px)", opacity: 0 }, "100%": { transform: "scale(1) translateY(0)", opacity: 1 } },
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        blob: { "0%": { transform: "translate(0px, 0px) scale(1)" }, "33%": { transform: "translate(30px, -30px) scale(1.1)" }, "66%": { transform: "translate(-20px, 20px) scale(0.9)" }, "100%": { transform: "translate(0px, 0px) scale(1)" } },
+                        popup: { "0%": { transform: "scale(0.95) opacity(0)" }, "100%": { transform: "scale(1) opacity(1)" } },
                         slideUp: { "0%": { transform: "translateY(20px)", opacity: 0 }, "100%": { transform: "translateY(0)", opacity: 1 } },
-                        typing: { "0%, 100%": { transform: "translateY(0)" }, "50%": { transform: "translateY(-4px)" } }
+                        slideDown: { "0%": { transform: "translateY(-20px)", opacity: 0 }, "100%": { transform: "translateY(0)", opacity: 1 } }
                     }
                 }
             }
         }
     </script>
     <style>
-        body { font-family: 'Rounded Mplus 1c', sans-serif; background-color: #fdf2f8; overflow-x: hidden; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body { font-family: 'Rounded Mplus 1c', sans-serif; background-color: #f8fafc; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         .dark body { background-color: #0f172a; color: #e2e8f0; }
         
-        .liquid-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; background: radial-gradient(circle at 50% 50%, #fff0f5 0%, #f3e8ff 100%); transition: background 0.5s; }
-        .dark .liquid-bg { background: radial-gradient(circle at 50% 50%, #0f172a 0%, #1e1b4b 100%); }
-        
-        .liquid-blob { position: absolute; filter: blur(80px); opacity: 0.6; will-change: transform; transition: opacity 0.5s; }
-        .dark .liquid-blob { opacity: 0.3; mix-blend-mode: screen; }
-        
-        /* Reduce Motion */
-        .reduce-motion .liquid-blob, .reduce-motion .animate-float, .reduce-motion .animate-spin-slow { animation: none !important; transition: none !important; }
+        /* Professional Liquid Background */
+        .liquid-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; background: radial-gradient(circle at 50% 50%, #fdf2f8 0%, #eef2ff 100%); transition: background 0.5s; }
+        .dark .liquid-bg { background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #0f172a 100%); }
+        .liquid-blob { position: absolute; filter: blur(80px); opacity: 0.5; will-change: transform; mix-blend-mode: multiply; }
+        .dark .liquid-blob { mix-blend-mode: screen; opacity: 0.2; }
 
-        .glass-panel { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 8px 32px rgba(31, 38, 135, 0.07); transition: background-color 0.3s, border-color 0.3s; }
-        .dark .glass-panel { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); }
+        /* Glassmorphism */
+        .glass-panel { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05); }
+        .dark .glass-panel { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3); }
         
-        .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-top: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 -4px 20px rgba(0,0,0,0.03); }
+        /* Navigation */
+        .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-top: 1px solid rgba(255, 255, 255, 0.6); }
         .dark .glass-nav { background: rgba(15, 23, 42, 0.85); border-top: 1px solid rgba(255, 255, 255, 0.1); }
 
+        /* Utilities */
+        .off-screen-render { position: fixed; left: -9999px; top: 0; width: 800px; display: flex !important; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
+        
+        /* Card Flip */
         .perspective-1000 { perspective: 1000px; }
         .transform-style-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
-        .appearance-none { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
-        .off-screen-render { position: fixed; left: -9999px; top: 0; width: 600px; display: flex !important; visibility: visible !important; opacity: 1 !important; z-index: -1; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 10px; }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
         
-        /* Chat Bubble Tail */
-        .bubble-left { border-bottom-left-radius: 4px; }
-        .bubble-right { border-bottom-right-radius: 4px; }
+        /* Chat Bubbles */
+        .bubble-user { border-radius: 20px 20px 4px 20px; }
+        .bubble-ai { border-radius: 20px 20px 20px 4px; }
+        
+        /* iOS Toggle Switch */
+        .toggle-checkbox:checked { right: 0; border-color: #4ade80; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #4ade80; }
+        
+        .watermark { position: absolute; bottom: 20px; left: 0; width: 100%; text-align: center; font-size: 14px; font-weight: bold; color: rgba(0,0,0,0.3); font-family: monospace; z-index: 50; }
+        .dark .watermark { color: rgba(255,255,255,0.3); }
+        
+        /* Safe Area */
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="text-slate-800 transition-colors duration-500 min-h-screen selection:bg-pink-200"
-      :class="{ 'dark': settings.darkMode, 'reduce-motion': settings.reduceMotion }"
+<body class="text-slate-800 transition-colors duration-500 min-h-screen flex flex-col" 
+      :class="{ 'dark': settings.darkMode, 'reduce-motion': settings.reduceMotion }" 
       x-data="deerApp()" x-init="initApp()">
 
-    <div x-show="isLoading" 
-         class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-3xl transition-opacity duration-700"
-         x-transition:leave="opacity-0 pointer-events-none">
-        <div class="relative w-32 h-32 mb-8 flex items-center justify-center">
+    <div x-show="isLoading" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-3xl transition-opacity duration-500">
+        <div class="relative w-32 h-32 mb-6">
             <div class="absolute inset-0 rounded-full border-[6px] border-pink-100 dark:border-slate-700 animate-ping"></div>
-            <div class="absolute inset-0 rounded-full border-[6px] border-t-pink-500 border-r-purple-400 border-b-transparent border-l-transparent animate-spin"></div>
-            <img src="./images/basic/icon.png" class="relative z-10 w-24 h-24 rounded-full object-cover shadow-lg">
+            <img src="./images/basic/icon.png" class="relative z-10 w-full h-full rounded-full object-cover shadow-2xl border-4 border-white dark:border-slate-800">
         </div>
-        <div class="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-600 tracking-wider mb-3">鹿 QA</div>
-        <div class="text-[10px] font-bold text-slate-400 tracking-[0.3em] uppercase">系統載入中 v5.0</div>
+        <div class="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-600 tracking-wider">鹿 QA v7.0</div>
+        <div class="text-[10px] font-bold text-slate-400 mt-2 tracking-[0.3em]">SYSTEM INITIALIZING</div>
     </div>
 
-    <div x-show="isProcessing" class="fixed inset-0 z-[9998] flex items-center justify-center bg-black/20 backdrop-blur-sm" x-cloak>
-        <div class="bg-white/95 dark:bg-slate-800/95 p-8 rounded-[2rem] shadow-2xl flex flex-col items-center animate-popup border border-white dark:border-slate-700">
+    <div x-show="isProcessing" class="fixed inset-0 z-[9998] flex items-center justify-center bg-black/30 backdrop-blur-sm" x-cloak>
+        <div class="bg-white/95 dark:bg-slate-800/95 p-8 rounded-[2rem] shadow-2xl flex flex-col items-center animate-popup border border-white/20">
             <div class="w-12 h-12 border-[5px] border-pink-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <span class="text-sm font-bold text-slate-600 dark:text-slate-300 tracking-widest">AI 運算處理中</span>
+            <span class="text-sm font-bold text-slate-600 dark:text-slate-300">處理中...</span>
         </div>
     </div>
 
     <div class="liquid-bg">
-        <div class="liquid-blob bg-pink-200 dark:bg-pink-900 w-[700px] h-[700px] rounded-full top-[-20%] left-[-20%] animate-blob mix-blend-multiply dark:mix-blend-screen"></div>
-        <div class="liquid-blob bg-purple-200 dark:bg-purple-900 w-[600px] h-[600px] rounded-full top-[30%] right-[-15%] animate-blob animation-delay-2000 mix-blend-multiply dark:mix-blend-screen"></div>
-        <div class="liquid-blob bg-blue-100 dark:bg-blue-900 w-[500px] h-[500px] rounded-full bottom-[-10%] left-[10%] animate-blob animation-delay-4000 mix-blend-multiply dark:mix-blend-screen"></div>
+        <div class="liquid-blob bg-pink-300 w-[600px] h-[600px] rounded-full top-[-10%] left-[-20%] animate-blob"></div>
+        <div class="liquid-blob bg-purple-300 w-[500px] h-[500px] rounded-full top-[40%] right-[-10%] animate-blob animation-delay-2000"></div>
     </div>
 
-    <nav class="fixed top-0 w-full z-40 transition-all duration-500" :class="scrollY > 10 ? 'glass-nav py-3' : 'bg-transparent py-5'">
-        <div class="max-w-[95%] w-full mx-auto px-4 flex justify-between items-center">
-            <div class="flex items-center gap-3 cursor-pointer group" @click="handleTitleClick">
+    <nav class="fixed top-0 w-full z-40 transition-all duration-300" :class="scrollY > 10 ? 'glass-nav py-3 shadow-sm' : 'bg-transparent py-5'">
+        <div class="max-w-7xl w-full mx-auto px-5 flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer group" @click="changeTab('home')">
                 <div class="relative">
-                     <img src="./images/basic/icon.png" class="w-11 h-11 rounded-full border-[3px] border-white dark:border-slate-600 shadow-md object-cover transition-transform group-hover:scale-110 group-active:scale-95">
-                     <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-400 rounded-full border-[3px] border-white dark:border-slate-800 animate-pulse-fast"></div>
+                    <img src="./images/basic/icon.png" class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-600 shadow-md group-hover:scale-105 transition-transform">
+                    <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full animate-pulse"></span>
                 </div>
                 <div class="flex flex-col">
-                    <span class="font-black text-xl text-slate-800 dark:text-white tracking-tight leading-none transition-colors">鹿 QA</span>
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-widest mt-0.5">管理員自製</span>
+                    <span class="font-black text-lg text-slate-800 dark:text-white leading-none">鹿 QA</span>
+                    <span class="text-[9px] font-bold text-slate-400 mt-0.5 tracking-wider">官方粉絲自製</span>
                 </div>
             </div>
-            <button @click="openSettings" class="w-10 h-10 rounded-full bg-white/60 dark:bg-slate-700/60 hover:bg-white dark:hover:bg-slate-600 flex items-center justify-center transition-all shadow-sm hover:shadow-md active:scale-90 border border-white dark:border-slate-600">
-                <svg class="w-5 h-5 text-slate-600 dark:text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <button @click="showSettingsModal = true" class="w-10 h-10 rounded-full bg-white/60 dark:bg-slate-700/60 flex items-center justify-center border border-white dark:border-slate-500 hover:bg-white dark:hover:bg-slate-600 transition-colors shadow-sm">
+                <svg class="w-5 h-5 text-slate-600 dark:text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             </button>
         </div>
     </nav>
 
-    <main class="pt-28 px-4 pb-32 w-full mx-auto min-h-screen max-w-7xl">
+    <main class="flex-grow pt-24 pb-28 px-4 w-full max-w-6xl mx-auto">
         
-        <div x-show="currentTab === 'home'" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-10" x-transition:enter-end="opacity-100 translate-y-0">
-            
-            <div class="glass-panel rounded-[2.5rem] p-6 mb-6 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-pink-300/40 to-transparent rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
-                <div class="flex flex-col items-center text-center relative z-10">
-                    <div class="mb-2 text-xs font-bold text-pink-500 dark:text-pink-300 tracking-widest uppercase bg-pink-50 dark:bg-pink-900/30 px-3 py-1 rounded-full border border-pink-100 dark:border-pink-800">生日倒數</div>
-                    <div class="flex items-end gap-1 mb-1">
-                        <span class="text-4xl font-black text-slate-800 dark:text-white tabular-nums" x-text="countdownDays"></span>
-                        <span class="text-sm font-bold text-slate-400 dark:text-slate-500 mb-1.5">天</span>
-                    </div>
-                    <div class="text-[10px] text-slate-400 font-bold">距離 10月3日 鹿鹿生日</div>
-                </div>
-            </div>
-
-            <div class="glass-panel rounded-[2.5rem] p-6 mb-8 relative overflow-hidden group">
-                <div class="flex flex-col md:flex-row items-center gap-6 relative z-10">
-                    <div class="relative group-hover:scale-105 transition-transform duration-500 cursor-pointer" @click="playSound('success')">
-                        <img src="./images/basic/icon.png" class="w-24 h-24 rounded-[2rem] shadow-2xl object-cover border-[4px] border-white dark:border-slate-600">
-                    </div>
-                    <div class="text-center md:text-left flex-1">
-                        <h2 class="text-2xl font-black text-slate-800 dark:text-white mb-2">鹿 <span class="text-pink-500">🦌</span></h2>
-                        <p class="text-slate-500 dark:text-slate-400 font-medium mb-4 text-xs leading-relaxed">
-                            天秤座｜170cm｜42kg<br>
-                            收錄所有關於鹿的小秘密與直播常見問題。
-                        </p>
-                        <div class="flex justify-center md:justify-start gap-2">
-                            <a href="https://www.tiktok.com/@ld.1003_" target="_blank" class="px-5 py-2.5 bg-black dark:bg-slate-900 text-white rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-slate-200 dark:shadow-none">
-                                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
-                                <span class="font-bold text-[10px]">TikTok</span>
-                            </a>
-                            <a href="https://www.instagram.com/ld.1003_/" target="_blank" class="px-5 py-2.5 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 text-white rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-pink-100 dark:shadow-none">
-                                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
-                                <span class="font-bold text-[10px]">Instagram</span>
-                            </a>
-                        </div>
+        <div x-show="currentTab === 'home'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4">
+            <div class="glass-panel rounded-[2.5rem] p-6 mb-8 relative overflow-hidden flex flex-col md:flex-row items-center gap-6 group">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-pink-300/20 to-transparent rounded-full blur-3xl -mr-10 -mt-10"></div>
+                <div class="relative shrink-0"><img src="./images/basic/icon.png" class="w-24 h-24 rounded-[2rem] shadow-2xl border-[3px] border-white dark:border-slate-600 object-cover"></div>
+                <div class="text-center md:text-left z-10 flex-1">
+                    <h2 class="text-3xl font-black text-slate-800 dark:text-white mb-2">鹿 <span class="text-pink-500">🦌</span></h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-4">
+                        天秤座｜170cm｜42kg<br>收錄所有關於鹿的小秘密與直播常見問題
+                    </p>
+                    <div class="flex justify-center md:justify-start gap-3">
+                        <a href="https://www.tiktok.com/@ld.1003_" target="_blank" class="px-5 py-2.5 bg-black text-white rounded-full flex items-center gap-2 hover:scale-105 transition-transform shadow-lg">
+                            <svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+                            <span class="text-xs font-bold">TikTok</span>
+                        </a>
+                        <a href="https://www.instagram.com/ld.1003_/" target="_blank" class="px-5 py-2.5 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 text-white rounded-full flex items-center gap-2 hover:scale-105 transition-transform shadow-lg">
+                            <svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+                            <span class="text-xs font-bold">Instagram</span>
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <div class="relative mb-6 z-20">
-                <input type="text" x-model.debounce.300ms="search" @input="handleSearch" placeholder="搜尋問題... (例如: 身高、直播)" 
-                       class="w-full pl-12 pr-6 py-4 rounded-2xl bg-white/70 dark:bg-slate-800/70 border-2 border-transparent focus:border-pink-300 dark:focus:border-purple-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-pink-100/50 dark:focus:ring-purple-900/30 shadow-sm outline-none transition-all text-sm font-bold placeholder-slate-400 text-slate-800 dark:text-white backdrop-blur-md">
+            <div class="relative mb-8 z-20">
+                <input type="text" x-model="search" @input="handleSearch" placeholder="搜尋問題... (例如: 身高、直播)" 
+                       class="w-full pl-12 pr-6 py-4 rounded-2xl bg-white/70 dark:bg-slate-800/70 border-2 border-transparent focus:border-pink-300 dark:focus:border-purple-500 focus:bg-white dark:focus:bg-slate-900 shadow-lg outline-none transition-all text-sm font-bold placeholder-slate-400 text-slate-800 dark:text-white backdrop-blur-md">
                 <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
 
-            <div class="grid gap-4 pb-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <div class="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-4">
                 <template x-for="item in paginatedData" :key="item.id">
-                    <div class="group h-48 perspective-1000 cursor-pointer" @click="toggleCard(item.id)">
-                        <div class="relative w-full h-full transform-style-3d transition-transform duration-700 shadow-sm hover:shadow-xl rounded-[2rem]" :class="{ 'rotate-y-180': flippedCards.includes(item.id) }">
-                            <div class="absolute w-full h-full glass-panel rounded-[2rem] p-6 flex flex-col justify-between backface-hidden bg-white/70 dark:bg-slate-800/70">
+                    <div class="group h-52 perspective-1000 cursor-pointer" @click="toggleCard(item.id)">
+                        <div class="relative w-full h-full transform-style-3d transition-transform duration-500 shadow-sm group-hover:shadow-xl rounded-[2rem]" :class="{ 'rotate-y-180': flippedCards.includes(item.id) }">
+                            <div class="absolute w-full h-full glass-panel rounded-[2rem] p-7 flex flex-col justify-between backface-hidden bg-white/70 dark:bg-slate-800/70">
                                 <div>
-                                    <div class="flex justify-between items-start mb-2">
-                                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-300 text-[10px] font-black shadow-inner">Q</span>
-                                        <span class="text-[9px] font-bold text-slate-300 dark:text-slate-600 bg-white dark:bg-slate-900 px-2 py-1 rounded-full">#<span x-text="item.id"></span></span>
+                                    <div class="flex justify-between items-start mb-3">
+                                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-pink-100 text-pink-600 text-xs font-black">Q</span>
+                                        <span class="text-[10px] font-bold text-slate-400 bg-white/50 px-2 py-1 rounded-full">#<span x-text="item.id"></span></span>
                                     </div>
-                                    <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 leading-snug line-clamp-3" x-text="item.q"></h3>
+                                    <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 leading-snug" x-text="item.q"></h3>
                                 </div>
-                                <div class="text-right text-[9px] font-bold text-slate-400 uppercase tracking-widest opacity-60">點擊查看</div>
+                                <div class="text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center justify-end gap-1">
+                                    點擊翻看答案 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                </div>
                             </div>
-                            <div class="absolute w-full h-full glass-panel rounded-[2rem] p-5 flex flex-col justify-between items-center backface-hidden rotate-y-180 bg-white/95 dark:bg-slate-900/95 border-2 border-pink-100 dark:border-pink-900">
+                            <div class="absolute w-full h-full glass-panel rounded-[2rem] p-6 flex flex-col justify-between items-center backface-hidden rotate-y-180 bg-white dark:bg-slate-900 border-2 border-pink-100 dark:border-pink-900">
                                 <div class="w-full h-full overflow-y-auto custom-scrollbar flex items-center justify-center">
                                     <p class="text-sm font-bold text-center text-slate-700 dark:text-slate-300 leading-relaxed" x-text="item.a"></p>
                                 </div>
-                                <button @click.stop="openShareModal(item)" class="mt-2 w-full py-2 bg-slate-50 dark:bg-slate-800 rounded-xl text-[10px] font-bold text-slate-400 hover:bg-pink-50 dark:hover:bg-pink-900 hover:text-pink-600 dark:hover:text-pink-300 transition-colors">
+                                <button @click.stop="openShareModal(item)" class="mt-2 w-full py-2 bg-slate-50 dark:bg-slate-800 rounded-xl text-[10px] font-bold text-slate-500 hover:bg-pink-50 hover:text-pink-600 transition-colors flex items-center justify-center gap-2">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
                                     分享卡片
                                 </button>
                             </div>
@@ -218,742 +213,532 @@
                 </template>
             </div>
             
-             <div class="mt-8 mb-12 px-4">
-                <div class="flex items-center gap-2 mb-6">
-                   <div class="w-1 h-5 bg-pink-500 rounded-full"></div>
-                   <h3 class="text-lg font-black text-slate-800 dark:text-white">成長大事記</h3>
-                </div>
-                <div class="relative border-l-2 border-pink-200 dark:border-pink-900/50 ml-3 space-y-8">
-                    <div class="relative pl-8">
-                        <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-pink-500 border-4 border-white dark:border-slate-900"></div>
-                        <div class="text-[10px] font-bold text-pink-500 dark:text-pink-400 mb-1">2021/11/29</div>
-                        <h4 class="text-sm font-black text-slate-800 dark:text-white">TikTok 初登場</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">開始在 TikTok 上發布貼文，傳說開始的地方。</p>
-                    </div>
-                    <div class="relative pl-8">
-                        <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-purple-500 border-4 border-white dark:border-slate-900"></div>
-                        <div class="text-[10px] font-bold text-purple-500 dark:text-purple-400 mb-1">2024/10/29</div>
-                        <h4 class="text-sm font-black text-slate-800 dark:text-white">粉絲破萬達成</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">達到了 1 萬名粉絲，麋鹿家族逐漸壯大。</p>
-                    </div>
-                    <div class="relative pl-8">
-                        <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-yellow-400 border-4 border-white dark:border-slate-900 shadow-lg shadow-yellow-200 dark:shadow-none animate-pulse"></div>
-                        <div class="text-[10px] font-bold text-yellow-600 dark:text-yellow-400 mb-1">2025/03/17</div>
-                        <h4 class="text-sm font-black text-slate-800 dark:text-white">十萬粉絲里程碑</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">達到了 10 萬名粉絲！感謝每一位麋鹿的支持。</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex justify-center items-center gap-3 pb-8">
-                <button @click="prevPage" :disabled="currentPage === 1" class="w-10 h-10 rounded-2xl bg-white/50 dark:bg-slate-800/50 flex items-center justify-center disabled:opacity-30 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 shadow-sm transition-all"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg></button>
-                <div class="px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-2xl font-bold text-slate-500 dark:text-slate-400 shadow-sm text-xs tracking-widest"><span x-text="currentPage"></span> / <span x-text="totalPages"></span></div>
-                <button @click="nextPage" :disabled="currentPage === totalPages" class="w-10 h-10 rounded-2xl bg-white/50 dark:bg-slate-800/50 flex items-center justify-center disabled:opacity-30 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 shadow-sm transition-all"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg></button>
+            <div class="flex justify-center items-center gap-3 mt-6">
+                <button @click="prevPage" :disabled="currentPage === 1" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center disabled:opacity-30 hover:bg-white text-slate-600 dark:text-white transition-all">←</button>
+                <div class="px-4 py-2 glass-panel rounded-xl font-bold text-slate-600 dark:text-white text-sm"><span x-text="currentPage"></span> / <span x-text="totalPages"></span></div>
+                <button @click="nextPage" :disabled="currentPage === totalPages" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center disabled:opacity-30 hover:bg-white text-slate-600 dark:text-white transition-all">→</button>
             </div>
         </div>
 
-        <div x-show="currentTab === 'ai'" x-cloak class="h-[75vh] flex flex-col glass-panel rounded-[2.5rem] overflow-hidden shadow-2xl relative bg-white/60 dark:bg-slate-800/60 border-white/60 dark:border-slate-700/60"
-             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
-            <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-4 border-b border-white dark:border-slate-700 flex items-center gap-3 z-10 shadow-sm">
+        <div x-show="currentTab === 'ai'" x-cloak class="h-[75vh] flex flex-col glass-panel rounded-[2.5rem] overflow-hidden shadow-2xl relative bg-white/60 dark:bg-slate-800/60 border-white/60">
+            <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-4 border-b border-white dark:border-slate-700 flex items-center gap-3 z-10">
                 <div class="relative">
                     <img src="./images/basic/AI.png" class="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-slate-600 shadow-sm">
-                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
+                    <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></span>
                 </div>
-                <div class="flex-1">
-                    <h3 class="font-black text-slate-800 dark:text-white text-sm flex items-center gap-2">AI 麋鹿</h3>
-                    <div class="text-[9px] font-bold text-slate-400 dark:text-slate-500" x-text="isTyping ? '對方正在輸入...' : '在線'"></div>
+                <div>
+                    <h3 class="font-black text-slate-800 dark:text-white text-sm">AI 麋鹿</h3>
+                    <div class="text-[9px] font-bold text-slate-400" x-text="isTyping ? '正在輸入中...' : 'SmartDeer 引擎在線'"></div>
                 </div>
             </div>
-            
-            <div id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-5 scroll-smooth custom-scrollbar overscroll-contain">
+            <div id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth custom-scrollbar">
                 <template x-for="msg in chatHistory" :key="msg.id">
                     <div class="flex w-full animate-slide-up" :class="msg.isUser ? 'justify-end' : 'justify-start'">
-                        <div class="flex flex-col gap-1 max-w-[85%]">
-                            <div class="px-5 py-3.5 shadow-sm text-sm leading-relaxed font-medium transition-all relative group"
-                                 @click="!msg.isUser && openMsgDetail(msg)"
-                                 :class="msg.isUser ? 'bg-slate-800 dark:bg-pink-600 text-white rounded-2xl bubble-right' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl bubble-left border border-white dark:border-slate-600 hover:shadow-md cursor-pointer'">
+                        <div class="flex flex-col gap-1 max-w-[80%]">
+                            <div class="px-5 py-3 shadow-sm text-sm leading-relaxed font-medium transition-all"
+                                 :class="msg.isUser ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white bubble-user' : 'bg-white dark:bg-slate-700 dark:text-slate-200 bubble-ai border border-white/50'">
                                 <p x-text="msg.text" class="whitespace-pre-line"></p>
                             </div>
-                            <div class="flex items-center gap-1 text-[9px] font-bold text-slate-400 dark:text-slate-500 px-1" :class="msg.isUser ? 'justify-end' : 'justify-start'">
+                            <div class="flex items-center gap-1 text-[9px] font-bold text-slate-400 px-1" :class="msg.isUser ? 'justify-end' : 'justify-start'">
                                 <span x-text="msg.time"></span>
-                                <span x-show="msg.isUser && msg.status === 'read'" class="text-slate-400">已讀</span>
+                                <span x-show="msg.isUser && msg.status === 'read'" class="text-pink-500">已讀</span>
                             </div>
                         </div>
                     </div>
                 </template>
-                
                 <div x-show="isTyping" class="flex justify-start animate-slide-up">
-                     <div class="bg-white dark:bg-slate-700 px-4 py-3 rounded-2xl bubble-left flex gap-1.5 shadow-sm border border-white dark:border-slate-600 items-center h-10">
-                        <div class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-typing"></div>
-                        <div class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-typing" style="animation-delay: 0.2s"></div>
-                        <div class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-typing" style="animation-delay: 0.4s"></div>
+                     <div class="bg-white dark:bg-slate-700 px-4 py-3 rounded-2xl bubble-ai flex gap-1.5 shadow-sm border border-white dark:border-slate-600 items-center h-10">
+                        <div class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></div>
+                        <div class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-100"></div>
+                        <div class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-200"></div>
                     </div>
                 </div>
             </div>
-
             <div class="p-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-white dark:border-slate-700 z-10">
                 <div class="relative flex items-center gap-2">
-                    <button @mousedown="startVoiceInput" @touchstart.prevent="startVoiceInput" @mouseup="stopVoiceInput" @touchend="stopVoiceInput"
-                            class="p-3 rounded-full transition-all active:scale-90 flex items-center justify-center relative overflow-hidden"
-                            :class="isListening ? 'bg-red-500 text-white shadow-lg shadow-red-200 animate-pulse' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
-                    </button>
-                    
-                    <input type="text" x-model="chatInput" @keydown.enter="handleChatEnter" placeholder="輸入訊息..." 
-                           class="flex-1 pl-5 pr-12 py-3.5 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-transparent focus:border-pink-300 dark:focus:border-purple-500 focus:bg-white dark:focus:bg-slate-900 outline-none text-slate-800 dark:text-white shadow-inner text-sm font-bold transition-all">
-                    
-                    <button @click="sendMessage" class="absolute right-1.5 p-2 bg-slate-800 dark:bg-pink-600 text-white rounded-full shadow-lg hover:bg-slate-700 transition-all active:scale-90" :disabled="!chatInput.trim()">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
+                    <button @mousedown="startVoice" @mouseup="stopVoice" @touchstart="startVoice" @touchend="stopVoice" class="p-3 bg-slate-100 dark:bg-slate-800 rounded-full text-lg transition-all active:scale-95" :class="isListening ? 'ring-2 ring-red-500 text-red-500' : 'text-slate-500'">🎤</button>
+                    <input type="text" x-model="chatInput" @keydown.enter="handleChatEnter" placeholder="輸入問題..." class="flex-1 px-5 py-3 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-transparent focus:border-pink-300 dark:focus:border-purple-500 focus:bg-white dark:focus:bg-slate-900 outline-none text-slate-800 dark:text-white shadow-inner text-sm font-bold transition-all">
+                    <button @click="sendMessage" class="p-3 bg-slate-800 dark:bg-pink-600 text-white rounded-full shadow-lg hover:scale-105 transition-all active:scale-95" :disabled="!chatInput.trim()">➤</button>
                 </div>
-                <div x-show="isListening" class="text-center text-[10px] font-bold text-red-500 mt-1 animate-pulse">正在聆聽...放開即發送</div>
             </div>
         </div>
 
-        <div x-show="currentTab === 'quiz'" x-cloak class="max-w-xl mx-auto" x-transition:enter="transition ease-out duration-500">
-            <div x-show="!quizStarted" class="glass-panel rounded-[3rem] p-10 text-center relative overflow-hidden bg-white/70 dark:bg-slate-800/70">
-                <div class="relative z-10">
-                    <div class="text-6xl mb-6 animate-float">🎓</div>
-                    <h2 class="text-2xl font-black text-slate-800 dark:text-white mb-2">麋鹿大會考</h2>
-                    <p class="text-slate-500 dark:text-slate-400 mb-8 font-bold text-xs tracking-wide">證明你是鐵粉的時刻到了</p>
-                    <input type="text" x-model="quizTakerName" placeholder="輸入你的名字" class="w-full max-w-[200px] mx-auto mb-6 px-6 py-3 rounded-2xl bg-white dark:bg-slate-900 border-2 border-pink-100 dark:border-slate-600 focus:border-pink-400 outline-none text-center font-bold shadow-sm transition-all text-sm dark:text-white">
-                    <button @click="startQuiz" class="w-full max-w-[200px] px-8 py-3 bg-slate-800 dark:bg-pink-600 text-white rounded-2xl font-bold shadow-lg shadow-slate-200 dark:shadow-none hover:shadow-xl hover:scale-105 transition-all active:scale-95 text-sm">開始挑戰</button>
-                </div>
-            </div>
-            <div x-show="quizStarted" class="glass-panel rounded-[2.5rem] p-8 shadow-xl bg-white/80 dark:bg-slate-800/80 border-white dark:border-slate-600">
-                <div class="flex justify-between items-center mb-6">
-                    <span class="bg-slate-800 dark:bg-slate-700 text-white px-3 py-1 rounded-lg text-[10px] font-black tracking-widest">Q.<span x-text="currentQuizIndex + 1"></span></span>
-                    <div class="h-1.5 flex-1 mx-4 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-pink-500 to-purple-500 transition-all duration-500 rounded-full" :style="`width: ${((currentQuizIndex + 1) / currentQuizSet.length) * 100}%`"></div>
-                    </div>
-                </div>
-                <h3 class="text-lg font-black text-slate-800 dark:text-white mb-8 min-h-[60px] flex items-center justify-center text-center leading-relaxed" x-text="currentQuestion?.q"></h3>
-                <div class="grid gap-3">
-                    <template x-for="(opt, idx) in currentOptions" :key="idx">
-                        <button @click="checkAnswer(opt)" :disabled="hasAnswered"
-                                class="w-full p-4 rounded-2xl text-left font-bold transition-all border-2 flex items-center relative overflow-hidden group active:scale-98"
-                                :class="hasAnswered ? (opt === currentQuestion.a ? 'bg-green-50 dark:bg-green-900/30 border-green-400 text-green-700 dark:text-green-300' : (selectedOption === opt ? 'bg-red-50 dark:bg-red-900/30 border-red-400 text-red-700 dark:text-red-300' : 'bg-white dark:bg-slate-900 border-transparent opacity-40')) : 'bg-white dark:bg-slate-900 border-transparent hover:border-pink-300 hover:bg-pink-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-sm'">
-                            <span class="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] mr-3 font-black text-slate-500 group-hover:bg-white" x-text="['A','B','C','D'][idx]"></span>
-                            <span class="text-sm" x-text="opt"></span>
-                        </button>
+        <div x-show="currentTab === 'timeline'" x-cloak x-transition class="max-w-xl mx-auto pb-10">
+            <h2 class="text-2xl font-black text-center mb-10 dark:text-white">成長大事記 📅</h2>
+            <div class="relative ml-6">
+                <div class="absolute left-[24px] top-0 bottom-0 w-1 bg-gradient-to-b from-pink-200 to-purple-200 dark:from-pink-900 dark:to-purple-900 rounded-full"></div>
+                <div class="space-y-0">
+                    <template x-for="(event, idx) in timelineWithGaps" :key="idx">
+                        <div class="relative pl-14" :style="`margin-bottom: ${event.visualGap}px`">
+                            <div class="absolute left-4 top-2 w-5 h-5 bg-pink-500 border-4 border-white dark:border-slate-900 rounded-full shadow-lg z-10"></div>
+                            <div class="glass-panel p-5 rounded-[2rem] border-pink-100/50 animate-slide-up relative hover:scale-[1.02] transition-transform duration-300">
+                                <div class="text-[10px] font-black text-pink-500 mb-1" x-text="event.date"></div>
+                                <h4 class="font-black text-slate-800 dark:text-white mb-1" x-text="event.title"></h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400" x-text="event.desc"></p>
+                            </div>
+                        </div>
                     </template>
                 </div>
-                <button x-show="hasAnswered" @click="nextQuestion" class="mt-6 w-full py-3 bg-slate-800 dark:bg-pink-600 text-white rounded-xl font-bold shadow-lg hover:bg-slate-700 transition-all animate-slide-up active:scale-95 text-sm">
-                    <span x-text="currentQuizIndex === currentQuizSet.length - 1 ? '完成測驗' : '下一題'"></span>
-                </button>
             </div>
         </div>
 
-        <div x-show="currentTab === 'idcard'" x-cloak class="glass-panel rounded-[3rem] p-8 shadow-xl text-center max-w-sm mx-auto bg-white/70 dark:bg-slate-800/70">
-            <h2 class="text-2xl font-black mb-1 text-slate-800 dark:text-white">麋鹿認證</h2>
-            <p class="text-slate-500 dark:text-slate-400 text-[10px] mb-6 font-bold tracking-widest uppercase">生成專屬粉絲證明</p>
-            <div class="space-y-5 mb-8 text-left">
-                <div>
-                    <label class="block text-[10px] font-black text-slate-400 dark:text-slate-500 mb-2 uppercase tracking-wider pl-2">暱稱</label>
-                    <input type="text" x-model="idCardName" placeholder="輸入名字..." class="w-full px-5 py-3 rounded-2xl bg-white dark:bg-slate-900 border-2 border-transparent focus:border-pink-300 outline-none font-bold shadow-sm transition-all text-sm dark:text-white">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black text-slate-400 dark:text-slate-500 mb-2 uppercase tracking-wider pl-2">樣式選擇</label>
-                    <div class="grid grid-cols-2 gap-3">
-                         <div @click="selectedBg = './images/backgrounds/bg16.jpg'; playSound('click')" 
-                              class="aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer border-[3px] transition-all relative"
-                              :class="selectedBg === './images/backgrounds/bg16.jpg' ? 'border-pink-500 ring-2 ring-pink-200' : 'border-white dark:border-slate-600 opacity-70 grayscale'">
-                            <img src="./images/backgrounds/bg16.jpg" class="w-full h-full object-cover">
-                        </div>
-                        <div class="aspect-[3/4] rounded-2xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center border-[3px] border-white dark:border-slate-600">
-                            <span class="text-[10px] font-bold text-slate-400">更多樣式<br>敬請期待</span>
-                        </div>
+        <div x-show="currentTab === 'idcard'" x-cloak x-transition class="max-w-sm mx-auto">
+             <div class="glass-panel rounded-[3rem] p-8 text-center shadow-2xl">
+                <h2 class="text-2xl font-black mb-6 dark:text-white">麋鹿認證 🪪</h2>
+                <div class="space-y-4 mb-6">
+                    <input type="text" x-model="idCardName" placeholder="輸入你的暱稱" class="w-full px-5 py-4 rounded-2xl bg-white dark:bg-slate-800 border-2 border-transparent focus:border-pink-400 outline-none font-bold text-center shadow-sm dark:text-white transition-all">
+                    <div class="grid grid-cols-2 gap-3 max-h-60 overflow-y-auto custom-scrollbar p-1">
+                        <template x-for="bg in backgrounds" :key="bg">
+                            <div @click="selectedBg = bg; playSound('click')" class="aspect-[3/4] rounded-xl overflow-hidden border-[3px] transition-all cursor-pointer relative" :class="selectedBg === bg ? 'border-pink-500 ring-2 ring-pink-200' : 'border-transparent opacity-60 hover:opacity-100'">
+                                <img :src="bg" class="w-full h-full object-cover">
+                                <div x-show="selectedBg === bg" class="absolute inset-0 bg-pink-500/20 flex items-center justify-center text-white font-bold">✓</div>
+                            </div>
+                        </template>
                     </div>
                 </div>
+                <button @click="generateIDCard()" class="w-full py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-2xl font-black shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all active:scale-95">立即生成</button>
             </div>
-            <button @click="generateIDCard" class="w-full py-3.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-2xl font-bold shadow-lg shadow-pink-200 dark:shadow-none hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95 text-sm tracking-wide">立即生成</button>
+        </div>
+
+        <div x-show="currentTab === 'quiz'" x-cloak x-transition class="max-w-xl mx-auto">
+             <div x-show="!quizStarted" class="glass-panel rounded-[3rem] p-10 text-center">
+                <div class="text-6xl mb-6 animate-float">🎓</div>
+                <h2 class="text-2xl font-black mb-4 dark:text-white">麋鹿大會考</h2>
+                <input type="text" x-model="quizTakerName" placeholder="輸入名字" class="w-full max-w-xs px-6 py-4 rounded-2xl bg-white dark:bg-slate-800 border-2 border-slate-100 outline-none font-bold mb-6 text-center dark:text-white">
+                <button @click="startQuiz()" class="w-full max-w-xs px-8 py-4 bg-slate-900 text-white rounded-2xl font-black shadow-xl transition-all active:scale-95">開始測驗</button>
+             </div>
+             <div x-show="quizStarted" class="glass-panel rounded-[2.5rem] p-8 shadow-xl relative overflow-hidden">
+                 <div class="mb-6 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                     <div class="h-full bg-pink-500 transition-all duration-500" :style="`width: ${((currentQuizIndex + 1) / 5) * 100}%`"></div>
+                 </div>
+                 <h3 class="text-xl font-black text-center mb-8 dark:text-white min-h-[3rem] flex items-center justify-center" x-text="currentQuestion?.q"></h3>
+                 <div class="grid gap-3">
+                     <template x-for="opt in currentOptions" :key="opt">
+                         <button @click="checkAnswer(opt)" :disabled="hasAnswered" class="w-full p-4 rounded-2xl text-left font-bold border-2 transition-all relative overflow-hidden" 
+                                 :class="hasAnswered ? (opt === currentQuestion.a ? 'bg-green-50 border-green-500 text-green-700' : (selectedOption === opt ? 'bg-red-50 border-red-400 text-red-700' : 'opacity-40')) : 'bg-white dark:bg-slate-800 hover:border-pink-300 shadow-sm dark:text-white'">
+                            <span x-text="opt" class="relative z-10"></span>
+                         </button>
+                     </template>
+                 </div>
+                 <button x-show="hasAnswered" @click="nextQuestion()" class="mt-6 w-full py-4 bg-slate-800 text-white rounded-xl font-black shadow-lg animate-slide-up" x-text="currentQuizIndex === 4 ? '查看獎狀' : '下一題'"></button>
+             </div>
         </div>
     </main>
 
-    <div class="fixed bottom-8 left-0 right-0 z-50 px-6 pointer-events-none safe-area-bottom">
-        <nav class="pointer-events-auto flex items-center justify-between p-2 rounded-[2.5rem] glass-nav shadow-2xl max-w-[320px] mx-auto border border-white/60 dark:border-slate-700/60">
+    <div class="fixed bottom-6 left-0 right-0 z-50 px-6 pointer-events-none safe-area-bottom">
+        <nav class="pointer-events-auto flex items-center justify-between p-2 rounded-[2.5rem] glass-nav shadow-2xl max-w-sm mx-auto border border-white/60">
             <template x-for="tab in tabs" :key="tab.id">
-                <button @click="changeTab(tab.id); playSound('click')"
-                        class="relative w-full py-3.5 rounded-[2rem] flex flex-col items-center justify-center gap-1 transition-all duration-300 group">
-                    <span class="text-xl transition-transform duration-300 group-active:scale-90" :class="currentTab === tab.id ? '-translate-y-1' : 'grayscale opacity-50 dark:opacity-40'" x-text="tab.icon"></span>
+                <button @click="changeTab(tab.id); playSound('click')" class="relative w-full py-3 rounded-[2rem] flex flex-col items-center justify-center gap-1 transition-all duration-300 group">
+                    <span class="text-xl transition-transform group-active:scale-90" :class="currentTab === tab.id ? '-translate-y-1' : 'grayscale opacity-50 dark:opacity-40'" x-text="tab.icon"></span>
                     <span class="text-[9px] font-black transition-all duration-300 leading-none" :class="currentTab === tab.id ? 'text-slate-800 dark:text-white scale-100' : 'text-slate-400 scale-0 opacity-0 h-0'" x-text="tab.label"></span>
-                    <div class="absolute bottom-1.5 w-1 h-1 rounded-full bg-pink-500 transition-all duration-300" :class="currentTab === tab.id ? 'opacity-100 scale-100' : 'opacity-0 scale-0'"></div>
+                    <div class="absolute bottom-1 w-1 h-1 rounded-full bg-pink-500 transition-all duration-300" :class="currentTab === tab.id ? 'opacity-100 scale-100' : 'opacity-0 scale-0'"></div>
                 </button>
             </template>
         </nav>
     </div>
 
-    <div x-show="modal.isOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-6" x-transition.opacity x-cloak>
-        <div @click.outside="closeModal" class="bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl relative text-center border-4 border-white dark:border-slate-600 animate-popup">
-            <div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl shadow-inner dark:shadow-none" 
-                 :class="modal.type === 'error' ? 'bg-red-50 dark:bg-red-900/30 text-red-500' : (modal.type === 'success' ? 'bg-green-50 dark:bg-green-900/30 text-green-500' : 'bg-slate-50 dark:bg-slate-700 text-slate-500')">
+    <div id="shareCardTemplate" class="off-screen-render flex-col items-center justify-center bg-white p-12 h-[1000px] w-[800px] relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-pink-50 via-white to-purple-50"></div>
+        <div class="relative z-10 glass-panel p-12 rounded-[4rem] border-8 border-white shadow-xl w-full text-center flex flex-col items-center justify-center h-full">
+            <img src="./images/basic/icon.png" class="w-32 h-32 rounded-[3rem] mb-10 shadow-xl border-4 border-white">
+            <div class="px-6 py-2 bg-pink-100 text-pink-600 rounded-full font-black mb-8 tracking-widest text-lg">鹿 QA 粉絲站</div>
+            <h2 id="scQ" class="text-4xl font-black text-slate-800 mb-12 leading-snug px-4"></h2>
+            <div class="w-24 h-2 bg-pink-200 rounded-full mb-12"></div>
+            <p id="scA" class="text-3xl font-bold text-slate-600 leading-relaxed px-4"></p>
+        </div>
+        <div class="watermark">wangleoncom.github.io/ldweb</div>
+    </div>
+
+    <div id="idCardTemplate" class="off-screen-render flex-col justify-between bg-slate-900 text-white relative overflow-hidden h-[1200px] w-[800px]">
+        <img :src="selectedBg" class="absolute inset-0 w-full h-full object-cover opacity-70" crossorigin="anonymous">
+        <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/90"></div>
+        <div class="relative z-20 p-16 flex items-center gap-8 pt-24">
+            <img src="./images/basic/icon.png" class="w-32 h-32 rounded-full border-8 border-white/30 shadow-2xl">
+            <div><div class="text-xl tracking-[0.5em] opacity-80 font-bold mb-2">OFFICIAL FAN</div><div class="text-7xl font-black tracking-widest uppercase">麋鹿認證</div></div>
+        </div>
+        <div class="relative z-20 p-16 pb-32">
+            <div class="mb-20">
+                <div class="text-xl font-bold tracking-[0.3em] opacity-60 mb-4 uppercase border-b-2 border-white/20 pb-4 inline-block">粉絲暱稱</div>
+                <div class="text-9xl font-black tracking-tight drop-shadow-2xl" x-text="idCardName"></div>
+            </div>
+            <div class="flex justify-between items-end">
+                <div><div class="text-xl opacity-60 mb-2 font-bold">認證編號</div><div class="text-5xl font-mono font-bold text-pink-300" x-text="generatedIdNumber"></div></div>
+                <div class="text-right font-mono text-3xl opacity-80" x-text="new Date().toLocaleDateString('zh-TW')"></div>
+            </div>
+        </div>
+        <div class="watermark" style="color: rgba(255,255,255,0.4)">wangleoncom.github.io/ldweb</div>
+    </div>
+
+    <div id="examPaperTemplate" class="off-screen-render flex-col items-center justify-center bg-[#fffbf0] p-20 border-[30px] border-double border-[#d4af37] h-[800px] w-[1000px]">
+        <div class="text-center relative z-10 w-full">
+            <div class="text-7xl font-black text-[#d4af37] mb-12 tracking-[0.5em] drop-shadow-sm">成績證明</div>
+            <div class="text-4xl text-slate-500 mb-8 font-bold">茲證明</div>
+            <div class="text-8xl font-black text-slate-900 mb-12 underline decoration-4 decoration-pink-300 underline-offset-8" x-text="quizTakerName"></div>
+            <div class="text-4xl text-slate-500 mb-12 font-bold">參加「麋鹿大會考」獲得</div>
+            <div class="flex justify-center items-center gap-4 mb-16">
+                <span class="text-[12rem] font-black text-pink-500 drop-shadow-2xl" x-text="quizScore * 20"></span>
+                <span class="text-5xl font-bold text-slate-400 self-end mb-10">分</span>
+            </div>
+            <div class="inline-block px-12 py-4 bg-[#d4af37] text-white text-3xl font-black rounded-full shadow-xl">🏆 超級鐵粉</div>
+        </div>
+        <div class="watermark">wangleoncom.github.io/ldweb</div>
+    </div>
+
+    <div x-show="modal.isOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-6" x-transition.opacity x-cloak>
+        <div @click.outside="closeModal" class="bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl relative text-center border-4 border-white dark:border-slate-700 animate-popup">
+            <div class="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl shadow-inner bg-slate-50 dark:bg-slate-700">
                 <span x-text="modal.type === 'error' ? '⚠️' : (modal.type === 'success' ? '✨' : 'ℹ️')"></span>
             </div>
-            <h3 class="text-xl font-black text-slate-800 dark:text-white mb-2" x-text="modal.title"></h3>
-            <div class="text-slate-500 dark:text-slate-300 font-bold text-sm mb-6 leading-relaxed whitespace-pre-line" x-text="modal.body"></div>
+            <h3 class="text-xl font-black text-slate-800 dark:text-white mb-3" x-text="modal.title"></h3>
             
-            <template x-if="modal.type === 'share' || modal.type === 'certificate'">
-                <div id="shareResult" class="mb-6 rounded-2xl overflow-hidden shadow-lg border-4 border-slate-50 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 min-h-[200px]"></div>
-            </template>
+            <div id="shareResult" class="mb-6 rounded-2xl overflow-hidden shadow-lg border-2 border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 min-h-[50px] empty:hidden"></div>
             
-            <button @click="closeModal" class="w-full py-3.5 bg-slate-800 dark:bg-slate-700 text-white rounded-2xl font-bold shadow-lg transition-all active:scale-95 text-sm">關閉</button>
+            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-6 whitespace-pre-line" x-text="modal.body"></p>
+            
+            <div x-show="modal.type === 'shareOption'" class="grid grid-cols-2 gap-3 mb-2">
+                <button @click="generateImage()" class="py-3 bg-pink-500 text-white rounded-xl font-bold text-xs shadow-lg hover:bg-pink-600 transition-colors">生成圖片</button>
+                <button @click="copyText()" class="py-3 bg-slate-700 text-white rounded-xl font-bold text-xs shadow-lg hover:bg-slate-800 transition-colors">複製文字</button>
+            </div>
+
+            <div x-show="modal.type === 'appShare'" class="grid grid-cols-2 gap-3 mb-2">
+                <button @click="shareToFB()" class="py-3 bg-[#1877F2] text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1">Facebook</button>
+                <button @click="shareToLine()" class="py-3 bg-[#06C755] text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1">Line</button>
+                <button @click="copyUrl()" class="py-3 bg-slate-700 text-white rounded-xl font-bold text-xs col-span-2">複製網址</button>
+            </div>
+
+            <button x-show="modal.type !== 'shareOption'" @click="closeModal" class="w-full py-3.5 bg-slate-900 dark:bg-white dark:text-slate-900 text-white rounded-2xl font-bold shadow-lg mt-2 active:scale-95 transition-transform">關閉</button>
         </div>
     </div>
 
     <div x-show="showSettingsModal" class="fixed inset-0 z-[90] flex items-center justify-center bg-black/40 backdrop-blur-sm p-6" x-transition.opacity x-cloak>
-        <div @click.outside="showSettingsModal = false" class="bg-white/95 dark:bg-slate-800/95 backdrop-blur-2xl rounded-[2.5rem] max-w-sm w-full shadow-2xl overflow-hidden animate-slide-up border border-white dark:border-slate-700 flex flex-col max-h-[80vh]">
-            <div class="p-6 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 flex justify-between items-center shrink-0">
-                <h3 class="font-black text-lg text-slate-800 dark:text-white">系統設定</h3>
-                <button @click="showSettingsModal = false" class="w-8 h-8 rounded-full bg-slate-200/50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 flex items-center justify-center hover:bg-slate-200 transition-colors">✕</button>
+        <div @click.outside="showSettingsModal = false" class="bg-white dark:bg-slate-900 rounded-[2.5rem] max-w-sm w-full p-6 shadow-2xl animate-slide-up border border-white/20">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black text-slate-800 dark:text-white">系統設定</h3>
+                <button @click="showSettingsModal = false" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">✕</button>
             </div>
             
-            <div class="p-6 space-y-3 overflow-y-auto custom-scrollbar">
-                 <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest pl-2">外觀與體驗</div>
-                 
-                 <div class="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-50 dark:border-slate-700">
+            <div class="space-y-4">
+                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest pl-1">外觀體驗</div>
+                <div class="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl">
                     <div class="flex items-center gap-3">
-                         <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-yellow-400">🌙</div>
-                         <div class="font-bold text-sm text-slate-700 dark:text-slate-200">深色模式</div>
+                        <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 text-sm">🌙</div>
+                        <span class="font-bold text-sm dark:text-white">深色模式</span>
                     </div>
-                    <button @click="toggleDarkMode" class="w-12 h-7 rounded-full transition-colors duration-300 relative px-1" :class="settings.darkMode ? 'bg-purple-600' : 'bg-slate-200'">
-                        <div class="w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-300" :class="settings.darkMode ? 'translate-x-5' : 'translate-x-0'"></div>
-                    </button>
+                    <label for="dark-toggle" class="flex items-center cursor-pointer relative">
+                        <input type="checkbox" id="dark-toggle" class="sr-only toggle-checkbox" x-model="settings.darkMode" @change="saveSettings">
+                        <div class="w-12 h-7 bg-slate-200 rounded-full toggle-label transition-colors duration-300"></div>
+                        <div class="w-5 h-5 bg-white rounded-full absolute top-1 left-1 transition-transform duration-300 transform" :class="settings.darkMode ? 'translate-x-5' : ''"></div>
+                    </label>
+                </div>
+                <div class="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center text-pink-500 text-sm">🎵</div>
+                        <span class="font-bold text-sm dark:text-white">音效開關</span>
+                    </div>
+                    <label for="sound-toggle" class="flex items-center cursor-pointer relative">
+                        <input type="checkbox" id="sound-toggle" class="sr-only toggle-checkbox" x-model="settings.sound" @change="saveSettings">
+                        <div class="w-12 h-7 bg-slate-200 rounded-full toggle-label transition-colors duration-300"></div>
+                        <div class="w-5 h-5 bg-white rounded-full absolute top-1 left-1 transition-transform duration-300 transform" :class="settings.sound ? 'translate-x-5' : ''"></div>
+                    </label>
+                </div>
+                <div class="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-sm">🐢</div>
+                        <span class="font-bold text-sm dark:text-white">省電模式 (減弱動畫)</span>
+                    </div>
+                    <label for="motion-toggle" class="flex items-center cursor-pointer relative">
+                        <input type="checkbox" id="motion-toggle" class="sr-only toggle-checkbox" x-model="settings.reduceMotion" @change="saveSettings">
+                        <div class="w-12 h-7 bg-slate-200 rounded-full toggle-label transition-colors duration-300"></div>
+                        <div class="w-5 h-5 bg-white rounded-full absolute top-1 left-1 transition-transform duration-300 transform" :class="settings.reduceMotion ? 'translate-x-5' : ''"></div>
+                    </label>
                 </div>
 
-                <div class="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-50 dark:border-slate-700">
+                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest pl-1 mt-2">系統</div>
+                <div class="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl" @click="showChangelog">
                     <div class="flex items-center gap-3">
-                         <div class="w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-900 flex items-center justify-center text-pink-500">🎵</div>
-                         <div class="font-bold text-sm text-slate-700 dark:text-slate-200">音效開關</div>
+                        <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 text-sm">📜</div>
+                        <span class="font-bold text-sm dark:text-white">更新日誌</span>
                     </div>
-                    <button @click="toggleSound" class="w-12 h-7 rounded-full transition-colors duration-300 relative px-1" :class="settings.sound ? 'bg-green-400' : 'bg-slate-200'">
-                        <div class="w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-300" :class="settings.sound ? 'translate-x-5' : 'translate-x-0'"></div>
-                    </button>
-                </div>
-
-                <div class="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-50 dark:border-slate-700">
-                    <div class="flex items-center gap-3">
-                         <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-500">🐢</div>
-                         <div class="font-bold text-sm text-slate-700 dark:text-slate-200">省電模式 (減弱動畫)</div>
-                    </div>
-                    <button @click="toggleReduceMotion" class="w-12 h-7 rounded-full transition-colors duration-300 relative px-1" :class="settings.reduceMotion ? 'bg-blue-500' : 'bg-slate-200'">
-                        <div class="w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-300" :class="settings.reduceMotion ? 'translate-x-5' : 'translate-x-0'"></div>
-                    </button>
+                    <button class="px-3 py-1 bg-white dark:bg-slate-700 text-xs font-bold rounded-lg shadow-sm">查看</button>
                 </div>
                 
-                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest pl-2 mt-2">系統</div>
-
-                <div class="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-50 dark:border-slate-700" x-show="deferredPrompt">
+                <div class="flex justify-between items-center p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-100 dark:border-red-800/30">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-500">📱</div>
-                        <div class="font-bold text-sm text-slate-700 dark:text-slate-200">安裝到主畫面</div>
+                        <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-500 text-sm">🧹</div>
+                        <span class="font-bold text-sm text-red-600 dark:text-red-300">重置應用程式</span>
                     </div>
-                    <button @click="installPWA" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-full hover:bg-green-100 text-slate-600 dark:text-slate-300 transition-colors">安裝</button>
+                    <button @click="resetApp" class="px-3 py-1 bg-white dark:bg-red-800 text-xs font-bold text-red-500 dark:text-white rounded-lg shadow-sm">執行</button>
                 </div>
 
-                <div class="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-50 dark:border-slate-700">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center text-orange-500">📜</div>
-                        <div class="font-bold text-sm text-slate-700 dark:text-slate-200">更新日誌</div>
-                    </div>
-                    <button @click="showChangelog" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-full hover:bg-orange-100 text-slate-600 dark:text-slate-300 transition-colors">查看</button>
-                </div>
-
-                <div class="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl shadow-sm border border-red-100 dark:border-red-900/30">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-red-100 dark:bg-red-800 flex items-center justify-center text-red-500 dark:text-white">🧹</div>
-                        <div class="font-bold text-sm text-red-700 dark:text-red-200">重置應用程式</div>
-                    </div>
-                    <button @click="resetApp" class="px-3 py-1.5 bg-white dark:bg-red-900 text-xs font-bold rounded-full hover:bg-red-200 text-red-500 dark:text-red-200 transition-colors">執行</button>
-                </div>
-
-                <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 text-center mt-4">
-                    <div class="text-[10px] text-slate-400 mb-1 font-bold">版本 v5.0.0</div>
-                    <div class="text-xs font-black text-slate-700 dark:text-slate-300">管理員自製</div>
-                </div>
+                <button @click="openAppShare()" class="w-full py-3 bg-slate-900 dark:bg-white dark:text-slate-900 text-white rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform mt-4">分享此網站 📤</button>
             </div>
-        </div>
-    </div>
-
-    <div id="shareCardTemplate" class="off-screen-render flex-col items-center justify-center bg-slate-900 text-white p-16 w-[800px] h-[1000px]">
-         <div class="absolute inset-0 bg-gradient-to-br from-pink-500 via-purple-600 to-indigo-900 opacity-90"></div>
-         <div class="relative z-10 bg-white/95 backdrop-blur-xl text-slate-900 p-16 rounded-[4rem] shadow-2xl w-full text-center border-[12px] border-white/20 flex flex-col items-center justify-center h-full">
-             <img src="./images/basic/icon.png" class="w-32 h-32 rounded-[2.5rem] mb-10 shadow-2xl border-4 border-white">
-             <div class="inline-block px-6 py-2 rounded-full bg-pink-100 text-pink-600 text-lg font-black mb-8 tracking-widest">鹿 QA 粉絲站</div>
-             <h2 id="scQ" class="text-4xl font-black mb-10 leading-snug px-4"></h2>
-             <div class="w-24 h-2 bg-slate-100 rounded-full mx-auto mb-10"></div>
-             <p id="scA" class="text-3xl font-bold text-slate-600 leading-relaxed px-4"></p>
-         </div>
-    </div>
-
-    <div id="idCardTemplate" class="off-screen-render flex-col justify-between font-sans text-white bg-slate-900 relative overflow-hidden w-[800px] h-[1200px]">
-        <img src="./images/backgrounds/bg16.jpg" class="absolute inset-0 w-full h-full object-cover" crossorigin="anonymous">
-        <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/90"></div>
-        <div class="relative z-20 p-16 pt-20">
-             <div class="flex items-center gap-8">
-                 <img src="./images/basic/icon.png" class="w-32 h-32 rounded-full border-[6px] border-white/50 shadow-2xl">
-                 <div>
-                     <div class="text-lg font-black tracking-[0.4em] opacity-80 mb-2">OFFICIAL FAN</div>
-                     <div class="text-6xl font-black tracking-widest drop-shadow-lg">麋鹿認證</div>
-                 </div>
-             </div>
-        </div>
-        <div class="relative z-20 p-16 pb-24">
-            <div class="mb-16">
-                <div class="text-xl font-bold tracking-[0.3em] opacity-70 mb-4 uppercase border-b-2 border-white/30 pb-4 inline-block">粉絲暱稱</div>
-                <div class="text-8xl font-black tracking-tight drop-shadow-2xl" x-text="idCardName"></div>
-            </div>
-            <div class="flex justify-between items-end">
-                <div>
-                    <div class="text-lg font-bold tracking-[0.3em] opacity-70 mb-2">認證編號</div>
-                    <div class="text-5xl font-mono font-bold tracking-widest text-pink-300" x-text="generatedIdNumber"></div>
-                </div>
-                <div class="text-right">
-                    <div class="text-lg font-bold tracking-[0.3em] opacity-70 mb-2">認證日期</div>
-                    <div class="text-3xl font-mono opacity-90" x-text="new Date().toLocaleDateString('zh-TW')"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="examPaperTemplate" class="off-screen-render flex-col justify-center items-center font-sans text-slate-800 bg-[#fffbf0] relative overflow-hidden p-16 border-[30px] border-double border-[#d4af37] w-[1000px] h-[750px]">
-        <img src="./images/backgrounds/bg16.jpg" class="absolute inset-0 w-full h-full object-cover opacity-20" crossorigin="anonymous">
-        <div class="absolute inset-0 bg-white/70"></div>
-        <div class="text-center z-20 relative flex flex-col items-center justify-center h-full">
-            <div class="text-6xl font-black tracking-[0.5em] text-[#d4af37] mb-10 drop-shadow-md">成績證明</div>
-            <div class="text-3xl font-bold text-slate-500 mb-6">茲證明</div>
-            <div class="text-7xl font-black text-slate-900 mb-8 underline decoration-4 decoration-pink-300 underline-offset-8" x-text="quizTakerName"></div>
-            <div class="text-3xl font-bold text-slate-500 mb-10">參加「麋鹿大會考」獲得</div>
-            <div class="flex justify-center items-center gap-6 mb-12">
-                <span class="text-[10rem] font-black text-pink-500 drop-shadow-xl" x-text="quizScore * 20"></span>
-                <span class="text-5xl font-bold text-slate-400 self-end mb-6">分</span>
-            </div>
-            <div class="inline-block px-10 py-4 bg-[#d4af37] text-white text-2xl font-bold rounded-full tracking-widest shadow-lg">
-                <span x-text="quizScore === 5 ? '🏆 超級鐵粉' : (quizScore >= 3 ? '🥈 資深麋鹿' : '🥉 努力加油')"></span>
-            </div>
+            <div class="text-center mt-6 text-[10px] text-slate-400 font-mono">v7.0.0 · wangleoncom.github.io</div>
         </div>
     </div>
 
     <script>
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
-        function playTone(type = 'success') {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            
-            if (type === 'click') {
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0.02, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.05);
-            } else if (type === 'success') {
-                oscillator.type = 'triangle';
-                oscillator.frequency.setValueAtTime(500, audioCtx.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
-                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.3);
+        // AI Brain Logic (SmartDeer Engine)
+        class SmartDeer {
+            constructor() {
+                this.synonyms = {
+                    "多高": "身高", "多重": "體重", "胖": "體重", "瘦": "體重", 
+                    "住哪": "家鄉", "哪裡人": "家鄉", "開台": "直播", "IG": "Instagram", 
+                    "抖音": "TikTok", "賴": "Line", "幾歲": "年紀", "生日": "年紀",
+                    "洗澡": "洗頭", "男友": "男朋友", "對象": "男朋友"
+                };
+                this.context = null;
+            }
+            process(query) {
+                let processed = query.toLowerCase();
+                for (const [key, value] of Object.entries(this.synonyms)) {
+                    if (processed.includes(key)) processed += " " + value;
+                }
+                return processed;
+            }
+            analyze(results, query) {
+                if (!results || results.length === 0) return { reply: "這個問題考倒麋鹿了...🦌\n換個關鍵字試試看？", accuracy: 0 };
+                const best = results[0];
+                const acc = Math.round((1 - best.score) * 100);
+                
+                // Conversational Logic
+                if (acc > 45) return { reply: best.item.a, accuracy: acc };
+                if (acc > 25) return { reply: `我不確定是不是這個，你是想問「${best.item.q}」嗎？\n\n${best.item.a}`, accuracy: acc };
+                return { reply: "抱歉，我好像沒聽懂...🤔\n您可以試試看搜尋「身高」、「直播」之類的關鍵字喔！", accuracy: acc };
             }
         }
 
-        window.onerror = function(msg, url, lineNo, columnNo, error) {
-            const app = document.querySelector('[x-data]').__x.$data;
-            if(app && app.showModal) app.showModal('系統錯誤', `代碼：${lineNo}\n訊息：${msg}`, 'error');
-            return true;
-        };
-
-        window.onunhandledrejection = function(event) {
-             const app = document.querySelector('[x-data]').__x.$data;
-             if(app && app.showModal) app.showModal('連線錯誤', '請檢查網路連線或稍後再試。', 'error');
-        };
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(type = 'success') {
+            const s = JSON.parse(localStorage.getItem('deer_settings') || '{}');
+            if (!s.sound) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            if (type === 'click') { osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1); }
+            else { osc.type = 'triangle'; osc.frequency.setValueAtTime(500, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3); }
+            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+        }
 
         function deerApp() {
             return {
-                appVersion: '5.0.0',
-                isLoading: true,
-                isProcessing: false,
-                loadProgress: 0,
-                currentTab: 'home',
-                scrollY: 0,
-                search: '',
-                qaData: [],
-                currentPage: 1,
-                itemsPerPage: 20,
-                flippedCards: [],
-                chatInput: '',
-                chatHistory: [{ id: 1, text: "嗨！我是 AI 麋鹿 🦌\n有什麼關於主播的問題都可以問我！", isUser: false, accuracy: 100, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }],
-                isTyping: false,
-                isListening: false,
-                quizStarted: false,
-                quizTakerName: '',
-                currentQuizIndex: 0,
-                currentQuestion: null,
-                currentOptions: [],
-                hasAnswered: false,
-                quizScore: 0,
-                currentQuizSet: [],
-                selectedQuizBg: '', 
-                idCardName: '',
-                selectedBg: './images/backgrounds/bg16.jpg',
-                generatedIdNumber: 'D' + Math.floor(Math.random() * 10000).toString().padStart(4, '0'),
-                showSettingsModal: false,
-                settings: { sound: true, itemsPerPage: 20, darkMode: false, reduceMotion: false },
-                modal: { isOpen: false, title: '', body: '', type: 'info' },
-                easterEggCount: 0,
-                countdownDays: 0,
+                appVersion: '7.0.0',
+                isLoading: true, isProcessing: false, loadProgress: 0,
+                currentTab: 'home', scrollY: 0, search: '', flippedCards: [], currentPage: 1, itemsPerPage: 12,
+                chatInput: '', isTyping: false, isListening: false,
+                chatHistory: [{ id: 1, text: "嗨！我是 AI 麋鹿 🦌\n我有更聰明的大腦了，問我看看吧！", isUser: false, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) }],
+                quizStarted: false, quizTakerName: '', currentQuizIndex: 0, quizScore: 0, hasAnswered: false,
+                idCardName: '', selectedBg: '', backgrounds: [], generatedIdNumber: 'D'+Math.floor(Math.random()*9000+1000),
+                showSettingsModal: false, settings: { sound: true, darkMode: false, reduceMotion: false, itemsPerPage: 20 },
+                modal: { isOpen: false, title: '', body: '', type: '' },
+                brain: new SmartDeer(),
+                shareItem: null,
+                tabs: [{id: 'home', label: '首頁', icon: '🏠'}, {id: 'ai', label: 'AI', icon: '🤖'}, {id: 'timeline', label: '大事記', icon: '📅'}, {id: 'idcard', label: '認證', icon: '🪪'}, {id: 'quiz', label: '會考', icon: '📝'}],
+                timelineEvents: [
+                    { date: '2021/11/29', title: 'TikTok 初登場', desc: '開始在 TikTok 上發布貼文。', ts: new Date('2021/11/29').getTime() },
+                    { date: '2024/10/29', title: '一萬名粉絲達成', desc: '這是一個重要里程碑。', ts: new Date('2024/10/29').getTime() },
+                    { date: '2025/03/17', title: '十萬名粉絲達成', desc: '官方認證十萬大軍！', ts: new Date('2025/03/17').getTime() }
+                ],
                 deferredPrompt: null,
-                recognition: null,
-                
-                tabs: [
-                    {id: 'home', label: '首頁', icon: '🏠'},
-                    {id: 'ai', label: 'AI 麋鹿', icon: '🤖'},
-                    {id: 'quiz', label: '大會考', icon: '📝'},
-                    {id: 'idcard', label: '認證', icon: '🪪'}
-                ],
-                synonyms: {
-                    "多高": "身高", "多重": "體重", "胖": "體重", "瘦": "體重", 
-                    "哪裡人": "家鄉", "住哪": "家鄉", "IG": "社群", "開台": "直播", 
-                    "賴": "Line", "幾歲": "年紀", "生日": "年紀", "對象": "男朋友",
-                    "洗澡": "洗頭", "男友": "男朋友"
-                },
-                fallbackReplies: [
-                    "這個問題考倒麋鹿了 🦌💦\n換個關鍵字試試看？",
-                    "抱歉，我不太確定這個問題的答案 🤔",
-                    "嗯... 關於這點我好像還沒學到 > <",
-                    "你可以試試看搜尋「身高」、「生日」或「直播」喔！"
-                ],
-                greetings: ["嗨", "你好", "哈囉", "hello", "hi"],
 
                 async initApp() {
-                    this.calculateCountdown();
-                    const savedSettings = localStorage.getItem('deer_settings');
-                    if(savedSettings) this.settings = JSON.parse(savedSettings);
-
-                    window.addEventListener('scroll', () => this.scrollY = window.scrollY);
+                    const saved = localStorage.getItem('deer_settings');
+                    if(saved) this.settings = JSON.parse(saved);
                     window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); this.deferredPrompt = e; });
-
-                    this.loadDB();
-                    this.initSpeechRecognition();
+                    window.addEventListener('scroll', () => this.scrollY = window.scrollY);
                     
-                    const preloadImage = new Image();
-                    preloadImage.src = './images/backgrounds/bg16.jpg';
-
-                    let progress = 0;
-                    const interval = setInterval(() => {
-                        progress += Math.random() * 15;
-                        if(progress > 95) clearInterval(interval);
-                        this.loadProgress = Math.min(progress, 95);
-                    }, 100);
-
-                    setTimeout(() => { 
-                        clearInterval(interval);
-                        this.loadProgress = 100;
-                        setTimeout(() => this.isLoading = false, 500);
-                    }, 1500);
+                    this.loadDB();
+                    await this.loadBackgrounds();
+                    
+                    let p = 0;
+                    const int = setInterval(() => { p += 10; this.loadProgress = p; if(p>=100) { clearInterval(int); setTimeout(()=>this.isLoading=false, 500); } }, 100);
                 },
 
-                calculateCountdown() {
-                    const today = new Date();
-                    const currentYear = today.getFullYear();
-                    let target = new Date(currentYear, 9, 3); 
-                    if (today > target) target = new Date(currentYear + 1, 9, 3);
-                    const diff = target - today;
-                    this.countdownDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
-                },
-
-                handleTitleClick() {
-                    this.easterEggCount++;
-                    this.playSound('click');
-                    if (this.easterEggCount >= 10) {
-                        this.playSound('success');
-                        confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
-                        this.showModal('隱藏彩蛋', '🎉 恭喜發現隱藏彩蛋！', 'success');
-                        this.easterEggCount = 0;
-                    }
-                },
-
-                playSound(type) { if(this.settings.sound) playTone(type); },
-                toggleSound() { this.settings.sound = !this.settings.sound; this.saveSettings(); if(this.settings.sound) this.playSound('success'); },
-                toggleDarkMode() { this.settings.darkMode = !this.settings.darkMode; this.saveSettings(); },
-                toggleReduceMotion() { this.settings.reduceMotion = !this.settings.reduceMotion; this.saveSettings(); },
                 saveSettings() { localStorage.setItem('deer_settings', JSON.stringify(this.settings)); },
                 
-                resetApp() {
-                    if(confirm("確定要重置應用程式嗎？\n這將清除所有快取和設定。")) {
-                        localStorage.clear();
-                        if('caches' in window) {
-                            caches.keys().then(names => {
-                                for (let name of names) caches.delete(name);
-                            });
-                        }
-                        if ('serviceWorker' in navigator) {
-                            navigator.serviceWorker.getRegistrations().then(registrations => {
-                                for(let registration of registrations) registration.unregister();
-                            });
-                        }
-                        window.location.reload();
-                    }
-                },
-
-                installPWA() {
-                    if (this.deferredPrompt) {
-                        this.deferredPrompt.prompt();
-                        this.deferredPrompt.userChoice.then((choiceResult) => {
-                            if (choiceResult.outcome === 'accepted') this.deferredPrompt = null;
-                        });
-                    }
-                },
-
-                showChangelog() {
-                    this.showSettingsModal = false;
-                    this.showModal('更新日誌 v5.0', 
-                        '🎉 大改版登場！\n\n✨ 新增深色模式 (Dark Mode)\n✨ 新增省電/減弱動畫模式\n✨ 新增首頁成長大事記\n✨ AI 聊天室全新升級：\n   - 擬真輸入中動畫\n   - 語音對話功能 (Voice-to-Voice)\n   - 介面鎖定優化\n✨ 新增應用程式重置功能', 
-                        'info');
-                },
-                
                 loadDB() {
-                    let rawData = window.deerQA_DB || [];
-                    this.qaData = rawData.map((item, index) => ({ ...item, id: index + 1 }));
-                    this.fuseInstance = new Fuse(this.qaData, { 
-                        includeScore: true, 
-                        threshold: 0.35, 
-                        ignoreLocation: true,
-                        keys: [ { name: 'q', weight: 0.7 }, { name: 'tags', weight: 0.2 }, { name: 'a', weight: 0.1 } ] 
+                    const raw = window.deerQA_DB || [];
+                    this.qaData = raw.map((d, i) => ({ ...d, id: i + 1 }));
+                    // Stronger Search: Low threshold = strict, but synonym processing helps matches
+                    this.fuse = new Fuse(this.qaData, { includeScore: true, threshold: 0.3, distance: 100, keys: ['q', 'tags', 'a'] });
+                },
+
+                async loadBackgrounds() {
+                    for(let i=1; i<=20; i++) {
+                        const path = `./images/backgrounds/bg${i}.jpg`;
+                        const ok = await fetch(path, { method: 'HEAD' }).then(r => r.ok).catch(() => false);
+                        if(ok) this.backgrounds.push(path);
+                    }
+                    if(!this.backgrounds.length) this.backgrounds = ['./images/basic/icon.png'];
+                    this.selectedBg = this.backgrounds[0];
+                },
+
+                // --- UI Logic ---
+                changeTab(id) { this.currentTab = id; this.search = ''; this.currentPage = 1; window.scrollTo(0,0); },
+                toggleCard(id) { if(this.flippedCards.includes(id)) this.flippedCards = this.flippedCards.filter(i => i !== id); else this.flippedCards.push(id); playTone('click'); },
+                
+                get paginatedData() {
+                    // Strict Search Logic
+                    let d = this.qaData;
+                    if(this.search) {
+                        // Using Fuse with Brain pre-processing for smarter matching
+                        const q = this.brain.process(this.search);
+                        const results = this.fuse.search(q);
+                        // Filter strict matches only
+                        d = results.filter(r => r.score < 0.4).map(r => r.item);
+                    }
+                    const start = (this.currentPage-1)*parseInt(this.settings.itemsPerPage);
+                    return d.slice(start, start + parseInt(this.settings.itemsPerPage));
+                },
+                get totalPages() { 
+                    const len = this.search ? this.paginatedData.length : this.qaData.length; // Approximate fix for logic
+                    let realLen = this.qaData.length;
+                    if(this.search) {
+                         const q = this.brain.process(this.search);
+                         realLen = this.fuse.search(q).filter(r => r.score < 0.4).length;
+                    }
+                    return Math.ceil(realLen / parseInt(this.settings.itemsPerPage)) || 1; 
+                },
+                get timelineWithGaps() {
+                    const events = [...this.timelineEvents].sort((a,b) => a.ts - b.ts);
+                    return events.map((e, i) => {
+                        let visualGap = 40;
+                        if (i < events.length - 1) {
+                            const diff = (events[i+1].ts - e.ts) / 86400000;
+                            visualGap = Math.min(Math.max(diff / 5, 40), 150);
+                        }
+                        return { ...e, visualGap };
                     });
                 },
 
-                showModal(title, body, type = 'info') { this.modal = { isOpen: true, title, body, type }; },
-                closeModal() { this.modal.isOpen = false; },
-                openSettings() { this.showSettingsModal = true; this.playSound('click'); },
-                changeTab(id) { this.currentTab = id; window.scrollTo({top:0, behavior:'smooth'}); },
-                
-                get paginatedData() {
-                    let data = this.qaData;
-                    if(this.search) {
-                         const processedSearch = this.preprocessInput(this.search);
-                         data = this.fuseInstance.search(processedSearch).map(r => r.item);
-                    }
-                    const start = (this.currentPage - 1) * parseInt(this.settings.itemsPerPage);
-                    return data.slice(start, start + parseInt(this.settings.itemsPerPage));
-                },
-                get totalPages() { 
-                    const count = this.search ? this.fuseInstance.search(this.preprocessInput(this.search)).length : this.qaData.length;
-                    return Math.ceil(count / parseInt(this.settings.itemsPerPage)); 
-                },
-                
                 handleSearch() { this.currentPage = 1; },
-                prevPage() { if(this.currentPage > 1) { this.currentPage--; window.scrollTo({top:0}); this.playSound('click'); } },
-                nextPage() { if(this.currentPage < this.totalPages) { this.currentPage++; window.scrollTo({top:0}); this.playSound('click'); } },
-                toggleCard(id) { if(this.flippedCards.includes(id)) this.flippedCards = this.flippedCards.filter(cid => cid !== id); else this.flippedCards.push(id); this.playSound('click'); },
-                
-                handleChatEnter(e) { if (e.isComposing || e.keyCode === 229) return; this.sendMessage(); },
-                
-                preprocessInput(input) {
-                    let processed = input.toLowerCase();
-                    for (const [key, value] of Object.entries(this.synonyms)) {
-                        if (processed.includes(key)) processed += " " + value;
-                    }
-                    return processed;
+                prevPage() { if(this.currentPage > 1) { this.currentPage--; window.scrollTo(0,0); playTone('click'); } },
+                nextPage() { if(this.currentPage < this.totalPages) { this.currentPage++; window.scrollTo(0,0); playTone('click'); } },
+
+                // --- Chat Logic ---
+                handleChatEnter(e) { 
+                    if (e.isComposing || e.keyCode === 229) return; 
+                    // PC: Enter sends, Shift+Enter new line. Mobile: Go button sends.
+                    // "Double Enter" logic is confusing UX, implemented standard IME-safe Enter.
+                    this.sendMessage(); 
                 },
-
-                initSpeechRecognition() {
-                    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                        this.recognition = new SpeechRecognition();
-                        this.recognition.lang = 'zh-TW';
-                        this.recognition.interimResults = false;
-                        this.recognition.maxAlternatives = 1;
-
-                        this.recognition.onresult = (event) => {
-                            const last = event.results.length - 1;
-                            const text = event.results[last][0].transcript;
-                            this.chatInput = text;
-                            this.sendMessage(true); 
-                        };
-                        
-                        this.recognition.onspeechend = () => {
-                            this.stopVoiceInput();
-                        };
-                        
-                        this.recognition.onerror = (event) => {
-                            this.stopVoiceInput();
-                        };
-                    }
-                },
-
-                startVoiceInput() {
-                    if (this.recognition) {
-                        try {
-                            this.isListening = true;
-                            this.recognition.start();
-                            this.playSound('click');
-                        } catch(e) {}
-                    } else {
-                        this.showModal('不支援', '您的瀏覽器不支援語音輸入功能', 'error');
-                    }
-                },
-
-                stopVoiceInput() {
-                    if (this.recognition) {
-                        this.isListening = false;
-                        this.recognition.stop();
-                    }
-                },
-
-                speakResponse(text) {
-                    if (!this.settings.sound || !('speechSynthesis' in window)) return;
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = 'zh-TW';
-                    utterance.rate = 1;
-                    utterance.pitch = 1.1; 
-                    window.speechSynthesis.speak(utterance);
-                },
-
-                sendMessage(isVoice = false) {
+                async sendMessage() {
                     if(!this.chatInput.trim()) return;
-                    const originalText = this.chatInput.trim();
-                    const nowTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    const text = this.chatInput; this.chatInput = '';
+                    this.chatHistory.push({ id: Date.now(), text, isUser: true, status: 'sent', time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+                    playTone('click');
+                    this.$nextTick(() => { const c = document.getElementById('chatContainer'); c.scrollTop = c.scrollHeight; });
                     
-                    this.chatInput = '';
-                    // User Message
-                    this.chatHistory.push({id: Date.now(), text: originalText, isUser: true, status: 'sent', time: nowTime});
-                    this.playSound('click');
-                    
-                    const scrollContainer = document.getElementById('chatContainer');
-                    this.$nextTick(() => scrollContainer.scrollTop = scrollContainer.scrollHeight);
-
-                    // 1. Simulate Read Delay (1-3s)
-                    const readDelay = Math.floor(Math.random() * 2000) + 1000;
-                    
+                    // Humanize: Read delay
+                    const readDelay = Math.random() * 1000 + 500;
                     setTimeout(() => {
-                        // Mark as read
-                        const lastUserMsg = this.chatHistory[this.chatHistory.length - 1];
-                        if(lastUserMsg && lastUserMsg.isUser) lastUserMsg.status = 'read';
-                        
-                        // 2. Start Typing Animation
+                        const lastMsg = this.chatHistory[this.chatHistory.length-1];
+                        if(lastMsg.isUser) lastMsg.status = 'read';
                         this.isTyping = true;
-                        this.$nextTick(() => scrollContainer.scrollTop = scrollContainer.scrollHeight);
+                        this.$nextTick(() => document.getElementById('chatContainer').scrollTop = document.getElementById('chatContainer').scrollHeight);
+
+                        const q = this.brain.process(text);
+                        const results = this.fuse.search(q);
+                        const response = this.brain.analyze(results, text);
                         
-                        // 3. Process Response
-                        let reply = "";
-                        let acc = 0;
-                        if (this.greetings.some(g => originalText.toLowerCase().includes(g))) {
-                            reply = "嗨！我是 AI 麋鹿 🦌\n很高興見到你！想問什麼都可以喔！";
-                            acc = 100;
-                        } else {
-                            const processedText = this.preprocessInput(originalText);
-                            const results = this.fuseInstance.search(processedText);
-                            if(results.length > 0) {
-                                const best = results[0];
-                                acc = Math.round((1 - best.score) * 100);
-                                if (acc > 65) reply = best.item.a;
-                                else if (acc > 40) reply = `我不太確定...\n你是想問「${best.item.q}」嗎？\n\n${best.item.a}`;
-                                else reply = this.fallbackReplies[Math.floor(Math.random() * this.fallbackReplies.length)];
-                            } else {
-                                reply = this.fallbackReplies[Math.floor(Math.random() * this.fallbackReplies.length)];
-                            }
-                        }
-
-                        // 4. Simulate Typing Delay (based on text length)
-                        const typingDelay = Math.min(Math.max(reply.length * 50, 1000), 3000);
-
+                        // Typing delay based on length
+                        const typingTime = Math.min(response.reply.length * 50, 2000) + 500;
+                        
                         setTimeout(() => {
                             this.isTyping = false;
-                            this.chatHistory.push({
-                                id: Date.now()+1, 
-                                text: reply, 
-                                isUser: false, 
-                                accuracy: acc > 0 ? acc : null,
-                                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                            });
-                            
-                            this.playSound('success');
-                            if(isVoice) this.speakResponse(reply);
-                            
-                            this.$nextTick(() => scrollContainer.scrollTop = scrollContainer.scrollHeight);
-                        }, typingDelay);
-
+                            this.chatHistory.push({ id: Date.now()+1, text: response.reply, isUser: false, accuracy: response.accuracy, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+                            playTone('success');
+                            this.$nextTick(() => document.getElementById('chatContainer').scrollTop = document.getElementById('chatContainer').scrollHeight);
+                        }, typingTime);
                     }, readDelay);
                 },
 
-                openMsgDetail(msg) { 
-                    if(msg.accuracy) this.showModal('AI 分析', `問題匹配信心度：${msg.accuracy}%`, 'info'); 
-                    this.playSound('click'); 
+                // --- Voice ---
+                startVoice() {
+                    const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    if(!Rec) return this.showHttpError(400, "Browser does not support Speech API");
+                    this.isListening = true; this.recognition = new Rec(); this.recognition.lang = 'zh-TW';
+                    this.recognition.onresult = (e) => { this.chatInput = e.results[0][0].transcript; this.sendMessage(); };
+                    this.recognition.onend = () => { this.isListening = false; };
+                    this.recognition.start();
                 },
+                stopVoice() { this.isListening = false; if(this.recognition) this.recognition.stop(); },
 
+                // --- Quiz ---
                 startQuiz() {
-                    if(!this.quizTakerName) return this.showModal('提示', '請先輸入名字！', 'error');
-                    let allQ = window.deerQuiz_DB || [];
-                    let shuffled = [...allQ].sort(() => 0.5 - Math.random());
-                    this.currentQuizSet = shuffled.slice(0, 5);
-                    this.quizStarted = true;
-                    this.quizScore = 0;
-                    this.currentQuizIndex = 0;
-                    this.playSound('success');
+                    if(!this.quizTakerName) return this.showModal('提示', '請輸入名字');
+                    this.quizStarted = true; this.quizScore = 0; this.currentQuizIndex = 0; 
+                    this.currentQuizSet = [...window.deerQuiz_DB].sort(()=>0.5-Math.random()).slice(0,5);
                     this.loadQuestion();
                 },
-                loadQuestion() { this.hasAnswered = false; this.selectedOption = null; this.currentQuestion = this.currentQuizSet[this.currentQuizIndex]; this.currentOptions = [...this.currentQuestion.options].sort(() => 0.5 - Math.random()); },
-                checkAnswer(opt) {
-                    if(this.hasAnswered) return;
-                    this.hasAnswered = true;
-                    this.selectedOption = opt;
-                    if(opt === this.currentQuestion.a) { this.quizScore++; confetti({ origin: { y: 0.8 }, particleCount: 50 }); this.playSound('success'); } else { this.playSound('click'); }
+                loadQuestion() { this.hasAnswered = false; this.currentQuestion = this.currentQuizSet[this.currentQuizIndex]; this.currentOptions = [...this.currentQuestion.options].sort(()=>0.5-Math.random()); },
+                checkAnswer(opt) { 
+                    this.hasAnswered = true; this.selectedOption = opt; 
+                    if(opt === this.currentQuestion.a) { this.quizScore++; confetti(); playTone('success'); } else playTone('click'); 
                 },
-                nextQuestion() {
-                    this.playSound('click');
-                    if(this.currentQuizIndex < this.currentQuizSet.length - 1) {
-                        this.currentQuizIndex++;
-                        this.loadQuestion();
-                    } else {
-                        this.quizStarted = false;
-                        this.isProcessing = true;
-                        setTimeout(async () => {
-                            await this.captureElement('examPaperTemplate', 'certificate');
-                            this.isProcessing = false;
-                        }, 500);
-                    }
+                nextQuestion() { 
+                    if(this.currentQuizIndex < 4) { this.currentQuizIndex++; this.loadQuestion(); } 
+                    else { this.quizStarted = false; this.capture('examPaperTemplate', 'certificate'); } 
                 },
 
-                async generateIDCard() {
-                    if(!this.idCardName) return this.showModal('提示', '請輸入暱稱', 'error');
-                    this.isProcessing = true;
-                    this.playSound('click');
-                    setTimeout(async () => { await this.captureElement('idCardTemplate', 'share'); this.isProcessing = false; }, 100);
+                // --- ID Card ---
+                generateIDCard() { 
+                    if(!this.idCardName) return this.showModal('提示', '請輸入暱稱'); 
+                    this.capture('idCardTemplate', 'share'); 
                 },
 
-                async openShareModal(item) {
+                // --- Sharing Logic ---
+                openShareModal(item) {
+                    this.shareItem = item;
+                    this.modal = { isOpen: true, title: '分享問題', body: '請選擇分享方式', type: 'shareOption' };
+                    // Pre-fill hidden template
                     document.getElementById('scQ').innerText = item.q;
                     document.getElementById('scA').innerText = item.a;
+                    document.getElementById('shareResult').innerHTML = ''; // Clear previous
+                },
+                async generateImage() {
+                    this.capture('shareCardTemplate', 'share');
+                },
+                copyText() {
+                    const text = `Q: ${this.shareItem.q}\nA: ${this.shareItem.a}\n-- 來自 鹿QA`;
+                    navigator.clipboard.writeText(text);
+                    this.showModal('已複製', '文字已複製到剪貼簿', 'success');
+                },
+                
+                async capture(id, type) {
                     this.isProcessing = true;
-                    this.playSound('click');
-                    setTimeout(async () => { await this.captureElement('shareCardTemplate', 'share'); this.isProcessing = false; }, 100);
+                    const el = document.getElementById(id);
+                    el.classList.remove('off-screen-render'); // Make visible for capture
+                    // Slight delay to ensure rendering
+                    await new Promise(r => setTimeout(r, 100));
+                    try {
+                        const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: null });
+                        const img = canvas.toDataURL("image/png");
+                        this.modal = { isOpen: true, title: type === 'certificate' ? '成績證明' : '生成成功', body: '長按圖片即可儲存到手機', type };
+                        this.$nextTick(() => document.getElementById('shareResult').innerHTML = `<img src="${img}" class="w-full h-auto rounded-lg shadow-md">`);
+                        playTone('success');
+                    } catch(e) { this.showHttpError(500, 'Image Generation Failed'); } 
+                    finally { 
+                        el.classList.add('off-screen-render'); 
+                        this.isProcessing = false; 
+                    }
                 },
 
-                async captureElement(id, type) {
-                    const el = document.getElementById(id);
-                    try {
-                        const canvas = await html2canvas(el, { 
-                            scale: 2, 
-                            useCORS: true, 
-                            allowTaint: true,
-                            backgroundColor: null,
-                            logging: false
-                        });
-                        const img = canvas.toDataURL("image/png");
-                        this.modal.type = type;
-                        const title = type === 'certificate' ? '恭喜獲得成績證明' : '生成成功';
-                        this.showModal(title, '長按下方圖片即可儲存', type);
-                        this.$nextTick(() => { document.getElementById('shareResult').innerHTML = `<img src="${img}" class="w-full h-auto rounded-xl">`; });
-                        this.playSound('success');
-                    } catch(e) { 
-                        this.showModal('錯誤', '圖片生成失敗，請稍後再試。', 'error'); 
-                    }
-                }
+                // --- System Utils ---
+                openAppShare() { 
+                    this.modal = { isOpen: true, title: '分享網站', body: '邀請更多朋友加入鹿 QA！', type: 'appShare' }; 
+                    document.getElementById('shareResult').innerHTML = '<div class="py-8 text-6xl">🦌</div>';
+                },
+                copyUrl() { navigator.clipboard.writeText(location.href); alert('網址已複製'); },
+                shareToFB() { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(location.href)}`); },
+                shareToLine() { window.open(`https://line.me/R/msg/text/?${encodeURIComponent(location.href)}`); },
+                showChangelog() { this.showModal('更新日誌', 'v7.0.0 - 重量級改版\n✨ 全新液態介面\n✨ 強化 AI 引擎\n✨ 專業分享功能', 'info'); },
+                resetApp() { if(confirm('確定要重置？')) { localStorage.clear(); location.reload(); } },
+                installPWA() { if(this.deferredPrompt) this.deferredPrompt.prompt(); else alert('請使用瀏覽器選單安裝'); },
+                
+                showModal(t, b, type='info') { this.modal = { isOpen: true, title: t, body: b, type }; },
+                showHttpError(code, msg) { this.showModal(`Error ${code}`, msg, 'error'); },
+                closeModal() { this.modal.isOpen = false; }
             }
         }
     </script>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ld-qa-v5.0.0';
+const CACHE_NAME = 'ld-qa-v7.0.0';
 const ASSETS = [
   './',
   './index.html',
