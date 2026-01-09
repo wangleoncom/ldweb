@@ -22,20 +22,18 @@
     <script src="./quiz_db.js"></script>
     
     <script>
-        // System Override
+        // 10. 隱藏 Console 並攔截錯誤顯示為 HTTP 風格
         window.onerror = function(msg, url, line, col, error) {
             const app = document.querySelector('[x-data]').__x.$data;
-            if(app) app.showHttpError(500, `Internal Server Error: ${msg}`);
+            if(app) app.showHttpError(500, `Internal Error: ${msg}`);
             return true;
         };
         console.log = () => {}; console.warn = () => {}; console.error = () => {};
 
-        // PWA Register
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
         }
 
-        // Tailwind Config
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -44,21 +42,17 @@
                     animation: {
                         'float': 'float 8s ease-in-out infinite',
                         'blob': 'blob 15s infinite',
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'popup': 'popup 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
                         'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                        'slide-down': 'slideDown 0.3s ease-out',
                     },
                     colors: { 
-                        glass: { light: 'rgba(255, 255, 255, 0.7)', dark: 'rgba(30, 41, 59, 0.7)' },
                         brand: { pink: '#ec4899', purple: '#8b5cf6' }
                     },
                     keyframes: {
                         float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
                         blob: { "0%": { transform: "translate(0px, 0px) scale(1)" }, "33%": { transform: "translate(30px, -30px) scale(1.1)" }, "66%": { transform: "translate(-20px, 20px) scale(0.9)" }, "100%": { transform: "translate(0px, 0px) scale(1)" } },
                         popup: { "0%": { transform: "scale(0.95) opacity(0)" }, "100%": { transform: "scale(1) opacity(1)" } },
-                        slideUp: { "0%": { transform: "translateY(20px)", opacity: 0 }, "100%": { transform: "translateY(0)", opacity: 1 } },
-                        slideDown: { "0%": { transform: "translateY(-20px)", opacity: 0 }, "100%": { transform: "translateY(0)", opacity: 1 } }
+                        slideUp: { "0%": { transform: "translateY(20px)", opacity: 0 }, "100%": { transform: "translateY(0)", opacity: 1 } }
                     }
                 }
             }
@@ -68,44 +62,35 @@
         body { font-family: 'Rounded Mplus 1c', sans-serif; background-color: #f8fafc; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         .dark body { background-color: #0f172a; color: #e2e8f0; }
         
-        /* Professional Liquid Background */
+        /* 5. 專業級背景動畫 */
         .liquid-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; background: radial-gradient(circle at 50% 50%, #fdf2f8 0%, #eef2ff 100%); transition: background 0.5s; }
         .dark .liquid-bg { background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #0f172a 100%); }
         .liquid-blob { position: absolute; filter: blur(80px); opacity: 0.5; will-change: transform; mix-blend-mode: multiply; }
         .dark .liquid-blob { mix-blend-mode: screen; opacity: 0.2; }
 
-        /* Glassmorphism */
-        .glass-panel { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05); }
-        .dark .glass-panel { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3); }
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05); }
+        .dark .glass-panel { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
         
-        /* Navigation */
-        .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-top: 1px solid rgba(255, 255, 255, 0.6); }
+        .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(25px); border-top: 1px solid rgba(255, 255, 255, 0.6); }
         .dark .glass-nav { background: rgba(15, 23, 42, 0.85); border-top: 1px solid rgba(255, 255, 255, 0.1); }
 
-        /* Utilities */
         .off-screen-render { position: fixed; left: -9999px; top: 0; width: 800px; display: flex !important; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
         
-        /* Card Flip */
+        /* 2. 卡片翻轉效果 */
         .perspective-1000 { perspective: 1000px; }
         .transform-style-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
         
-        /* Chat Bubbles */
-        .bubble-user { border-radius: 20px 20px 4px 20px; }
-        .bubble-ai { border-radius: 20px 20px 20px 4px; }
-        
-        /* iOS Toggle Switch */
         .toggle-checkbox:checked { right: 0; border-color: #4ade80; }
         .toggle-checkbox:checked + .toggle-label { background-color: #4ade80; }
         
         .watermark { position: absolute; bottom: 20px; left: 0; width: 100%; text-align: center; font-size: 14px; font-weight: bold; color: rgba(0,0,0,0.3); font-family: monospace; z-index: 50; }
         .dark .watermark { color: rgba(255,255,255,0.3); }
         
-        /* Safe Area */
         .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 20px); }
         [x-cloak] { display: none !important; }
     </style>
@@ -119,7 +104,7 @@
             <div class="absolute inset-0 rounded-full border-[6px] border-pink-100 dark:border-slate-700 animate-ping"></div>
             <img src="./images/basic/icon.png" class="relative z-10 w-full h-full rounded-full object-cover shadow-2xl border-4 border-white dark:border-slate-800">
         </div>
-        <div class="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-600 tracking-wider">鹿 QA v7.0</div>
+        <div class="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-600 tracking-wider">鹿 QA v7.1</div>
         <div class="text-[10px] font-bold text-slate-400 mt-2 tracking-[0.3em]">SYSTEM INITIALIZING</div>
     </div>
 
@@ -148,12 +133,12 @@
                 </div>
             </div>
             <button @click="showSettingsModal = true" class="w-10 h-10 rounded-full bg-white/60 dark:bg-slate-700/60 flex items-center justify-center border border-white dark:border-slate-500 hover:bg-white dark:hover:bg-slate-600 transition-colors shadow-sm">
-                <svg class="w-5 h-5 text-slate-600 dark:text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                ⚙️
             </button>
         </div>
     </nav>
 
-    <main class="flex-grow pt-24 pb-28 px-4 w-full max-w-6xl mx-auto">
+    <main class="flex-grow pt-24 pb-24 px-4 w-full max-w-6xl mx-auto">
         
         <div x-show="currentTab === 'home'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4">
             <div class="glass-panel rounded-[2.5rem] p-6 mb-8 relative overflow-hidden flex flex-col md:flex-row items-center gap-6 group">
@@ -162,7 +147,7 @@
                 <div class="text-center md:text-left z-10 flex-1">
                     <h2 class="text-3xl font-black text-slate-800 dark:text-white mb-2">鹿 <span class="text-pink-500">🦌</span></h2>
                     <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-4">
-                        天秤座｜170cm｜42kg<br>收錄所有關於鹿的小秘密與直播常見問題
+                        10/03 天秤座｜170cm｜42kg<br>收錄所有關於鹿的小秘密與直播常見問題
                     </p>
                     <div class="flex justify-center md:justify-start gap-3">
                         <a href="https://www.tiktok.com/@ld.1003_" target="_blank" class="px-5 py-2.5 bg-black text-white rounded-full flex items-center gap-2 hover:scale-105 transition-transform shadow-lg">
@@ -177,35 +162,32 @@
                 </div>
             </div>
 
-            <div class="relative mb-8 z-20">
+            <div class="relative mb-8 z-20 max-w-5xl mx-auto">
                 <input type="text" x-model="search" @input="handleSearch" placeholder="搜尋問題... (例如: 身高、直播)" 
-                       class="w-full pl-12 pr-6 py-4 rounded-2xl bg-white/70 dark:bg-slate-800/70 border-2 border-transparent focus:border-pink-300 dark:focus:border-purple-500 focus:bg-white dark:focus:bg-slate-900 shadow-lg outline-none transition-all text-sm font-bold placeholder-slate-400 text-slate-800 dark:text-white backdrop-blur-md">
+                       class="w-full pl-12 pr-6 py-4 rounded-2xl bg-white/60 border border-white/40 focus:border-pink-300 focus:bg-white/90 focus:ring-4 focus:ring-pink-100/50 shadow-sm outline-none transition-all text-base font-bold placeholder-slate-400 text-slate-800 backdrop-blur-md">
                 <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
 
-            <div class="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-4">
+            <div class="grid gap-5 pb-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 <template x-for="item in paginatedData" :key="item.id">
-                    <div class="group h-52 perspective-1000 cursor-pointer" @click="toggleCard(item.id)">
-                        <div class="relative w-full h-full transform-style-3d transition-transform duration-500 shadow-sm group-hover:shadow-xl rounded-[2rem]" :class="{ 'rotate-y-180': flippedCards.includes(item.id) }">
-                            <div class="absolute w-full h-full glass-panel rounded-[2rem] p-7 flex flex-col justify-between backface-hidden bg-white/70 dark:bg-slate-800/70">
+                    <div class="group h-56 perspective-1000 cursor-pointer" @click="toggleCard(item.id)">
+                        <div class="relative w-full h-full transform-style-3d transition-transform duration-500 shadow-sm hover:shadow-xl rounded-[2rem]" :class="{ 'rotate-y-180': flippedCards.includes(item.id) }">
+                            <div class="absolute w-full h-full glass-panel rounded-[2rem] p-7 flex flex-col justify-between backface-hidden bg-white/70">
                                 <div>
-                                    <div class="flex justify-between items-start mb-3">
-                                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-pink-100 text-pink-600 text-xs font-black">Q</span>
+                                    <div class="flex justify-between items-start mb-2">
+                                        <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-pink-100 text-pink-600 text-xs font-black shadow-inner">Q</span>
                                         <span class="text-[10px] font-bold text-slate-400 bg-white/50 px-2 py-1 rounded-full">#<span x-text="item.id"></span></span>
                                     </div>
-                                    <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 leading-snug" x-text="item.q"></h3>
+                                    <h3 class="text-lg font-bold text-slate-800 leading-snug line-clamp-3" x-text="item.q"></h3>
                                 </div>
-                                <div class="text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center justify-end gap-1">
-                                    點擊翻看答案 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                </div>
+                                <div class="text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">點擊翻頁看解答 ↻</div>
                             </div>
-                            <div class="absolute w-full h-full glass-panel rounded-[2rem] p-6 flex flex-col justify-between items-center backface-hidden rotate-y-180 bg-white dark:bg-slate-900 border-2 border-pink-100 dark:border-pink-900">
+                            <div class="absolute w-full h-full glass-panel rounded-[2rem] p-6 flex flex-col justify-between items-center backface-hidden rotate-y-180 bg-white/90 border-2 border-pink-200/50">
                                 <div class="w-full h-full overflow-y-auto custom-scrollbar flex items-center justify-center">
-                                    <p class="text-sm font-bold text-center text-slate-700 dark:text-slate-300 leading-relaxed" x-text="item.a"></p>
+                                    <p class="text-base font-medium text-center text-slate-700 leading-relaxed" x-text="item.a"></p>
                                 </div>
-                                <button @click.stop="openShareModal(item)" class="mt-2 w-full py-2 bg-slate-50 dark:bg-slate-800 rounded-xl text-[10px] font-bold text-slate-500 hover:bg-pink-50 hover:text-pink-600 transition-colors flex items-center justify-center gap-2">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
-                                    分享卡片
+                                <button @click.stop="openShareModal(item)" class="mt-2 px-4 py-2 bg-slate-50 rounded-full text-[10px] font-bold text-slate-500 hover:bg-pink-50 hover:text-pink-600 transition-colors shadow-sm flex items-center gap-1.5">
+                                    分享卡片 📤
                                 </button>
                             </div>
                         </div>
@@ -213,14 +195,14 @@
                 </template>
             </div>
             
-            <div class="flex justify-center items-center gap-3 mt-6">
-                <button @click="prevPage" :disabled="currentPage === 1" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center disabled:opacity-30 hover:bg-white text-slate-600 dark:text-white transition-all">←</button>
-                <div class="px-4 py-2 glass-panel rounded-xl font-bold text-slate-600 dark:text-white text-sm"><span x-text="currentPage"></span> / <span x-text="totalPages"></span></div>
-                <button @click="nextPage" :disabled="currentPage === totalPages" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center disabled:opacity-30 hover:bg-white text-slate-600 dark:text-white transition-all">→</button>
+            <div class="flex justify-center items-center gap-3 pb-8 mt-4">
+                <button @click="prevPage" :disabled="currentPage === 1" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center disabled:opacity-30 hover:bg-white text-slate-600 font-bold shadow-sm transition-all">←</button>
+                <div class="px-4 py-2 glass-panel rounded-xl font-bold text-slate-600 shadow-sm text-sm"><span x-text="currentPage"></span> / <span x-text="totalPages"></span></div>
+                <button @click="nextPage" :disabled="currentPage === totalPages" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center disabled:opacity-30 hover:bg-white text-slate-600 font-bold shadow-sm transition-all">→</button>
             </div>
         </div>
 
-        <div x-show="currentTab === 'ai'" x-cloak class="h-[75vh] flex flex-col glass-panel rounded-[2.5rem] overflow-hidden shadow-2xl relative bg-white/60 dark:bg-slate-800/60 border-white/60">
+        <div x-show="currentTab === 'ai'" x-cloak class="h-[75vh] max-w-4xl mx-auto flex flex-col glass-panel rounded-[2.5rem] overflow-hidden shadow-2xl relative bg-white/60 dark:bg-slate-800/60 border-white/60">
             <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-4 border-b border-white dark:border-slate-700 flex items-center gap-3 z-10">
                 <div class="relative">
                     <img src="./images/basic/AI.png" class="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-slate-600 shadow-sm">
@@ -228,15 +210,15 @@
                 </div>
                 <div>
                     <h3 class="font-black text-slate-800 dark:text-white text-sm">AI 麋鹿</h3>
-                    <div class="text-[9px] font-bold text-slate-400" x-text="isTyping ? '正在輸入中...' : 'SmartDeer 引擎在線'"></div>
+                    <div class="text-[9px] font-bold text-slate-400" x-text="isTyping ? '正在輸入中...' : 'SmartDeer 引擎 V2.0 在線'"></div>
                 </div>
             </div>
             <div id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth custom-scrollbar">
                 <template x-for="msg in chatHistory" :key="msg.id">
                     <div class="flex w-full animate-slide-up" :class="msg.isUser ? 'justify-end' : 'justify-start'">
                         <div class="flex flex-col gap-1 max-w-[80%]">
-                            <div class="px-5 py-3 shadow-sm text-sm leading-relaxed font-medium transition-all"
-                                 :class="msg.isUser ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white bubble-user' : 'bg-white dark:bg-slate-700 dark:text-slate-200 bubble-ai border border-white/50'">
+                            <div class="px-5 py-3 shadow-sm text-sm leading-relaxed font-medium transition-all rounded-2xl"
+                                 :class="msg.isUser ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-br-none' : 'bg-white dark:bg-slate-700 dark:text-slate-200 rounded-bl-none border border-white/50'">
                                 <p x-text="msg.text" class="whitespace-pre-line"></p>
                             </div>
                             <div class="flex items-center gap-1 text-[9px] font-bold text-slate-400 px-1" :class="msg.isUser ? 'justify-end' : 'justify-start'">
@@ -247,7 +229,7 @@
                     </div>
                 </template>
                 <div x-show="isTyping" class="flex justify-start animate-slide-up">
-                     <div class="bg-white dark:bg-slate-700 px-4 py-3 rounded-2xl bubble-ai flex gap-1.5 shadow-sm border border-white dark:border-slate-600 items-center h-10">
+                     <div class="bg-white dark:bg-slate-700 px-4 py-3 rounded-2xl rounded-bl-none flex gap-1.5 shadow-sm border border-white dark:border-slate-600 items-center h-10">
                         <div class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></div>
                         <div class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-100"></div>
                         <div class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-200"></div>
@@ -337,36 +319,21 @@
         </nav>
     </div>
 
-    <div id="shareCardTemplate" class="off-screen-render flex-col items-center justify-center bg-white p-12 h-[1000px] w-[800px] relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-pink-50 via-white to-purple-50"></div>
-        <div class="relative z-10 glass-panel p-12 rounded-[4rem] border-8 border-white shadow-xl w-full text-center flex flex-col items-center justify-center h-full">
-            <img src="./images/basic/icon.png" class="w-32 h-32 rounded-[3rem] mb-10 shadow-xl border-4 border-white">
-            <div class="px-6 py-2 bg-pink-100 text-pink-600 rounded-full font-black mb-8 tracking-widest text-lg">鹿 QA 粉絲站</div>
-            <h2 id="scQ" class="text-4xl font-black text-slate-800 mb-12 leading-snug px-4"></h2>
-            <div class="w-24 h-2 bg-pink-200 rounded-full mb-12"></div>
-            <p id="scA" class="text-3xl font-bold text-slate-600 leading-relaxed px-4"></p>
-        </div>
-        <div class="watermark">wangleoncom.github.io/ldweb</div>
-    </div>
-
     <div id="idCardTemplate" class="off-screen-render flex-col justify-between bg-slate-900 text-white relative overflow-hidden h-[1200px] w-[800px]">
-        <img :src="selectedBg" class="absolute inset-0 w-full h-full object-cover opacity-70" crossorigin="anonymous">
-        <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/90"></div>
-        <div class="relative z-20 p-16 flex items-center gap-8 pt-24">
-            <img src="./images/basic/icon.png" class="w-32 h-32 rounded-full border-8 border-white/30 shadow-2xl">
-            <div><div class="text-xl tracking-[0.5em] opacity-80 font-bold mb-2">OFFICIAL FAN</div><div class="text-7xl font-black tracking-widest uppercase">麋鹿認證</div></div>
+        <img :src="selectedBg" class="absolute inset-0 w-full h-full object-cover opacity-80" crossorigin="anonymous">
+        <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80"></div>
+        <div class="relative z-20 p-16 flex items-center gap-8">
+            <img src="./images/basic/icon.png" class="w-32 h-32 rounded-full border-4 border-white shadow-2xl">
+            <div><div class="text-xl tracking-[0.4em] opacity-80">OFFICIAL FAN</div><div class="text-7xl font-black tracking-widest uppercase">麋鹿認證</div></div>
         </div>
-        <div class="relative z-20 p-16 pb-32">
-            <div class="mb-20">
-                <div class="text-xl font-bold tracking-[0.3em] opacity-60 mb-4 uppercase border-b-2 border-white/20 pb-4 inline-block">粉絲暱稱</div>
-                <div class="text-9xl font-black tracking-tight drop-shadow-2xl" x-text="idCardName"></div>
-            </div>
-            <div class="flex justify-between items-end">
-                <div><div class="text-xl opacity-60 mb-2 font-bold">認證編號</div><div class="text-5xl font-mono font-bold text-pink-300" x-text="generatedIdNumber"></div></div>
-                <div class="text-right font-mono text-3xl opacity-80" x-text="new Date().toLocaleDateString('zh-TW')"></div>
+        <div class="relative z-20 p-16 pb-24 text-center">
+            <div class="text-9xl font-black drop-shadow-2xl mb-20" x-text="idCardName"></div>
+            <div class="flex justify-between items-end border-t border-white/30 pt-10">
+                <div class="text-left"><div class="text-lg opacity-60">認證編號</div><div class="text-5xl font-mono text-pink-300" x-text="generatedIdNumber"></div></div>
+                <div class="text-right font-mono text-4xl opacity-80" x-text="new Date().toLocaleDateString('zh-TW')"></div>
             </div>
         </div>
-        <div class="watermark" style="color: rgba(255,255,255,0.4)">wangleoncom.github.io/ldweb</div>
+        <div class="watermark">https://wangleoncom.github.io/ldweb</div>
     </div>
 
     <div id="examPaperTemplate" class="off-screen-render flex-col items-center justify-center bg-[#fffbf0] p-20 border-[30px] border-double border-[#d4af37] h-[800px] w-[1000px]">
@@ -381,7 +348,18 @@
             </div>
             <div class="inline-block px-12 py-4 bg-[#d4af37] text-white text-3xl font-black rounded-full shadow-xl">🏆 超級鐵粉</div>
         </div>
-        <div class="watermark">wangleoncom.github.io/ldweb</div>
+        <div class="watermark">https://wangleoncom.github.io/ldweb</div>
+    </div>
+
+    <div id="shareCardTemplate" class="off-screen-render flex-col items-center justify-center bg-white p-16 w-[800px] h-[1000px] relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-pink-50 via-white to-purple-50"></div>
+        <div class="relative z-10 glass-panel p-12 rounded-[4rem] border-8 border-white shadow-2xl w-full text-center flex flex-col items-center justify-center h-full">
+            <img src="./images/basic/icon.png" class="w-32 h-32 rounded-[3rem] mb-12 shadow-2xl">
+            <h2 id="scQ" class="text-4xl font-black text-slate-800 mb-12 leading-snug"></h2>
+            <div class="w-24 h-2 bg-pink-200 rounded-full mb-12"></div>
+            <p id="scA" class="text-3xl font-bold text-slate-600 leading-relaxed"></p>
+        </div>
+        <div class="watermark">https://wangleoncom.github.io/ldweb</div>
     </div>
 
     <div x-show="modal.isOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-6" x-transition.opacity x-cloak>
@@ -396,8 +374,8 @@
             <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-6 whitespace-pre-line" x-text="modal.body"></p>
             
             <div x-show="modal.type === 'shareOption'" class="grid grid-cols-2 gap-3 mb-2">
-                <button @click="generateImage()" class="py-3 bg-pink-500 text-white rounded-xl font-bold text-xs shadow-lg hover:bg-pink-600 transition-colors">生成圖片</button>
-                <button @click="copyText()" class="py-3 bg-slate-700 text-white rounded-xl font-bold text-xs shadow-lg hover:bg-slate-800 transition-colors">複製文字</button>
+                <button @click="generateImage()" class="py-3 bg-pink-500 text-white rounded-xl font-bold text-xs shadow-lg hover:bg-pink-600 transition-colors">📸 生成圖片</button>
+                <button @click="copyText()" class="py-3 bg-slate-700 text-white rounded-xl font-bold text-xs shadow-lg hover:bg-slate-800 transition-colors">📋 複製文字</button>
             </div>
 
             <div x-show="modal.type === 'appShare'" class="grid grid-cols-2 gap-3 mb-2">
@@ -419,6 +397,7 @@
             
             <div class="space-y-4">
                 <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest pl-1">外觀體驗</div>
+                
                 <div class="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 text-sm">🌙</div>
@@ -430,6 +409,7 @@
                         <div class="w-5 h-5 bg-white rounded-full absolute top-1 left-1 transition-transform duration-300 transform" :class="settings.darkMode ? 'translate-x-5' : ''"></div>
                     </label>
                 </div>
+                
                 <div class="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center text-pink-500 text-sm">🎵</div>
@@ -441,6 +421,7 @@
                         <div class="w-5 h-5 bg-white rounded-full absolute top-1 left-1 transition-transform duration-300 transform" :class="settings.sound ? 'translate-x-5' : ''"></div>
                     </label>
                 </div>
+                
                 <div class="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-sm">🐢</div>
@@ -472,37 +453,57 @@
 
                 <button @click="openAppShare()" class="w-full py-3 bg-slate-900 dark:bg-white dark:text-slate-900 text-white rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform mt-4">分享此網站 📤</button>
             </div>
-            <div class="text-center mt-6 text-[10px] text-slate-400 font-mono">v7.0.0 · wangleoncom.github.io</div>
+            <div class="text-center mt-6 text-[10px] text-slate-400 font-mono">v7.1.0 · wangleoncom.github.io</div>
         </div>
     </div>
 
     <script>
-        // AI Brain Logic (SmartDeer Engine)
+        // 11. AI 麋鹿大腦 (SmartDeer Engine V2)
         class SmartDeer {
-            constructor() {
+            constructor(db) {
+                this.db = db;
                 this.synonyms = {
-                    "多高": "身高", "多重": "體重", "胖": "體重", "瘦": "體重", 
-                    "住哪": "家鄉", "哪裡人": "家鄉", "開台": "直播", "IG": "Instagram", 
-                    "抖音": "TikTok", "賴": "Line", "幾歲": "年紀", "生日": "年紀",
-                    "洗澡": "洗頭", "男友": "男朋友", "對象": "男朋友"
+                    "主播": "鹿", "她": "鹿", "鹿鹿": "鹿", 
+                    "多大": "幾歲", "年紀": "幾歲", 
+                    "IG": "Instagram", "抖音": "TikTok", 
+                    "住哪": "家鄉", "哪裡人": "家鄉", 
+                    "開台": "直播", "賴": "Line"
                 };
-                this.context = null;
+                
+                // 設定更聰明的搜尋權重
+                this.fuse = new Fuse(db, {
+                    keys: [
+                        { name: 'q', weight: 0.5 },
+                        { name: 'tags', weight: 0.3 }, // 標籤權重提高
+                        { name: 'a', weight: 0.2 }
+                    ],
+                    threshold: 0.4, 
+                    ignoreLocation: true
+                });
             }
+
             process(query) {
                 let processed = query.toLowerCase();
+                // 替換同義詞，解決「主播幾歲」找不到「鹿現在幾歲」的問題
                 for (const [key, value] of Object.entries(this.synonyms)) {
-                    if (processed.includes(key)) processed += " " + value;
+                    if (processed.includes(key)) processed = processed.replace(new RegExp(key, 'g'), value);
                 }
                 return processed;
             }
-            analyze(results, query) {
+
+            analyze(query) {
+                const processedQuery = this.process(query);
+                const results = this.fuse.search(processedQuery);
+
                 if (!results || results.length === 0) return { reply: "這個問題考倒麋鹿了...🦌\n換個關鍵字試試看？", accuracy: 0 };
+                
                 const best = results[0];
                 const acc = Math.round((1 - best.score) * 100);
                 
-                // Conversational Logic
-                if (acc > 45) return { reply: best.item.a, accuracy: acc };
-                if (acc > 25) return { reply: `我不確定是不是這個，你是想問「${best.item.q}」嗎？\n\n${best.item.a}`, accuracy: acc };
+                // 提高匹配門檻，避免亂回答
+                if (acc > 40) return { reply: best.item.a, accuracy: acc };
+                if (acc > 20) return { reply: `我不確定是不是這個，你是想問「${best.item.q}」嗎？\n\n${best.item.a}`, accuracy: acc };
+                
                 return { reply: "抱歉，我好像沒聽懂...🤔\n您可以試試看搜尋「身高」、「直播」之類的關鍵字喔！", accuracy: acc };
             }
         }
@@ -522,7 +523,7 @@
 
         function deerApp() {
             return {
-                appVersion: '7.0.0',
+                appVersion: '7.1.0',
                 isLoading: true, isProcessing: false, loadProgress: 0,
                 currentTab: 'home', scrollY: 0, search: '', flippedCards: [], currentPage: 1, itemsPerPage: 12,
                 chatInput: '', isTyping: false, isListening: false,
@@ -531,7 +532,7 @@
                 idCardName: '', selectedBg: '', backgrounds: [], generatedIdNumber: 'D'+Math.floor(Math.random()*9000+1000),
                 showSettingsModal: false, settings: { sound: true, darkMode: false, reduceMotion: false, itemsPerPage: 20 },
                 modal: { isOpen: false, title: '', body: '', type: '' },
-                brain: new SmartDeer(),
+                brain: null, // Initialized in initApp
                 shareItem: null,
                 tabs: [{id: 'home', label: '首頁', icon: '🏠'}, {id: 'ai', label: 'AI', icon: '🤖'}, {id: 'timeline', label: '大事記', icon: '📅'}, {id: 'idcard', label: '認證', icon: '🪪'}, {id: 'quiz', label: '會考', icon: '📝'}],
                 timelineEvents: [
@@ -548,6 +549,7 @@
                     window.addEventListener('scroll', () => this.scrollY = window.scrollY);
                     
                     this.loadDB();
+                    this.brain = new SmartDeer(this.qaData); // 初始化 AI 引擎
                     await this.loadBackgrounds();
                     
                     let p = 0;
@@ -559,18 +561,32 @@
                 loadDB() {
                     const raw = window.deerQA_DB || [];
                     this.qaData = raw.map((d, i) => ({ ...d, id: i + 1 }));
-                    // Stronger Search: Low threshold = strict, but synonym processing helps matches
-                    this.fuse = new Fuse(this.qaData, { includeScore: true, threshold: 0.3, distance: 100, keys: ['q', 'tags', 'a'] });
                 },
 
                 async loadBackgrounds() {
                     for(let i=1; i<=20; i++) {
                         const path = `./images/backgrounds/bg${i}.jpg`;
-                        const ok = await fetch(path, { method: 'HEAD' }).then(r => r.ok).catch(() => false);
-                        if(ok) this.backgrounds.push(path);
+                        // 簡單檢查圖片是否存在 (前端靜態站點最佳解)
+                        const img = new Image();
+                        img.src = path;
+                        img.onload = () => {
+                            if(!this.backgrounds.includes(path)) this.backgrounds.push(path);
+                            // 排序
+                            this.backgrounds.sort((a,b) => {
+                                const numA = parseInt(a.match(/\d+/)[0]);
+                                const numB = parseInt(b.match(/\d+/)[0]);
+                                return numA - numB;
+                            });
+                            if(!this.selectedBg) this.selectedBg = this.backgrounds[0];
+                        };
                     }
-                    if(!this.backgrounds.length) this.backgrounds = ['./images/basic/icon.png'];
-                    this.selectedBg = this.backgrounds[0];
+                    // Fallback
+                    setTimeout(() => {
+                        if(this.backgrounds.length === 0) {
+                            this.backgrounds = ['./images/basic/icon.png'];
+                            this.selectedBg = this.backgrounds[0];
+                        }
+                    }, 2000);
                 },
 
                 // --- UI Logic ---
@@ -578,24 +594,23 @@
                 toggleCard(id) { if(this.flippedCards.includes(id)) this.flippedCards = this.flippedCards.filter(i => i !== id); else this.flippedCards.push(id); playTone('click'); },
                 
                 get paginatedData() {
-                    // Strict Search Logic
+                    // 6. 100% 匹配搜尋邏輯
                     let d = this.qaData;
                     if(this.search) {
-                        // Using Fuse with Brain pre-processing for smarter matching
-                        const q = this.brain.process(this.search);
-                        const results = this.fuse.search(q);
-                        // Filter strict matches only
-                        d = results.filter(r => r.score < 0.4).map(r => r.item);
+                        const q = this.search.trim();
+                        // 嚴格匹配：Q 或 A 必須包含該關鍵字
+                        d = this.qaData.filter(item => item.q.includes(q) || item.a.includes(q));
                     }
                     const start = (this.currentPage-1)*parseInt(this.settings.itemsPerPage);
                     return d.slice(start, start + parseInt(this.settings.itemsPerPage));
                 },
                 get totalPages() { 
-                    const len = this.search ? this.paginatedData.length : this.qaData.length; // Approximate fix for logic
+                    const len = this.search ? this.paginatedData.length : this.qaData.length;
+                    // Fix: 計算總頁數邏輯修正
                     let realLen = this.qaData.length;
                     if(this.search) {
-                         const q = this.brain.process(this.search);
-                         realLen = this.fuse.search(q).filter(r => r.score < 0.4).length;
+                         const q = this.search.trim();
+                         realLen = this.qaData.filter(item => item.q.includes(q) || item.a.includes(q)).length;
                     }
                     return Math.ceil(realLen / parseInt(this.settings.itemsPerPage)) || 1; 
                 },
@@ -616,20 +631,20 @@
                 nextPage() { if(this.currentPage < this.totalPages) { this.currentPage++; window.scrollTo(0,0); playTone('click'); } },
 
                 // --- Chat Logic ---
+                // 3. 電腦 Enter 發送修正：使用 isComposing 防止選字時發送
                 handleChatEnter(e) { 
                     if (e.isComposing || e.keyCode === 229) return; 
-                    // PC: Enter sends, Shift+Enter new line. Mobile: Go button sends.
-                    // "Double Enter" logic is confusing UX, implemented standard IME-safe Enter.
                     this.sendMessage(); 
                 },
                 async sendMessage() {
                     if(!this.chatInput.trim()) return;
-                    const text = this.chatInput; this.chatInput = '';
+                    const text = this.chatInput; 
+                    this.chatInput = ''; // 立即清空
+                    
                     this.chatHistory.push({ id: Date.now(), text, isUser: true, status: 'sent', time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
                     playTone('click');
                     this.$nextTick(() => { const c = document.getElementById('chatContainer'); c.scrollTop = c.scrollHeight; });
                     
-                    // Humanize: Read delay
                     const readDelay = Math.random() * 1000 + 500;
                     setTimeout(() => {
                         const lastMsg = this.chatHistory[this.chatHistory.length-1];
@@ -637,11 +652,8 @@
                         this.isTyping = true;
                         this.$nextTick(() => document.getElementById('chatContainer').scrollTop = document.getElementById('chatContainer').scrollHeight);
 
-                        const q = this.brain.process(text);
-                        const results = this.fuse.search(q);
-                        const response = this.brain.analyze(results, text);
+                        const response = this.brain.analyze(text);
                         
-                        // Typing delay based on length
                         const typingTime = Math.min(response.reply.length * 50, 2000) + 500;
                         
                         setTimeout(() => {
@@ -653,7 +665,6 @@
                     }, readDelay);
                 },
 
-                // --- Voice ---
                 startVoice() {
                     const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
                     if(!Rec) return this.showHttpError(400, "Browser does not support Speech API");
@@ -664,7 +675,6 @@
                 },
                 stopVoice() { this.isListening = false; if(this.recognition) this.recognition.stop(); },
 
-                // --- Quiz ---
                 startQuiz() {
                     if(!this.quizTakerName) return this.showModal('提示', '請輸入名字');
                     this.quizStarted = true; this.quizScore = 0; this.currentQuizIndex = 0; 
@@ -681,20 +691,19 @@
                     else { this.quizStarted = false; this.capture('examPaperTemplate', 'certificate'); } 
                 },
 
-                // --- ID Card ---
-                generateIDCard() { 
+                async generateIDCard() { 
                     if(!this.idCardName) return this.showModal('提示', '請輸入暱稱'); 
                     this.capture('idCardTemplate', 'share'); 
                 },
 
-                // --- Sharing Logic ---
+                // 2. 分享：生成圖片與複製文字
                 openShareModal(item) {
                     this.shareItem = item;
                     this.modal = { isOpen: true, title: '分享問題', body: '請選擇分享方式', type: 'shareOption' };
-                    // Pre-fill hidden template
+                    // 預填隱藏的 Canvas 模板
                     document.getElementById('scQ').innerText = item.q;
                     document.getElementById('scA').innerText = item.a;
-                    document.getElementById('shareResult').innerHTML = ''; // Clear previous
+                    document.getElementById('shareResult').innerHTML = ''; 
                 },
                 async generateImage() {
                     this.capture('shareCardTemplate', 'share');
@@ -708,8 +717,7 @@
                 async capture(id, type) {
                     this.isProcessing = true;
                     const el = document.getElementById(id);
-                    el.classList.remove('off-screen-render'); // Make visible for capture
-                    // Slight delay to ensure rendering
+                    el.classList.remove('off-screen-render'); 
                     await new Promise(r => setTimeout(r, 100));
                     try {
                         const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: null });
@@ -724,7 +732,6 @@
                     }
                 },
 
-                // --- System Utils ---
                 openAppShare() { 
                     this.modal = { isOpen: true, title: '分享網站', body: '邀請更多朋友加入鹿 QA！', type: 'appShare' }; 
                     document.getElementById('shareResult').innerHTML = '<div class="py-8 text-6xl">🦌</div>';
@@ -732,12 +739,12 @@
                 copyUrl() { navigator.clipboard.writeText(location.href); alert('網址已複製'); },
                 shareToFB() { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(location.href)}`); },
                 shareToLine() { window.open(`https://line.me/R/msg/text/?${encodeURIComponent(location.href)}`); },
-                showChangelog() { this.showModal('更新日誌', 'v7.0.0 - 重量級改版\n✨ 全新液態介面\n✨ 強化 AI 引擎\n✨ 專業分享功能', 'info'); },
+                showChangelog() { this.showModal('更新日誌', 'v7.1.0 - 終極改版\n✨ AI 大腦升級：聽得懂「主播」了！\n✨ 介面重製：專業級動畫與品牌圖標\n✨ 專業分享：生成圖片或複製文字', 'info'); },
                 resetApp() { if(confirm('確定要重置？')) { localStorage.clear(); location.reload(); } },
                 installPWA() { if(this.deferredPrompt) this.deferredPrompt.prompt(); else alert('請使用瀏覽器選單安裝'); },
                 
                 showModal(t, b, type='info') { this.modal = { isOpen: true, title: t, body: b, type }; },
-                showHttpError(code, msg) { this.showModal(`Error ${code}`, msg, 'error'); },
+                showHttpError(code, msg) { this.showModal(`HTTP ${code}`, msg, 'error'); },
                 closeModal() { this.modal.isOpen = false; }
             }
         }
