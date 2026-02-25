@@ -1,7 +1,7 @@
 /* ==========================================================================
-   鹿🦌 QA 粉絲站 v13.0 - 尊爵旗艦版 (app.js)
+   鹿🦌 QA 粉絲站 v14.1 - 全息科技繪圖版 (app.js)
    ========================================================================== */
-const CURRENT_APP_VERSION = "13.0"; 
+const CURRENT_APP_VERSION = "14.1"; 
 
 const qaData = window.QA_DB || window.deerQuiz_DB || []; 
 const quizData = window.QUIZ_DB || window.deerQuiz_DB || [];
@@ -26,10 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function checkVersionAndClearCache() {
-    const saved = localStorage.getItem('deerAppConfig_v13');
+    const saved = localStorage.getItem('deerAppConfig_v14_1');
     if (saved) {
         try { if (JSON.parse(saved).version !== CURRENT_APP_VERSION) throw new Error("Old"); } 
-        catch(e) { localStorage.removeItem('deerAppConfig_v13'); }
+        catch(e) { localStorage.removeItem('deerAppConfig_v14_1'); }
     }
 }
 
@@ -49,10 +49,10 @@ window.switchTab = function(tabId, btn) {
     if(tabId === 'page-timeline') triggerTimelineAnim();
 };
 
-/* 時間軸進場動畫 (v13 優化) */
 function triggerTimelineAnim() {
     const nodes = document.querySelectorAll('.timeline-node');
     const line = document.getElementById('tl-line');
+    
     if(line) line.classList.remove('draw');
     nodes.forEach(n => n.classList.remove('animate-pop'));
     
@@ -79,7 +79,7 @@ window.toggleSettings = function() {
 };
 
 function loadSettings() {
-    const saved = localStorage.getItem('deerAppConfig_v13');
+    const saved = localStorage.getItem('deerAppConfig_v14_1');
     if (saved) {
         appSettings = JSON.parse(saved);
         document.getElementById('qa-per-page-slider').value = appSettings.qaPerPage;
@@ -93,14 +93,14 @@ function loadSettings() {
 window.saveSettings = function() {
     appSettings.soundOn = document.getElementById('sound-toggle').checked;
     appSettings.largeFont = document.getElementById('font-toggle').checked;
-    localStorage.setItem('deerAppConfig_v13', JSON.stringify(appSettings));
+    localStorage.setItem('deerAppConfig_v14_1', JSON.stringify(appSettings));
     applyFontSetting();
 };
 
 window.updateQASetting = function(val) {
     appSettings.qaPerPage = parseInt(val);
     document.getElementById('qa-count-display').innerText = `${val} 題`;
-    localStorage.setItem('deerAppConfig_v13', JSON.stringify(appSettings));
+    localStorage.setItem('deerAppConfig_v14_1', JSON.stringify(appSettings));
     currentPage = 1; renderQA(1);
 };
 
@@ -118,7 +118,7 @@ window.shareApp = function() {
     }
 };
 
-/* ================== 3. QA 渲染與裂變分享系統 ================== */
+/* ================== 3. QA 渲染與極速翻頁 ================== */
 let currentPage = 1; let filteredQA = [...qaData];
 
 function initQA() { if (qaData.length > 0) renderQA(1); }
@@ -141,7 +141,6 @@ function renderQA(page) {
 
     currentItems.forEach((item, index) => {
         const num = String(start + index + 1).padStart(2, '0');
-        // v13: 加入專屬的 Share Icon，並防止事件冒泡
         list.innerHTML += `
             <div class="glass-card p-4 flex flex-col justify-between cursor-pointer active:scale-95 transition-transform relative group" onclick="showAnswer(event, '${item.a}')">
                 <div class="flex justify-between items-start mb-2">
@@ -149,7 +148,6 @@ function renderQA(page) {
                    <div class="text-slate-500 text-[9px] font-black tracking-widest bg-white/5 px-2 py-0.5 rounded">#${num}</div>
                 </div>
                 <h3 class="font-bold text-white mt-1 mb-2 line-clamp-2 leading-relaxed pr-6">${item.q}</h3>
-                
                 <button onclick="openQAShareOptions(event, '${item.q}', '${item.a}')" class="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-pink-500 transition-colors">
                     <i class="fas fa-share text-xs"></i>
                 </button>
@@ -157,25 +155,27 @@ function renderQA(page) {
     });
 
     controls.innerHTML = `
-        <button onclick="changePage(-1)" class="w-8 h-8 flex items-center justify-center bg-white/10 text-white rounded-full active:bg-pink-500 disabled:opacity-20" ${page === 1 ? 'disabled' : ''}><i class="fas fa-chevron-left text-[10px]"></i></button>
-        <span class="text-slate-400 font-black text-[10px] tracking-[0.2em]">第 ${page} / ${totalPages} 頁</span>
-        <button onclick="changePage(1)" class="w-8 h-8 flex items-center justify-center bg-white/10 text-white rounded-full active:bg-pink-500 disabled:opacity-20" ${page === totalPages ? 'disabled' : ''}><i class="fas fa-chevron-right text-[10px]"></i></button>
+        <button onclick="changePageTo(1)" class="w-8 h-8 flex items-center justify-center bg-white/10 text-slate-400 rounded-full active:bg-pink-500 disabled:opacity-20" ${page === 1 ? 'disabled' : ''}><i class="fas fa-angle-double-left text-[10px]"></i></button>
+        <button onclick="changePageTo(${page - 1})" class="w-8 h-8 flex items-center justify-center bg-white/10 text-white rounded-full active:bg-pink-500 disabled:opacity-20" ${page === 1 ? 'disabled' : ''}><i class="fas fa-chevron-left text-[10px]"></i></button>
+        <span class="text-slate-400 font-black text-[10px] tracking-[0.2em] px-1">第 ${page} / ${totalPages} 頁</span>
+        <button onclick="changePageTo(${page + 1})" class="w-8 h-8 flex items-center justify-center bg-white/10 text-white rounded-full active:bg-pink-500 disabled:opacity-20" ${page === totalPages ? 'disabled' : ''}><i class="fas fa-chevron-right text-[10px]"></i></button>
+        <button onclick="changePageTo(${totalPages})" class="w-8 h-8 flex items-center justify-center bg-white/10 text-slate-400 rounded-full active:bg-pink-500 disabled:opacity-20" ${page === totalPages ? 'disabled' : ''}><i class="fas fa-angle-double-right text-[10px]"></i></button>
     `;
 }
 
 window.showAnswer = function(e, ans) {
-    if(e.target.closest('button')) return; // 防止點擊分享按鈕時觸發
+    if(e.target.closest('button')) return; 
     if(appSettings.soundOn) playClickSound();
     Swal.fire({title:'解答', text: ans, background:'#121215', color:'#fff', confirmButtonColor:'#f43f5e', customClass:{popup:'custom-modal', title:'text-pink-500 text-lg'}});
 }
 
-window.changePage = function(delta) {
+window.changePageTo = function(targetPage) {
     if(appSettings.soundOn) playClickSound();
-    currentPage += delta; renderQA(currentPage);
+    currentPage = targetPage; renderQA(currentPage);
     document.getElementById('page-home').scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-/* --- QA 分享邏輯 --- */
+/* --- QA 分享圖片 --- */
 window.openQAShareOptions = function(e, q, a) {
     e.stopPropagation();
     if(appSettings.soundOn) playClickSound();
@@ -201,7 +201,6 @@ window.shareQAText = function(q, a) {
     Swal.fire({ title: '複製成功', icon: 'success', timer: 1500, showConfirmButton: false, background: '#121215', color: '#fff' });
 }
 
-// Canvas 繪製多行文字工具
 function wrapText(context, text, x, y, maxWidth, lineHeight) {
     const words = text.split(''); let line = ''; let currentY = y;
     for(let n = 0; n < words.length; n++) {
@@ -212,32 +211,26 @@ function wrapText(context, text, x, y, maxWidth, lineHeight) {
         } else { line = testLine; }
     }
     context.fillText(line, x, currentY);
-    return currentY + lineHeight; // 回傳最後的高度
+    return currentY + lineHeight;
 }
 
 window.shareQAImage = function(q, a) {
     const canvas = document.getElementById('qa-canvas'); const ctx = canvas.getContext('2d');
-    
-    // 背景
     ctx.fillStyle = '#0a0a0f'; ctx.fillRect(0, 0, 1080, 1080);
     const grad = ctx.createLinearGradient(0, 0, 1080, 1080);
     grad.addColorStop(0, 'rgba(244, 63, 94, 0.2)'); grad.addColorStop(1, 'rgba(59, 130, 246, 0.1)');
     ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1080);
     ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 4; roundRect(ctx, 40, 40, 1000, 1000, 40); ctx.stroke();
 
-    // 繪製 Q
     ctx.fillStyle = '#f43f5e'; ctx.font = '900 60px "Segoe UI"'; ctx.fillText('Q.', 100, 150);
     ctx.fillStyle = '#ffffff'; ctx.font = 'bold 50px "PingFang TC", sans-serif'; ctx.textAlign = "left";
     let nextY = wrapText(ctx, q, 100, 230, 880, 70);
 
-    // 繪製 A
     ctx.fillStyle = '#3b82f6'; ctx.font = '900 60px "Segoe UI"'; ctx.fillText('A.', 100, nextY + 60);
     ctx.fillStyle = '#cbd5e1'; ctx.font = '50px "PingFang TC", sans-serif'; 
     wrapText(ctx, a, 100, nextY + 140, 880, 75);
 
-    // 浮水印
-    ctx.textAlign = "center";
-    ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = 'bold 24px monospace'; 
+    ctx.textAlign = "center"; ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = 'bold 24px monospace'; 
     ctx.fillText(WATERMARK_TEXT, 540, 1020);
 
     const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
@@ -263,17 +256,17 @@ window.switchAIModel = function(modelId) {
         btn1.classList.replace('text-slate-400', 'text-white'); btn2.classList.replace('text-white', 'text-slate-400');
         btn1.querySelector('img').style.opacity = '1'; btn2.querySelector('img').style.opacity = '0.5';
         btnSend.className = "w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all active:scale-90";
-        avatar.src = "ai-model-1.jpg"; avatar.className = "w-10 h-10 rounded-full object-cover border-2 border-blue-500";
+        avatar.src = "ai-model-1.jpg"; avatar.className = "w-10 h-10 rounded-full object-cover border-2 border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]";
         nameLabel.innerText = "精準智庫"; nameLabel.className = "text-[14px] font-bold text-blue-400";
-        chat.innerHTML += `<div class="max-w-[85%] self-start glass-card p-4 shadow-lg text-sm leading-relaxed border-t-2 border-t-blue-500 msg-enter text-slate-300">系統切換：載入【精準智庫】。<br>將提供嚴謹的答案比對。</div>`;
+        chat.innerHTML += `<div class="max-w-[85%] self-start glass-card p-4 shadow-lg text-sm leading-relaxed border-t-2 border-t-blue-500 msg-enter text-slate-300">系統切換：載入【精準麋鹿】。<br>將提供嚴謹的答案比對。</div>`;
     } else {
         slider.style.transform = 'translateX(100%)';
         btn1.classList.replace('text-white', 'text-slate-400'); btn2.classList.replace('text-slate-400', 'text-white');
         btn1.querySelector('img').style.opacity = '0.5'; btn2.querySelector('img').style.opacity = '1';
         btnSend.className = "w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white shadow-[0_0_15px_rgba(244,63,94,0.4)] transition-all active:scale-90";
-        avatar.src = "ai-model-2.jpg"; avatar.className = "w-10 h-10 rounded-full object-cover border-2 border-pink-500";
+        avatar.src = "ai-model-2.jpg"; avatar.className = "w-10 h-10 rounded-full object-cover border-2 border-pink-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]";
         nameLabel.innerText = "元氣小鹿"; nameLabel.className = "text-[14px] font-bold text-pink-400";
-        chat.innerHTML += `<div class="max-w-[85%] self-start glass-card p-4 shadow-lg text-sm leading-relaxed border-t-2 border-t-pink-500 msg-enter text-slate-300">系統切換：載入【元氣小鹿】。<br>呀吼！有什麼秘密想問我呢？</div>`;
+        chat.innerHTML += `<div class="max-w-[85%] self-start glass-card p-4 shadow-lg text-sm leading-relaxed border-t-2 border-t-pink-500 msg-enter text-slate-300">系統切換：載入【元氣麋鹿】。<br>呀吼！有什麼秘密想問我呢？</div>`;
     }
     chat.scrollTop = chat.scrollHeight;
 };
@@ -304,7 +297,7 @@ window.sendAIMessage = function() {
         } else {
             if (bestMatch.score > 0.1) {
                 reply = `嘿嘿！這題我知道：<br><b class="text-pink-400 mt-1 block">${bestMatch.item.a}</b> (๑•̀ㅂ•́)و✧`;
-                sourceBtn = `<button onclick="showSource('${bestMatch.item.q}', '${bestMatch.item.a}')" class="mt-2 text-[10px] text-slate-500 bg-black/50 px-2 py-1 rounded border border-white/10 hover:text-white"><i class="fas fa-paw"></i> 原本的題目</button>`;
+                sourceBtn = `<button onclick="showSource('${bestMatch.item.q}', '${bestMatch.item.a}')" class="mt-2 text-[10px] text-slate-500 bg-black/50 px-2 py-1 rounded border border-white/10 hover:text-white"><i class="fas fa-paw"></i> 看看原本的題目</button>`;
             } else {
                 const fallbacks = ["這題太難了啦！下次直播直接問鹿吧🦌", "嗚嗚...小鹿的腦袋當機了 🤯"];
                 reply = fallbacks[Math.floor(Math.random() * fallbacks.length)];
@@ -338,103 +331,85 @@ function findBestMatch(userInput) {
     return best;
 }
 
-/* ================== 5. 照片 ID 卡生成 (包含照片與浮水印) ================== */
+/* ================== 5. 全息科技 ID 卡生成器 (無圖片版) ================== */
 function roundRect(ctx, x, y, w, h, r) {
     ctx.beginPath(); ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
     ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h); ctx.lineTo(x+r, y+h);
     ctx.quadraticCurveTo(x, y+h, x, y+h-r); ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y); ctx.closePath();
 }
 
-window.generateHoloIDCard = function() {
+window.generateIDCard = function() {
     if(appSettings.soundOn) playClickSound();
     const nameInput = document.getElementById('id-name').value.trim() || "神秘麋鹿";
-    Swal.fire({ title: '編碼生成中...', background: '#0f0f13', color: '#fff', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+    
+    Swal.fire({ title: '全息編碼中...', background: '#0f0f13', color: '#fff', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
 
     const canvas = document.getElementById('id-canvas'); const ctx = canvas.getContext('2d');
     
-    // 背景
-    ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, 1080, 1600);
-    const grad1 = ctx.createRadialGradient(0, 400, 100, 0, 400, 800);
-    grad1.addColorStop(0, 'rgba(244, 63, 94, 0.3)'); grad1.addColorStop(1, 'transparent');
-    ctx.fillStyle = grad1; ctx.fillRect(0, 0, 1080, 1600);
-    const grad2 = ctx.createRadialGradient(1080, 1200, 100, 1080, 1200, 800);
-    grad2.addColorStop(0, 'rgba(59, 130, 246, 0.2)'); grad2.addColorStop(1, 'transparent');
-    ctx.fillStyle = grad2; ctx.fillRect(0, 0, 1080, 1600);
+    // 1. 深色全息背景
+    ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, 1080, 1500);
+    const grad = ctx.createLinearGradient(0, 0, 1080, 1500);
+    grad.addColorStop(0, 'rgba(244, 63, 94, 0.15)'); grad.addColorStop(1, 'rgba(139, 92, 246, 0.05)');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1500);
 
-    // 主卡片
+    // 2. 科技網格
+    ctx.strokeStyle = 'rgba(255,255,255,0.02)'; ctx.lineWidth = 2;
+    for(let i=0; i<1080; i+=80) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,1500); ctx.stroke(); }
+    for(let i=0; i<1500; i+=80) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(1080,i); ctx.stroke(); }
+
+    // 3. 實體卡片框
     ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 60; ctx.shadowOffsetY = 30;
-    ctx.fillStyle = '#101015'; roundRect(ctx, 80, 80, 920, 1360, 50); ctx.fill();
+    ctx.fillStyle = '#0a0a0e'; roundRect(ctx, 80, 100, 920, 1300, 50); ctx.fill();
     ctx.shadowColor = 'transparent'; 
-    ctx.strokeStyle = 'rgba(244, 63, 94, 0.5)'; ctx.lineWidth = 4; roundRect(ctx, 80, 80, 920, 1360, 50); ctx.stroke();
+    ctx.strokeStyle = 'rgba(244, 63, 94, 0.4)'; ctx.lineWidth = 4; roundRect(ctx, 80, 100, 920, 1300, 50); ctx.stroke();
 
-    const avatarImg = new Image();
-    avatarImg.crossOrigin = "Anonymous";
-    avatarImg.src = "avatar-main.jpg";
-
-    avatarImg.onload = () => drawContent(avatarImg);
-    avatarImg.onerror = () => drawContent(null);
-
-    function drawContent(img) {
-        // 照片處理 (置中大圓)
-        if(img) {
-            ctx.save();
-            ctx.beginPath(); ctx.arc(540, 460, 260, 0, Math.PI * 2); ctx.closePath();
-            ctx.clip();
-            // 計算比例，置中裁切
-            const scale = Math.max(520 / img.width, 520 / img.height);
-            const x = (540) - (img.width / 2) * scale;
-            const y = (460) - (img.height / 2) * scale;
-            ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-            ctx.restore();
-            
-            // 照片發光邊框
-            ctx.shadowColor = 'rgba(244, 63, 94, 0.8)'; ctx.shadowBlur = 30;
-            ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 8;
-            ctx.beginPath(); ctx.arc(540, 460, 260, 0, Math.PI * 2); ctx.stroke();
-            ctx.shadowColor = 'transparent';
-        } else {
-            // 防呆處理
-            ctx.fillStyle = '#f43f5e'; ctx.font = '150px sans-serif'; ctx.textAlign = "center"; ctx.fillText('🦌', 540, 500);
-        }
-
-        // 文字排版
-        ctx.textAlign = "center";
-        ctx.fillStyle = '#f43f5e'; ctx.font = '900 45px "Segoe UI", sans-serif'; ctx.letterSpacing = "10px";
-        ctx.fillText('OFFICIAL FAN ID', 540, 860);
-        
-        ctx.shadowColor = 'rgba(255,255,255,0.4)'; ctx.shadowBlur = 20;
-        ctx.fillStyle = '#ffffff'; ctx.font = '900 130px "Segoe UI", "PingFang TC", sans-serif'; ctx.letterSpacing = "5px";
-        ctx.fillText(nameInput, 540, 1050);
-        ctx.shadowColor = 'transparent';
-
-        // 條碼
-        const barcodeTotalWidth = 600; const startX = 540 - (barcodeTotalWidth / 2);
-        ctx.fillStyle = 'rgba(255,255,255,0.2)'; let currX = startX;
-        while(currX < startX + barcodeTotalWidth) {
-            let w = Math.random() > 0.5 ? 4 : (Math.random() > 0.5 ? 8 : 12);
-            if (currX + w > startX + barcodeTotalWidth) w = startX + barcodeTotalWidth - currX;
-            ctx.fillRect(currX, 1180, w - 2, 80); 
-            currX += w + (Math.random() > 0.5 ? 4 : 8);
-        }
-
-        const dateStr = new Date().toISOString().split('T')[0];
-        ctx.fillStyle = '#64748b'; ctx.font = 'bold 30px monospace'; 
-        ctx.fillText(`ID: 8${Date.now().toString().slice(-6)} | AUTH: ${dateStr}`, 540, 1340);
-
-        // 浮水印
-        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = 'bold 20px monospace'; 
-        ctx.fillText(WATERMARK_TEXT, 540, 1500);
-
-        setTimeout(() => {
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-            Swal.fire({
-                title: '💳 認證卡生成成功', text: '請長按下方圖片進行儲存',
-                imageUrl: dataUrl, imageWidth: '100%',
-                background: '#121215', color: '#fff', confirmButtonColor: '#f43f5e', confirmButtonText: '完成',
-                customClass: { popup: 'custom-modal', image: 'swal2-image' }
-            });
-        }, 500);
+    // 4. 🔥 科技發光同心圓 (取代照片)
+    ctx.shadowColor = 'rgba(244, 63, 94, 0.6)'; ctx.shadowBlur = 20;
+    ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 6;
+    for(let r = 60; r <= 240; r += 30) {
+        ctx.beginPath();
+        ctx.arc(540, 480, r, Math.PI * 0.15, Math.PI * 1.85); // 缺口設計增加科技感
+        ctx.stroke();
     }
+    ctx.shadowColor = 'transparent';
+
+    // 🦌 中心鹿 Icon
+    ctx.fillStyle = '#f43f5e'; ctx.font = '140px "Segoe UI", sans-serif';
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText('🦌', 540, 480);
+    ctx.textBaseline = "alphabetic"; // 復原基準線，避免影響後續文字
+
+    // 5. 文字排版
+    ctx.fillStyle = '#f43f5e'; ctx.font = '900 45px "Segoe UI", sans-serif'; ctx.letterSpacing = "10px";
+    ctx.fillText('OFFICIAL MEMBER', 540, 850);
+    
+    // 名字發光
+    ctx.shadowColor = 'rgba(255,255,255,0.4)'; ctx.shadowBlur = 20;
+    ctx.fillStyle = '#ffffff'; ctx.font = '900 120px "Segoe UI", "PingFang TC", sans-serif'; ctx.letterSpacing = "5px";
+    ctx.fillText(nameInput, 540, 1020);
+    ctx.shadowColor = 'transparent';
+
+    // 條碼裝飾
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    for(let i=200; i<880; i+=12) {
+        let w = Math.random() > 0.5 ? 4 : 8;
+        ctx.fillRect(i, 1150, w, 80);
+    }
+
+    const dateStr = new Date().toISOString().split('T')[0];
+    ctx.fillStyle = '#64748b'; ctx.font = 'bold 30px monospace'; 
+    ctx.fillText(`ID: 8${Date.now().toString().slice(-6)} | AUTH: ${dateStr}`, 540, 1320);
+
+    setTimeout(() => {
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+        Swal.fire({
+            title: '💳 認證卡生成成功',
+            text: '請長按下方圖片進行儲存',
+            imageUrl: dataUrl, imageWidth: '100%',
+            background: '#0f0f13', color: '#fff', confirmButtonColor: '#f43f5e', confirmButtonText: '完成',
+            customClass: { popup: 'custom-modal', image: 'swal2-image' }
+        });
+    }, 600);
 };
 
 /* ================== 6. 會考系統 ================== */
@@ -511,9 +486,8 @@ window.generateQuizResultImage = function(title) {
     textGrad.addColorStop(0, '#fbbf24'); textGrad.addColorStop(1, '#f59e0b');
     ctx.fillStyle = textGrad; ctx.font = '900 100px "Segoe UI", sans-serif'; ctx.fillText(`🏆 ${title}`, 540, 1180);
 
-    // 浮水印
-    ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = 'bold 20px monospace'; 
-    ctx.fillText(WATERMARK_TEXT, 540, 1460);
+    ctx.fillStyle = '#475569'; ctx.font = 'bold 28px monospace'; ctx.fillText(`ISSUED: ${new Date().toISOString().split('T')[0]}`, 540, 1350);
+    ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = 'bold 24px monospace'; ctx.fillText(WATERMARK_TEXT, 540, 1460);
 
     const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
     Swal.fire({
