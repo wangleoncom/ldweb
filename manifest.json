@@ -1,0 +1,21 @@
+{
+  "name": "鹿🦌 官方粉絲站",
+  "short_name": "鹿 QA",
+  "description": "鹿🦌的專屬問答與粉絲互動平台",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#f43f5e",
+  "icons": [
+    {
+      "src": "avatar-main.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "avatar-main.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
