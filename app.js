@@ -1,36 +1,41 @@
 /* ==========================================================================
-   鹿🦌 QA 粉絲站 v19.0 - 究極修復特仕版 (app.js)
+   鹿🦌 QA 粉絲站 v20.0 - 終極防擠壓版 (app.js)
    ========================================================================== */
-const CURRENT_APP_VERSION = "19.0"; 
+const CURRENT_APP_VERSION = "20.0"; 
 
 const qaData = window.QA_DB || window.deerQuiz_DB || []; 
 const quizData = window.QUIZ_DB || window.deerQuiz_DB || [];
 
-let appSettings = { version: CURRENT_APP_VERSION, qaPerPage: 10, soundOn: true, hapticOn: true, theme: 'default', liquidGlass: false, exp: 0 };
+let appSettings = { version: CURRENT_APP_VERSION, qaPerPage: 8, soundOn: true, hapticOn: true, theme: 'dark', liquidGlass: false, exp: 0 };
 let currentAIModel = 1; 
 let aiContextMemory = { lastSubject: null };
-const WATERMARK_TEXT = "鹿🦌粉絲站 | wangleoncom.github.io/ldweb/";
+const WATERMARK_TEXT = "鹿🦌官方粉絲站 | wangleoncom.github.io/ldweb/";
 
-// 取得當前 CSS 變數顏色 (供 Canvas 使用)
 function getThemeColor(varName) { 
     return getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || '#f43f5e'; 
 }
 
-/* ================== 1. 系統初始化與防護 ================== */
+/* ================== 1. 初始化與防護 ================== */
 document.addEventListener('DOMContentLoaded', () => {
     checkVersionAndClearCache();
-    loadSettings(); // 安全載入，不會再導致無窮迴圈
+    loadSettings(); 
     renderTimeline();
     updateExpUI();
     
-    // 平滑關閉啟動畫面
+    // PWA 安裝偵測
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault(); window.deferredPrompt = e;
+        const promptEl = document.getElementById('pwa-prompt');
+        if(promptEl) promptEl.style.display = 'flex';
+    });
+
     setTimeout(() => {
         const splash = document.getElementById('splash');
         if (splash) {
             splash.style.opacity = '0';
             setTimeout(() => { splash.style.display = 'none'; initQA(); }, 400);
         } else initQA();
-    }, 1500);
+    }, 1200);
 });
 
 function hapticFeedback(type = 'light') {
@@ -40,12 +45,11 @@ function hapticFeedback(type = 'light') {
     else if(type === 'success') navigator.vibrate([15, 50, 15, 50, 20]);
 }
 
-/* 🏆 優化的經驗值系統 */
+/* 🏆 保證運作的經驗值系統 */
 function gainExp(amount) {
     if (typeof appSettings.exp !== 'number' || isNaN(appSettings.exp)) appSettings.exp = 0;
     appSettings.exp += amount;
-    // 靜默寫入 localStorage，不觸發其他 UI 刷新
-    localStorage.setItem('deerAppConfig_v19', JSON.stringify(appSettings)); 
+    localStorage.setItem('deerAppConfig_v20', JSON.stringify(appSettings)); 
     updateExpUI();
 }
 
@@ -76,10 +80,10 @@ window.showLevelInfo = function() {
 }
 
 function checkVersionAndClearCache() {
-    const saved = localStorage.getItem('deerAppConfig_v19');
+    const saved = localStorage.getItem('deerAppConfig_v20');
     if (saved) {
         try { if (JSON.parse(saved).version !== CURRENT_APP_VERSION) throw new Error("Old"); } 
-        catch(e) { localStorage.removeItem('deerAppConfig_v19'); }
+        catch(e) { localStorage.removeItem('deerAppConfig_v20'); }
     }
 }
 
@@ -95,13 +99,13 @@ window.switchTab = function(tabId, btn) {
     if(tabId === 'page-timeline') window.triggerTimelineAnim();
 };
 
-/* 🎬 電影級時間軸動畫 (修正防呆) */
+/* 🎬 電影級時間軸動畫 (鎖定防滑動) */
 window.triggerTimelineAnim = function() {
     const nodes = document.querySelectorAll('.timeline-node');
     const line = document.getElementById('tl-line');
     const container = document.getElementById('page-timeline');
     
-    if(!container) return; // 防呆
+    if(!container) return; 
 
     container.classList.add('timeline-scroll-lock');
     container.scrollTo({ top: 0 });
@@ -137,17 +141,16 @@ window.toggleSettings = function() {
 };
 
 function loadSettings() {
-    const saved = localStorage.getItem('deerAppConfig_v19');
+    const saved = localStorage.getItem('deerAppConfig_v20');
     if (saved) {
         try { appSettings = JSON.parse(saved); } catch (e) { console.error("Parse Error"); }
     }
     
     if (typeof appSettings.exp !== 'number') appSettings.exp = 0;
-    if (typeof appSettings.qaPerPage !== 'number') appSettings.qaPerPage = 10;
+    if (typeof appSettings.qaPerPage !== 'number') appSettings.qaPerPage = 8;
     if (typeof appSettings.theme !== 'string') appSettings.theme = 'default';
     appSettings.version = CURRENT_APP_VERSION;
 
-    // 安全更新 DOM
     const slider = document.getElementById('qa-per-page-slider');
     const display = document.getElementById('qa-count-display');
     const soundToggle = document.getElementById('sound-toggle');
@@ -160,25 +163,22 @@ function loadSettings() {
     if (hapticToggle) hapticToggle.checked = appSettings.hapticOn;
     if (liquidToggle) liquidToggle.checked = appSettings.liquidGlass;
     
-    // 套用主題 (不觸發 Save)
     applyThemeToDOM(appSettings.theme, appSettings.liquidGlass);
 }
 
-// 分離 DOM 套用邏輯，打破無窮迴圈
 function applyThemeToDOM(theme, isLiquid) {
     document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.setAttribute('data-liquid', isLiquid ? 'true' : 'false');
 }
 
-// 供按鈕點擊的主題切換函數
 window.changeTheme = function(theme) {
+    hapticFeedback();
     appSettings.theme = theme;
     applyThemeToDOM(theme, appSettings.liquidGlass);
-    saveSettings(); 
+    saveSettings(true); 
 }
 
-// 一般設定儲存
-window.saveSettings = function() {
+window.saveSettings = function(silent = false) {
     const soundToggle = document.getElementById('sound-toggle');
     const hapticToggle = document.getElementById('haptic-toggle');
     const liquidToggle = document.getElementById('liquid-toggle');
@@ -187,23 +187,31 @@ window.saveSettings = function() {
     if (hapticToggle) appSettings.hapticOn = hapticToggle.checked;
     if (liquidToggle) {
         appSettings.liquidGlass = liquidToggle.checked;
-        applyThemeToDOM(appSettings.theme, appSettings.liquidGlass); // 即時預覽材質
+        applyThemeToDOM(appSettings.theme, appSettings.liquidGlass); 
     }
     
-    localStorage.setItem('deerAppConfig_v19', JSON.stringify(appSettings));
-    if(appSettings.soundOn) playClickSound();
+    localStorage.setItem('deerAppConfig_v20', JSON.stringify(appSettings));
+    if(!silent && appSettings.soundOn) playClickSound();
 };
 
 window.updateQASetting = function(val) {
     appSettings.qaPerPage = parseInt(val);
     const display = document.getElementById('qa-count-display');
     if (display) display.innerText = `${val} 題`;
-    localStorage.setItem('deerAppConfig_v19', JSON.stringify(appSettings));
-    currentPage = 1; renderQA(1);
+    saveSettings(true); currentPage = 1; renderQA(1);
 };
 
 window.nukeAndReload = function() {
     hapticFeedback('heavy'); localStorage.clear(); sessionStorage.clear(); window.location.reload(true); 
+};
+
+window.installPWA = async function() {
+    if (window.deferredPrompt) {
+        window.deferredPrompt.prompt();
+        const { outcome } = await window.deferredPrompt.userChoice;
+        if (outcome === 'accepted') document.getElementById('pwa-prompt').style.display = 'none';
+        window.deferredPrompt = null;
+    }
 };
 
 window.shareApp = function() {
@@ -222,8 +230,8 @@ window.showChangelog = function() {
         title: '📝 更新日誌',
         html: `<div class="text-left text-xs space-y-3 mt-2">
                 <div class="border-l-2 border-[var(--primary)] pl-3">
-                    <div class="text-[var(--primary)] font-black">v19.0 - 究極修復版</div>
-                    <div class="text-slate-300 mt-1">✨ 徹底解決系統設定導致的卡死 Bug<br>📱 完美適配本地 CORS 阻擋防護機制<br>🎬 動畫與色盤引擎全面解耦<br>📍 AI 沉底排版二次優化</div>
+                    <div class="text-[var(--primary)] font-black">v20.0版</div>
+                    <div class="text-slate-300 mt-1">✨ 解決首頁卡片擠壓變形問題<br>📱 新增獨立頭像 avatar-profile.jpg<br>🎬 優化按鈕設計<br>📍 保證 AI 輸入框與底部導航不衝突</div>
                </div></div>`,
         background: 'var(--bg-start)', color: '#fff', confirmButtonColor: 'var(--primary)', customClass: { popup: 'custom-modal', title: 'text-sm' }
     });
@@ -233,6 +241,28 @@ window.showChangelog = function() {
 let currentPage = 1; let filteredQA = [...qaData];
 
 function initQA() { if (qaData.length > 0) renderQA(1); }
+
+window.handleSearchInput = function() {
+    const term = document.getElementById('qa-search').value.toLowerCase();
+    const box = document.getElementById('autocomplete-results');
+    if(!term) { box.classList.remove('show'); return; }
+    
+    const suggestions = qaData.filter(i => i.q.toLowerCase().includes(term) || i.a.toLowerCase().includes(term)).slice(0, 3);
+    if(suggestions.length > 0) {
+        box.innerHTML = suggestions.map(s => `
+            <div class="p-3 border-b border-white/5 hover:bg-white/5 cursor-pointer text-sm font-bold text-white line-clamp-1" onclick="selectSuggestion('${s.q}')">
+                <i class="fas fa-search text-[var(--primary)] mr-2 text-xs"></i>${s.q}
+            </div>
+        `).join('');
+        box.classList.add('show');
+    } else { box.classList.remove('show'); }
+}
+
+window.selectSuggestion = function(q) {
+    document.getElementById('qa-search').value = q;
+    document.getElementById('autocomplete-results').classList.remove('show');
+    filterQA();
+}
 
 window.filterQA = function() {
     const term = document.getElementById('qa-search').value.toLowerCase();
@@ -277,6 +307,7 @@ window.changePageTo = function(p) { hapticFeedback(); currentPage = p; renderQA(
 window.showAnswer = function(e, ans) {
     if(e.target.closest('button')) return; 
     hapticFeedback(); gainExp(3);
+    if(appSettings.soundOn) playClickSound();
     Swal.fire({text: ans, background:'var(--bg-start)', color:'#fff', confirmButtonColor:'var(--primary)', customClass:{popup:'custom-modal'}});
 }
 
@@ -338,7 +369,7 @@ window.renderQAImage = function(q, a) {
     }
 };
 
-/* ================== 4. 雙生 AI 系統 ================== */
+/* ================== 4. AI 系統 ================== */
 window.switchAIModel = function(id) {
     hapticFeedback(); currentAIModel = id;
     const slider = document.getElementById('model-slider');
@@ -419,8 +450,8 @@ function findBestMatch(userInput) {
 
 /* ================== 5. 動態時間軸 ================== */
 const timelineData = [
-    { date: "2021/11/29", title: "初次亮相", desc: "在 TikTok 發布了第一支影片。" },
-    { date: "2024/10/29", title: "一萬粉達成", desc: "里程碑突破，粉絲逐漸凝聚。" },
+    { date: "2021/11/29", title: "初次亮相", desc: "在 TikTok 發布了第一支影片，夢想的起點。" },
+    { date: "2024/10/29", title: "一萬粉達成", desc: "里程碑突破，粉絲逐漸凝聚成為麋鹿大軍。" },
     { date: "2025/03/17", title: "十萬粉絲集結", desc: "官方認證十萬大軍！" },
     { date: "2026/01/13", title: "四十萬粉達成 🎉", desc: "勢不可擋！感謝每一位麋鹿的支持！", highlight: true }
 ];
@@ -443,7 +474,7 @@ function renderTimeline() {
     }).join('');
 }
 
-/* ================== 6. 照片 ID 卡生成 (含防呆) ================== */
+/* ================== 6. 照片 ID 卡生成 ================== */
 window.generateIDCard = function() {
     hapticFeedback('heavy'); gainExp(15);
     const nameInput = document.getElementById('id-name').value.trim() || "神秘麋鹿";
