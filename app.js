@@ -1,44 +1,90 @@
 /* ==========================================================================
-   鹿🦌 QA 粉絲站 v14.1 - 全息科技繪圖版 (app.js)
+   鹿🦌 QA 粉絲站 v19.0 - 究極修復特仕版 (app.js)
    ========================================================================== */
-const CURRENT_APP_VERSION = "14.1"; 
+const CURRENT_APP_VERSION = "19.0"; 
 
 const qaData = window.QA_DB || window.deerQuiz_DB || []; 
 const quizData = window.QUIZ_DB || window.deerQuiz_DB || [];
 
-let appSettings = { version: CURRENT_APP_VERSION, qaPerPage: 8, soundOn: true, largeFont: false };
+let appSettings = { version: CURRENT_APP_VERSION, qaPerPage: 10, soundOn: true, hapticOn: true, theme: 'default', liquidGlass: false, exp: 0 };
 let currentAIModel = 1; 
+let aiContextMemory = { lastSubject: null };
+const WATERMARK_TEXT = "鹿🦌粉絲站 | wangleoncom.github.io/ldweb/";
 
-const WATERMARK_TEXT = "鹿🦌粉絲站 | https://wangleoncom.github.io/ldweb/";
+// 取得當前 CSS 變數顏色 (供 Canvas 使用)
+function getThemeColor(varName) { 
+    return getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || '#f43f5e'; 
+}
 
-/* ================== 1. 系統初始化 ================== */
+/* ================== 1. 系統初始化與防護 ================== */
 document.addEventListener('DOMContentLoaded', () => {
     checkVersionAndClearCache();
-    loadSettings();
-
+    loadSettings(); // 安全載入，不會再導致無窮迴圈
+    renderTimeline();
+    updateExpUI();
+    
+    // 平滑關閉啟動畫面
     setTimeout(() => {
         const splash = document.getElementById('splash');
         if (splash) {
             splash.style.opacity = '0';
             setTimeout(() => { splash.style.display = 'none'; initQA(); }, 400);
         } else initQA();
-    }, 1000);
+    }, 1500);
 });
 
+function hapticFeedback(type = 'light') {
+    if(!appSettings.hapticOn || !navigator.vibrate) return;
+    if(type === 'light') navigator.vibrate(15);
+    else if(type === 'heavy') navigator.vibrate([30, 50, 30]);
+    else if(type === 'success') navigator.vibrate([15, 50, 15, 50, 20]);
+}
+
+/* 🏆 優化的經驗值系統 */
+function gainExp(amount) {
+    if (typeof appSettings.exp !== 'number' || isNaN(appSettings.exp)) appSettings.exp = 0;
+    appSettings.exp += amount;
+    // 靜默寫入 localStorage，不觸發其他 UI 刷新
+    localStorage.setItem('deerAppConfig_v19', JSON.stringify(appSettings)); 
+    updateExpUI();
+}
+
+function updateExpUI() {
+    if (typeof appSettings.exp !== 'number' || isNaN(appSettings.exp)) appSettings.exp = 0;
+    let level = 1, title = "初見麋鹿", maxExp = 50;
+    const exp = appSettings.exp;
+    
+    if(exp >= 1000) { level = 6; title = "鹿的傳說"; maxExp = 1000; }
+    else if(exp >= 600) { level = 5; title = "鹿的守護神"; maxExp = 1000; }
+    else if(exp >= 300) { level = 4; title = "核心幹部"; maxExp = 600; }
+    else if(exp >= 150) { level = 3; title = "忠誠麋鹿"; maxExp = 300; }
+    else if(exp >= 50) { level = 2; title = "資深粉絲"; maxExp = 150; }
+    
+    const badge = document.getElementById('level-badge');
+    const bar = document.getElementById('exp-bar');
+    if(badge) badge.innerText = `LV.${level} ${title}`;
+    if(bar) bar.style.width = level === 6 ? '100%' : `${Math.min(100, (exp / maxExp) * 100)}%`;
+}
+
+window.showLevelInfo = function() {
+    hapticFeedback();
+    Swal.fire({
+        title: '🌟 粉絲成就系統',
+        html: `<div class="text-center"><p class="text-slate-300 text-sm mb-4">目前經驗值: <b class="text-[var(--primary)] text-xl">${appSettings.exp} EXP</b></p><div class="text-xs text-slate-400 space-y-2 bg-black/30 p-4 rounded-xl border border-white/5"><p>🔍 搜尋問題：+5 EXP</p><p>👀 查看解答：+3 EXP</p><p>🤖 與 AI 互動：+10 EXP</p><p>🎓 會考答對一題：+20 EXP</p><p>🏆 完成大會考：+50 EXP</p><p>💳 生成認證卡：+15 EXP</p></div></div>`,
+        background: 'var(--bg-start)', color: '#fff', confirmButtonColor: 'var(--primary)', customClass:{popup:'custom-modal'}
+    });
+}
+
 function checkVersionAndClearCache() {
-    const saved = localStorage.getItem('deerAppConfig_v14_1');
+    const saved = localStorage.getItem('deerAppConfig_v19');
     if (saved) {
         try { if (JSON.parse(saved).version !== CURRENT_APP_VERSION) throw new Error("Old"); } 
-        catch(e) { localStorage.removeItem('deerAppConfig_v14_1'); }
+        catch(e) { localStorage.removeItem('deerAppConfig_v19'); }
     }
 }
 
-window.nukeAndReload = function() {
-    localStorage.clear(); sessionStorage.clear(); window.location.reload(true); 
-};
-
 window.switchTab = function(tabId, btn) {
-    if(appSettings.soundOn) playClickSound();
+    hapticFeedback(); if(appSettings.soundOn) playClickSound();
     document.querySelectorAll('.page').forEach(sec => sec.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
@@ -46,29 +92,41 @@ window.switchTab = function(tabId, btn) {
     
     if(tabId === 'page-home') document.getElementById('page-home').scrollTo({ top: 0, behavior: 'smooth' });
     if(tabId === 'page-ai') document.getElementById('chat-window').scrollTop = document.getElementById('chat-window').scrollHeight;
-    if(tabId === 'page-timeline') triggerTimelineAnim();
+    if(tabId === 'page-timeline') window.triggerTimelineAnim();
 };
 
-function triggerTimelineAnim() {
+/* 🎬 電影級時間軸動畫 (修正防呆) */
+window.triggerTimelineAnim = function() {
     const nodes = document.querySelectorAll('.timeline-node');
     const line = document.getElementById('tl-line');
+    const container = document.getElementById('page-timeline');
     
+    if(!container) return; // 防呆
+
+    container.classList.add('timeline-scroll-lock');
+    container.scrollTo({ top: 0 });
     if(line) line.classList.remove('draw');
     nodes.forEach(n => n.classList.remove('animate-pop'));
     
     setTimeout(() => {
         if(line) line.classList.add('draw');
-        nodes.forEach((n, idx) => {
-            setTimeout(() => n.classList.add('animate-pop'), 400 + (idx * 250));
+        nodes.forEach((n, idx) => { 
+            setTimeout(() => {
+                n.classList.add('animate-pop');
+                if(appSettings.soundOn && idx > 0) playClickSound(); 
+            }, 500 + (idx * 300)); 
         });
+        
+        setTimeout(() => {
+            container.classList.remove('timeline-scroll-lock');
+        }, 500 + (nodes.length * 300) + 200);
     }, 100);
-}
+};
 
-/* ================== 2. 設定管理與全局分享 ================== */
+/* ================== 2. 安全設定管理 ================== */
 window.toggleSettings = function() {
-    if(appSettings.soundOn) playClickSound();
-    const modal = document.getElementById('settings-modal');
-    const content = document.getElementById('settings-content');
+    hapticFeedback();
+    const modal = document.getElementById('settings-modal'); const content = document.getElementById('settings-content');
     if (modal.classList.contains('hidden')) {
         modal.classList.remove('hidden'); void modal.offsetWidth; 
         modal.classList.remove('opacity-0'); content.classList.remove('scale-95');
@@ -79,46 +137,99 @@ window.toggleSettings = function() {
 };
 
 function loadSettings() {
-    const saved = localStorage.getItem('deerAppConfig_v14_1');
+    const saved = localStorage.getItem('deerAppConfig_v19');
     if (saved) {
-        appSettings = JSON.parse(saved);
-        document.getElementById('qa-per-page-slider').value = appSettings.qaPerPage;
-        document.getElementById('qa-count-display').innerText = `${appSettings.qaPerPage} 題`;
-        document.getElementById('sound-toggle').checked = appSettings.soundOn;
-        document.getElementById('font-toggle').checked = appSettings.largeFont;
-        applyFontSetting();
+        try { appSettings = JSON.parse(saved); } catch (e) { console.error("Parse Error"); }
     }
+    
+    if (typeof appSettings.exp !== 'number') appSettings.exp = 0;
+    if (typeof appSettings.qaPerPage !== 'number') appSettings.qaPerPage = 10;
+    if (typeof appSettings.theme !== 'string') appSettings.theme = 'default';
+    appSettings.version = CURRENT_APP_VERSION;
+
+    // 安全更新 DOM
+    const slider = document.getElementById('qa-per-page-slider');
+    const display = document.getElementById('qa-count-display');
+    const soundToggle = document.getElementById('sound-toggle');
+    const hapticToggle = document.getElementById('haptic-toggle');
+    const liquidToggle = document.getElementById('liquid-toggle');
+
+    if (slider) slider.value = appSettings.qaPerPage;
+    if (display) display.innerText = `${appSettings.qaPerPage} 題`;
+    if (soundToggle) soundToggle.checked = appSettings.soundOn;
+    if (hapticToggle) hapticToggle.checked = appSettings.hapticOn;
+    if (liquidToggle) liquidToggle.checked = appSettings.liquidGlass;
+    
+    // 套用主題 (不觸發 Save)
+    applyThemeToDOM(appSettings.theme, appSettings.liquidGlass);
 }
 
+// 分離 DOM 套用邏輯，打破無窮迴圈
+function applyThemeToDOM(theme, isLiquid) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute('data-liquid', isLiquid ? 'true' : 'false');
+}
+
+// 供按鈕點擊的主題切換函數
+window.changeTheme = function(theme) {
+    appSettings.theme = theme;
+    applyThemeToDOM(theme, appSettings.liquidGlass);
+    saveSettings(); 
+}
+
+// 一般設定儲存
 window.saveSettings = function() {
-    appSettings.soundOn = document.getElementById('sound-toggle').checked;
-    appSettings.largeFont = document.getElementById('font-toggle').checked;
-    localStorage.setItem('deerAppConfig_v14_1', JSON.stringify(appSettings));
-    applyFontSetting();
+    const soundToggle = document.getElementById('sound-toggle');
+    const hapticToggle = document.getElementById('haptic-toggle');
+    const liquidToggle = document.getElementById('liquid-toggle');
+    
+    if (soundToggle) appSettings.soundOn = soundToggle.checked;
+    if (hapticToggle) appSettings.hapticOn = hapticToggle.checked;
+    if (liquidToggle) {
+        appSettings.liquidGlass = liquidToggle.checked;
+        applyThemeToDOM(appSettings.theme, appSettings.liquidGlass); // 即時預覽材質
+    }
+    
+    localStorage.setItem('deerAppConfig_v19', JSON.stringify(appSettings));
+    if(appSettings.soundOn) playClickSound();
 };
 
 window.updateQASetting = function(val) {
     appSettings.qaPerPage = parseInt(val);
-    document.getElementById('qa-count-display').innerText = `${val} 題`;
-    localStorage.setItem('deerAppConfig_v14_1', JSON.stringify(appSettings));
+    const display = document.getElementById('qa-count-display');
+    if (display) display.innerText = `${val} 題`;
+    localStorage.setItem('deerAppConfig_v19', JSON.stringify(appSettings));
     currentPage = 1; renderQA(1);
 };
 
-function applyFontSetting() {
-    if(appSettings.largeFont) document.getElementById('app-body').classList.add('text-[16px]');
-    else document.getElementById('app-body').classList.remove('text-[16px]');
-}
+window.nukeAndReload = function() {
+    hapticFeedback('heavy'); localStorage.clear(); sessionStorage.clear(); window.location.reload(true); 
+};
 
 window.shareApp = function() {
+    hapticFeedback();
     if (navigator.share) {
-        navigator.share({ title: '鹿🦌 官方粉絲資訊站', text: '來看看鹿的小秘密跟會考測驗吧！', url: window.location.href }).catch(e=>{});
+        navigator.share({ title: '鹿🦌 官方粉絲站', text: '來看看鹿的秘密跟測驗吧！', url: window.location.href }).catch(e=>{});
     } else {
         navigator.clipboard.writeText(window.location.href);
-        Swal.fire({ title: '已複製網址', text: '可以直接貼上分享給朋友囉！', icon: 'success', background: '#121215', color: '#fff', confirmButtonColor: '#f43f5e' });
+        Swal.fire({ title: '已複製網址', icon: 'success', timer:1500, showConfirmButton:false, background: 'var(--bg-start)', color: '#fff' });
     }
 };
 
-/* ================== 3. QA 渲染與極速翻頁 ================== */
+window.showChangelog = function() {
+    hapticFeedback();
+    Swal.fire({
+        title: '📝 更新日誌',
+        html: `<div class="text-left text-xs space-y-3 mt-2">
+                <div class="border-l-2 border-[var(--primary)] pl-3">
+                    <div class="text-[var(--primary)] font-black">v19.0 - 究極修復版</div>
+                    <div class="text-slate-300 mt-1">✨ 徹底解決系統設定導致的卡死 Bug<br>📱 完美適配本地 CORS 阻擋防護機制<br>🎬 動畫與色盤引擎全面解耦<br>📍 AI 沉底排版二次優化</div>
+               </div></div>`,
+        background: 'var(--bg-start)', color: '#fff', confirmButtonColor: 'var(--primary)', customClass: { popup: 'custom-modal', title: 'text-sm' }
+    });
+};
+
+/* ================== 3. QA 渲染與分享 ================== */
 let currentPage = 1; let filteredQA = [...qaData];
 
 function initQA() { if (qaData.length > 0) renderQA(1); }
@@ -126,7 +237,7 @@ function initQA() { if (qaData.length > 0) renderQA(1); }
 window.filterQA = function() {
     const term = document.getElementById('qa-search').value.toLowerCase();
     if (!term) filteredQA = [...qaData];
-    else filteredQA = qaData.filter(item => item.q.toLowerCase().includes(term) || item.a.toLowerCase().includes(term));
+    else { filteredQA = qaData.filter(item => item.q.toLowerCase().includes(term) || item.a.toLowerCase().includes(term)); gainExp(5); }
     currentPage = 1; renderQA(currentPage);
 };
 
@@ -142,180 +253,155 @@ function renderQA(page) {
     currentItems.forEach((item, index) => {
         const num = String(start + index + 1).padStart(2, '0');
         list.innerHTML += `
-            <div class="glass-card p-4 flex flex-col justify-between cursor-pointer active:scale-95 transition-transform relative group" onclick="showAnswer(event, '${item.a}')">
+            <div class="glass-card p-4 flex flex-col justify-between cursor-pointer active:scale-95 transition-transform relative group border-l-2 border-l-[var(--primary)]" onclick="showAnswer(event, '${item.a}')">
                 <div class="flex justify-between items-start mb-2">
-                   <div class="w-6 h-6 rounded-full bg-pink-500/20 text-pink-500 flex items-center justify-center font-black text-[10px]">Q</div>
+                   <div class="w-6 h-6 rounded-full bg-[var(--primary)]/20 text-[var(--primary)] flex items-center justify-center font-black text-[10px]">Q</div>
                    <div class="text-slate-500 text-[9px] font-black tracking-widest bg-white/5 px-2 py-0.5 rounded">#${num}</div>
                 </div>
-                <h3 class="font-bold text-white mt-1 mb-2 line-clamp-2 leading-relaxed pr-6">${item.q}</h3>
-                <button onclick="openQAShareOptions(event, '${item.q}', '${item.a}')" class="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-pink-500 transition-colors">
-                    <i class="fas fa-share text-xs"></i>
-                </button>
+                <h3 class="font-bold text-white mt-1 mb-2 line-clamp-2 leading-relaxed pr-8">${item.q}</h3>
+                <button onclick="openQAShare(event, '${item.q}', '${item.a}')" class="absolute bottom-3 right-3 w-7 h-7 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-[var(--primary)] transition-all"><i class="fas fa-share-alt text-[10px]"></i></button>
             </div>`;
     });
 
     controls.innerHTML = `
-        <button onclick="changePageTo(1)" class="w-8 h-8 flex items-center justify-center bg-white/10 text-slate-400 rounded-full active:bg-pink-500 disabled:opacity-20" ${page === 1 ? 'disabled' : ''}><i class="fas fa-angle-double-left text-[10px]"></i></button>
-        <button onclick="changePageTo(${page - 1})" class="w-8 h-8 flex items-center justify-center bg-white/10 text-white rounded-full active:bg-pink-500 disabled:opacity-20" ${page === 1 ? 'disabled' : ''}><i class="fas fa-chevron-left text-[10px]"></i></button>
-        <span class="text-slate-400 font-black text-[10px] tracking-[0.2em] px-1">第 ${page} / ${totalPages} 頁</span>
-        <button onclick="changePageTo(${page + 1})" class="w-8 h-8 flex items-center justify-center bg-white/10 text-white rounded-full active:bg-pink-500 disabled:opacity-20" ${page === totalPages ? 'disabled' : ''}><i class="fas fa-chevron-right text-[10px]"></i></button>
-        <button onclick="changePageTo(${totalPages})" class="w-8 h-8 flex items-center justify-center bg-white/10 text-slate-400 rounded-full active:bg-pink-500 disabled:opacity-20" ${page === totalPages ? 'disabled' : ''}><i class="fas fa-angle-double-right text-[10px]"></i></button>
+        <button onclick="changePageTo(1)" class="w-8 h-8 flex items-center justify-center bg-white/10 text-slate-400 rounded-full" ${page === 1 ? 'disabled' : ''}><i class="fas fa-angles-left text-[10px]"></i></button>
+        <button onclick="changePageTo(${page - 1})" class="w-8 h-8 flex items-center justify-center bg-white/10 text-white rounded-full" ${page === 1 ? 'disabled' : ''}><i class="fas fa-chevron-left text-[10px]"></i></button>
+        <span class="text-slate-400 font-black text-[10px] tracking-[0.2em] uppercase">第 ${page}/${totalPages} 頁</span>
+        <button onclick="changePageTo(${page + 1})" class="w-8 h-8 flex items-center justify-center bg-white/10 text-white rounded-full" ${page === totalPages ? 'disabled' : ''}><i class="fas fa-chevron-right text-[10px]"></i></button>
+        <button onclick="changePageTo(${totalPages})" class="w-8 h-8 flex items-center justify-center bg-white/10 text-slate-500 rounded-full" ${page === totalPages ? 'disabled' : ''}><i class="fas fa-angles-right text-[10px]"></i></button>
     `;
 }
 
+window.changePageTo = function(p) { hapticFeedback(); currentPage = p; renderQA(p); document.getElementById('page-home').scrollTo({ top: 0, behavior: 'smooth' }); }
+
 window.showAnswer = function(e, ans) {
     if(e.target.closest('button')) return; 
-    if(appSettings.soundOn) playClickSound();
-    Swal.fire({title:'解答', text: ans, background:'#121215', color:'#fff', confirmButtonColor:'#f43f5e', customClass:{popup:'custom-modal', title:'text-pink-500 text-lg'}});
+    hapticFeedback(); gainExp(3);
+    Swal.fire({text: ans, background:'var(--bg-start)', color:'#fff', confirmButtonColor:'var(--primary)', customClass:{popup:'custom-modal'}});
 }
 
-window.changePageTo = function(targetPage) {
-    if(appSettings.soundOn) playClickSound();
-    currentPage = targetPage; renderQA(currentPage);
-    document.getElementById('page-home').scrollTo({ top: 0, behavior: 'smooth' });
+window.openQAShare = function(e, q, a) {
+    e.stopPropagation(); hapticFeedback();
+    Swal.fire({
+        title: '分享問答',
+        html: `<div class="grid grid-cols-2 gap-3 mt-2">
+                <button onclick="copyQAText('${q}','${a}')" class="bg-black/50 py-4 rounded-xl text-xs font-bold flex flex-col items-center gap-2 border border-white/10 hover:bg-white/10"><i class="fas fa-copy text-lg text-[var(--secondary)]"></i>複製文字</button>
+                <button onclick="renderQAImage('${q}','${a}')" class="bg-[var(--primary)]/20 border border-[var(--primary)]/30 py-4 rounded-xl text-xs font-bold text-[var(--primary)] flex flex-col items-center gap-2 hover:bg-[var(--primary)] hover:text-white transition"><i class="fas fa-image text-lg"></i>生成圖片</button>
+               </div>`,
+        showConfirmButton: false, background: 'var(--bg-start)', color: '#fff', customClass:{popup:'custom-modal'}
+    });
 };
 
-/* --- QA 分享圖片 --- */
-window.openQAShareOptions = function(e, q, a) {
-    e.stopPropagation();
-    if(appSettings.soundOn) playClickSound();
-    Swal.fire({
-        title: '分享這則 QA',
-        html: `
-            <div class="grid grid-cols-2 gap-3 mt-2">
-                <button onclick="shareQAText('${q}', '${a}')" class="bg-slate-800 py-4 rounded-xl text-white font-bold hover:bg-slate-700 transition flex flex-col items-center gap-2">
-                    <i class="fas fa-copy text-xl text-blue-400"></i> 複製文字
-                </button>
-                <button onclick="shareQAImage('${q}', '${a}')" class="bg-pink-500/20 border border-pink-500/30 py-4 rounded-xl text-pink-400 font-bold hover:bg-pink-500 hover:text-white transition flex flex-col items-center gap-2">
-                    <i class="fas fa-image text-xl"></i> 生成圖片
-                </button>
-            </div>
-        `,
-        showConfirmButton: false, background: '#121215', color: '#fff', customClass: { popup: 'custom-modal', title: 'text-base' }
-    });
-}
-
-window.shareQAText = function(q, a) {
-    const text = `Q: ${q}\nA: ${a}\n\n${WATERMARK_TEXT}`;
-    navigator.clipboard.writeText(text);
-    Swal.fire({ title: '複製成功', icon: 'success', timer: 1500, showConfirmButton: false, background: '#121215', color: '#fff' });
-}
+window.copyQAText = function(q, a) {
+    navigator.clipboard.writeText(`Q: ${q}\nA: ${a}\n\n來自 ${WATERMARK_TEXT}`);
+    Swal.fire({ title: '複製成功', icon: 'success', timer: 1000, showConfirmButton: false, background: 'var(--bg-start)', color: '#fff' });
+};
 
 function wrapText(context, text, x, y, maxWidth, lineHeight) {
     const words = text.split(''); let line = ''; let currentY = y;
     for(let n = 0; n < words.length; n++) {
-        let testLine = line + words[n];
-        let metrics = context.measureText(testLine);
-        if (metrics.width > maxWidth && n > 0) {
-            context.fillText(line, x, currentY); line = words[n]; currentY += lineHeight;
-        } else { line = testLine; }
+        let testLine = line + words[n]; let metrics = context.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) { context.fillText(line, x, currentY); line = words[n]; currentY += lineHeight; }
+        else { line = testLine; }
     }
-    context.fillText(line, x, currentY);
-    return currentY + lineHeight;
+    context.fillText(line, x, currentY); return currentY + lineHeight;
 }
 
-window.shareQAImage = function(q, a) {
+window.renderQAImage = function(q, a) {
     const canvas = document.getElementById('qa-canvas'); const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#0a0a0f'; ctx.fillRect(0, 0, 1080, 1080);
-    const grad = ctx.createLinearGradient(0, 0, 1080, 1080);
-    grad.addColorStop(0, 'rgba(244, 63, 94, 0.2)'); grad.addColorStop(1, 'rgba(59, 130, 246, 0.1)');
-    ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1080);
-    ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 4; roundRect(ctx, 40, 40, 1000, 1000, 40); ctx.stroke();
+    const colorPrim = getThemeColor('--primary'); const colorSec = getThemeColor('--secondary'); const colorBg = getThemeColor('--bg-start');
 
-    ctx.fillStyle = '#f43f5e'; ctx.font = '900 60px "Segoe UI"'; ctx.fillText('Q.', 100, 150);
-    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 50px "PingFang TC", sans-serif'; ctx.textAlign = "left";
-    let nextY = wrapText(ctx, q, 100, 230, 880, 70);
+    ctx.fillStyle = colorBg; ctx.fillRect(0, 0, 1080, 1080);
+    const grad = ctx.createLinearGradient(0,0,1080,1080); grad.addColorStop(0, colorPrim+'33'); grad.addColorStop(1, colorBg);
+    ctx.fillStyle = grad; ctx.fillRect(0,0,1080,1080);
+    
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.roundRect(40,40,1000,1000,40); ctx.stroke();
 
-    ctx.fillStyle = '#3b82f6'; ctx.font = '900 60px "Segoe UI"'; ctx.fillText('A.', 100, nextY + 60);
-    ctx.fillStyle = '#cbd5e1'; ctx.font = '50px "PingFang TC", sans-serif'; 
-    wrapText(ctx, a, 100, nextY + 140, 880, 75);
+    ctx.textAlign = "left";
+    ctx.fillStyle = colorPrim; ctx.font = '900 60px "Segoe UI"'; ctx.fillText('Q.', 100, 180);
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 45px "PingFang TC"'; 
+    let nextY = wrapText(ctx, q, 100, 260, 880, 70);
+    
+    ctx.fillStyle = colorSec; ctx.font = '900 60px "Segoe UI"'; ctx.fillText('A.', 100, nextY + 80);
+    ctx.fillStyle = '#cbd5e1'; ctx.font = '45px "PingFang TC"'; 
+    wrapText(ctx, a, 100, nextY + 160, 880, 70);
 
-    ctx.textAlign = "center"; ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = 'bold 24px monospace'; 
+    ctx.textAlign = "center"; ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = 'bold 24px monospace';
     ctx.fillText(WATERMARK_TEXT, 540, 1020);
 
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-    Swal.fire({
-        title: '分享圖片已生成', text: '請長按圖片進行儲存',
-        imageUrl: dataUrl, imageWidth: '100%',
-        background: '#121215', color: '#fff', confirmButtonColor: '#f43f5e', confirmButtonText: '完成',
-        customClass: { popup: 'custom-modal', image: 'swal2-image' }
-    });
-}
+    try {
+        const url = canvas.toDataURL('image/jpeg', 0.95);
+        Swal.fire({ title: '長按儲存圖片', imageUrl: url, imageWidth: '100%', background: 'var(--bg-start)', color: '#fff', confirmButtonColor: 'var(--primary)', customClass: { popup: 'custom-modal', image: 'swal2-image' }});
+    } catch(e) {
+        Swal.fire('無法生成', '本地端瀏覽器阻擋了圖片生成，請上傳至 GitHub Pages 後再試。', 'error');
+    }
+};
 
-/* ================== 4. AI 系統 ================== */
-window.switchAIModel = function(modelId) {
-    if(appSettings.soundOn) playClickSound();
-    currentAIModel = modelId;
+/* ================== 4. 雙生 AI 系統 ================== */
+window.switchAIModel = function(id) {
+    hapticFeedback(); currentAIModel = id;
     const slider = document.getElementById('model-slider');
-    const btn1 = document.getElementById('btn-model-1'); const btn2 = document.getElementById('btn-model-2');
-    const chat = document.getElementById('chat-window'); const btnSend = document.getElementById('ai-send-btn');
-    const avatar = document.getElementById('ai-current-avatar'); const nameLabel = document.getElementById('ai-current-name');
+    const chat = document.getElementById('chat-window');
     
-    if(modelId === 1) {
+    if(id === 1) {
         slider.style.transform = 'translateX(0)';
-        btn1.classList.replace('text-slate-400', 'text-white'); btn2.classList.replace('text-white', 'text-slate-400');
-        btn1.querySelector('img').style.opacity = '1'; btn2.querySelector('img').style.opacity = '0.5';
-        btnSend.className = "w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all active:scale-90";
-        avatar.src = "ai-model-1.jpg"; avatar.className = "w-10 h-10 rounded-full object-cover border-2 border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]";
-        nameLabel.innerText = "精準智庫"; nameLabel.className = "text-[14px] font-bold text-blue-400";
-        chat.innerHTML += `<div class="max-w-[85%] self-start glass-card p-4 shadow-lg text-sm leading-relaxed border-t-2 border-t-blue-500 msg-enter text-slate-300">系統切換：載入【精準麋鹿】。<br>將提供嚴謹的答案比對。</div>`;
+        chat.innerHTML += `<div class="max-w-[85%] self-start glass-card p-3 shadow-lg text-xs leading-relaxed border-l-4 border-l-[var(--secondary)] msg-enter text-slate-300 italic">系統切換：已載入【精準麋鹿】。將採取嚴格比對模式。</div>`;
     } else {
         slider.style.transform = 'translateX(100%)';
-        btn1.classList.replace('text-white', 'text-slate-400'); btn2.classList.replace('text-slate-400', 'text-white');
-        btn1.querySelector('img').style.opacity = '0.5'; btn2.querySelector('img').style.opacity = '1';
-        btnSend.className = "w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white shadow-[0_0_15px_rgba(244,63,94,0.4)] transition-all active:scale-90";
-        avatar.src = "ai-model-2.jpg"; avatar.className = "w-10 h-10 rounded-full object-cover border-2 border-pink-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]";
-        nameLabel.innerText = "元氣小鹿"; nameLabel.className = "text-[14px] font-bold text-pink-400";
-        chat.innerHTML += `<div class="max-w-[85%] self-start glass-card p-4 shadow-lg text-sm leading-relaxed border-t-2 border-t-pink-500 msg-enter text-slate-300">系統切換：載入【元氣麋鹿】。<br>呀吼！有什麼秘密想問我呢？</div>`;
+        chat.innerHTML += `<div class="max-w-[85%] self-start glass-card p-3 shadow-lg text-xs leading-relaxed border-l-4 border-l-[var(--primary)] msg-enter text-slate-300 italic">呀吼～！我是【元氣麋鹿】✨，想知道什麼盡管問喔！</div>`;
     }
     chat.scrollTop = chat.scrollHeight;
 };
 
 window.handleAIKeyPress = function(e) { if (e.key === 'Enter') sendAIMessage(); };
 window.sendAIMessage = function() {
-    const inputEl = document.getElementById('ai-input'); const text = inputEl.value.trim(); if (!text) return;
-    if(appSettings.soundOn) playClickSound();
+    const inputEl = document.getElementById('ai-input'); let text = inputEl.value.trim(); if (!text) return;
+    hapticFeedback(); gainExp(10);
 
     const chat = document.getElementById('chat-window');
-    chat.innerHTML += `<div class="max-w-[85%] self-end glass-card p-3 shadow-lg text-sm leading-relaxed border border-white/5 bg-[#1a1a1f] ml-auto text-right msg-enter">${text}</div>`;
+    chat.innerHTML += `<div class="max-w-[85%] self-end glass-card p-3 shadow-lg text-sm leading-relaxed border border-white/5 bg-white/10 ml-auto text-right msg-enter">${text}</div>`;
     inputEl.value = ''; chat.scrollTop = chat.scrollHeight;
 
     const typingId = 'typing-' + Date.now();
-    chat.innerHTML += `<div id="${typingId}" class="max-w-[85%] self-start glass-card p-3 shadow-lg border border-white/5 bg-white/5 msg-enter"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+    chat.innerHTML += `<div id="${typingId}" class="max-w-[85%] self-start glass-card p-3 shadow-lg border border-white/5 bg-black/50 msg-enter"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
     chat.scrollTop = chat.scrollHeight;
+
+    if((text.includes("那") || text.includes("多少")) && aiContextMemory.lastSubject) {
+        text = aiContextMemory.lastSubject + " " + text; 
+    }
 
     const bestMatch = findBestMatch(text);
     
     setTimeout(() => {
         document.getElementById(typingId).remove();
         let reply = ""; let sourceBtn = "";
-        if (currentAIModel === 1) {
-            if (bestMatch.score > 0.15) {
-                reply = `分析結果：<br><b class="text-blue-400 mt-1 block">${bestMatch.item.a}</b>`;
-                sourceBtn = `<button onclick="showSource('${bestMatch.item.q}', '${bestMatch.item.a}')" class="mt-2 text-[10px] text-slate-500 bg-black/50 px-2 py-1 rounded border border-white/10 hover:text-white"><i class="fas fa-search"></i> 來源追蹤</button>`;
-            } else reply = "無法在現有資料庫中找到精確配對。請提供更多關鍵字。";
+        
+        if (bestMatch.score > 0.15) {
+            aiContextMemory.lastSubject = extractSubject(bestMatch.item.q);
+            if(currentAIModel === 1) reply = `根據資料分析 📊：<br><b class="text-[var(--secondary)] mt-1 block">${bestMatch.item.a}</b>`;
+            else reply = `嘿嘿！這題我知道 (๑•̀ㅂ•́)و✧：<br><b class="text-[var(--primary)] mt-1 block">${bestMatch.item.a}</b>`;
+            sourceBtn = `<button onclick="showSource('${bestMatch.item.q}', '${bestMatch.item.a}')" class="mt-3 text-[10px] text-slate-500 bg-white/5 px-2 py-1 rounded hover:text-white transition active:scale-95"><i class="fas fa-search"></i> 追蹤來源</button>`;
         } else {
-            if (bestMatch.score > 0.1) {
-                reply = `嘿嘿！這題我知道：<br><b class="text-pink-400 mt-1 block">${bestMatch.item.a}</b> (๑•̀ㅂ•́)و✧`;
-                sourceBtn = `<button onclick="showSource('${bestMatch.item.q}', '${bestMatch.item.a}')" class="mt-2 text-[10px] text-slate-500 bg-black/50 px-2 py-1 rounded border border-white/10 hover:text-white"><i class="fas fa-paw"></i> 看看原本的題目</button>`;
-            } else {
-                const fallbacks = ["這題太難了啦！下次直播直接問鹿吧🦌", "嗚嗚...小鹿的腦袋當機了 🤯"];
-                reply = fallbacks[Math.floor(Math.random() * fallbacks.length)];
-            }
+            if(currentAIModel === 1) reply = "資料庫中暫無此紀錄 🔍。請提供更精確的關鍵字。";
+            else reply = "嗚嗚...小鹿的腦袋當機了，這題我不知道啦 (ಥ﹏ಥ)";
         }
-        const borderColor = currentAIModel === 1 ? 'border-l-2 border-l-blue-500' : 'border-l-2 border-l-pink-500';
-        chat.innerHTML += `<div class="max-w-[85%] self-start glass-card p-3 shadow-lg text-sm leading-relaxed bg-white/5 msg-enter ${borderColor}">${reply}${sourceBtn}</div>`;
-        chat.scrollTop = chat.scrollHeight; if(appSettings.soundOn) playClickSound();
-    }, 800 + Math.random() * 600); 
+
+        const borderColor = currentAIModel === 1 ? 'border-l-4 border-l-[var(--secondary)]' : 'border-l-4 border-l-[var(--primary)]';
+        chat.innerHTML += `<div class="max-w-[85%] self-start glass-card p-4 shadow-lg text-sm leading-relaxed bg-black/50 msg-enter ${borderColor}">${reply}${sourceBtn}</div>`;
+        chat.scrollTop = chat.scrollHeight; hapticFeedback('light');
+        if(appSettings.soundOn) playClickSound();
+    }, 800 + Math.random() * 500); 
 };
 
+function extractSubject(q) {
+    if(q.includes("身高")) return "身高"; if(q.includes("體重")) return "體重";
+    if(q.includes("生日")) return "生日"; return "鹿";
+}
+
 window.showSource = function(q, a) {
-    if(appSettings.soundOn) playClickSound();
-    Swal.fire({
-        title: '資料庫溯源',
-        html: `<div class="text-left text-sm space-y-2 mt-2"><div class="text-slate-400 text-xs">原始問題：</div><div class="text-white font-bold bg-white/5 p-2 rounded border border-white/10">${q}</div><div class="text-slate-400 text-xs pt-2">標準解答：</div><div class="text-pink-400 font-bold bg-white/5 p-2 rounded border border-white/10">${a}</div></div>`,
-        background: '#121215', color: '#fff', confirmButtonColor: '#f43f5e', confirmButtonText: '了解', customClass: { popup: 'custom-modal', title: 'text-sm text-slate-300' }
-    });
+    hapticFeedback();
+    Swal.fire({ title: '資料溯源', html: `<div class="text-left text-xs space-y-2 mt-2"><div class="text-slate-400">原始問題：</div><div class="text-white bg-white/5 p-2 rounded">${q}</div><div class="text-slate-400 pt-2">標準解答：</div><div class="text-[var(--primary)] bg-white/5 p-2 rounded">${a}</div></div>`, background: 'var(--bg-start)', color: '#fff', confirmButtonColor: 'var(--primary)', customClass:{popup:'custom-modal'} });
 };
 
 function findBestMatch(userInput) {
@@ -331,94 +417,95 @@ function findBestMatch(userInput) {
     return best;
 }
 
-/* ================== 5. 全息科技 ID 卡生成器 (無圖片版) ================== */
-function roundRect(ctx, x, y, w, h, r) {
-    ctx.beginPath(); ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-    ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h); ctx.lineTo(x+r, y+h);
-    ctx.quadraticCurveTo(x, y+h, x, y+h-r); ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y); ctx.closePath();
+/* ================== 5. 動態時間軸 ================== */
+const timelineData = [
+    { date: "2021/11/29", title: "初次亮相", desc: "在 TikTok 發布了第一支影片。" },
+    { date: "2024/10/29", title: "一萬粉達成", desc: "里程碑突破，粉絲逐漸凝聚。" },
+    { date: "2025/03/17", title: "十萬粉絲集結", desc: "官方認證十萬大軍！" },
+    { date: "2026/01/13", title: "四十萬粉達成 🎉", desc: "勢不可擋！感謝每一位麋鹿的支持！", highlight: true }
+];
+
+function renderTimeline() {
+    const container = document.getElementById('timeline-nodes-container');
+    container.innerHTML = timelineData.map((t, idx) => {
+        const mt = idx === 0 ? "pt-2 pb-10" : "pb-10";
+        const hlBox = t.highlight ? "bg-[var(--primary)]/10 border-[var(--primary)]/30 shadow-[0_10px_30px_var(--primary)]" : "bg-black/30";
+        const hlTitle = t.highlight ? "text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[var(--secondary)] to-[var(--primary)] mt-2 mb-2" : `text-base font-bold text-white mt-2 mb-1`;
+        return `
+        <div class="relative pl-10 timeline-node ${mt}">
+            <div class="absolute w-4 h-4 bg-[var(--primary)] rounded-full -left-[10px] top-5 border-4 border-[#050505] shadow-[0_0_15px_var(--primary)] z-10 ${t.highlight ? 'pulse-dot w-6 h-6 -left-[13px] top-4' : ''}"></div>
+            <div class="glass-card p-5 transition-all ${hlBox}">
+                <span class="text-[10px] text-[var(--primary)] font-black tracking-widest bg-[var(--primary)]/20 px-2 py-1 rounded">${t.date}</span>
+                <h3 class="${hlTitle}">${t.title}</h3>
+                <p class="text-xs text-slate-400">${t.desc}</p>
+            </div>
+        </div>`;
+    }).join('');
 }
 
+/* ================== 6. 照片 ID 卡生成 (含防呆) ================== */
 window.generateIDCard = function() {
-    if(appSettings.soundOn) playClickSound();
+    hapticFeedback('heavy'); gainExp(15);
     const nameInput = document.getElementById('id-name').value.trim() || "神秘麋鹿";
-    
-    Swal.fire({ title: '全息編碼中...', background: '#0f0f13', color: '#fff', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+    Swal.fire({ title: '渲染中...', background: 'var(--bg-start)', color: '#fff', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
 
     const canvas = document.getElementById('id-canvas'); const ctx = canvas.getContext('2d');
+    const colorPrim = getThemeColor('--primary');
     
-    // 1. 深色全息背景
-    ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, 1080, 1500);
-    const grad = ctx.createLinearGradient(0, 0, 1080, 1500);
-    grad.addColorStop(0, 'rgba(244, 63, 94, 0.15)'); grad.addColorStop(1, 'rgba(139, 92, 246, 0.05)');
-    ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1500);
+    ctx.fillStyle = getThemeColor('--bg-end'); ctx.fillRect(0, 0, 1080, 1600);
+    const grad1 = ctx.createRadialGradient(540, 800, 200, 540, 800, 1000);
+    grad1.addColorStop(0, colorPrim + '44'); grad1.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad1; ctx.fillRect(0, 0, 1080, 1600);
 
-    // 2. 科技網格
-    ctx.strokeStyle = 'rgba(255,255,255,0.02)'; ctx.lineWidth = 2;
-    for(let i=0; i<1080; i+=80) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,1500); ctx.stroke(); }
-    for(let i=0; i<1500; i+=80) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(1080,i); ctx.stroke(); }
+    ctx.fillStyle = '#0a0a0e'; ctx.beginPath(); ctx.roundRect(80, 80, 920, 1440, 60); ctx.fill();
+    ctx.strokeStyle = colorPrim + '88'; ctx.lineWidth = 4; ctx.stroke();
 
-    // 3. 實體卡片框
-    ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 60; ctx.shadowOffsetY = 30;
-    ctx.fillStyle = '#0a0a0e'; roundRect(ctx, 80, 100, 920, 1300, 50); ctx.fill();
-    ctx.shadowColor = 'transparent'; 
-    ctx.strokeStyle = 'rgba(244, 63, 94, 0.4)'; ctx.lineWidth = 4; roundRect(ctx, 80, 100, 920, 1300, 50); ctx.stroke();
+    const avatarImg = new Image(); avatarImg.crossOrigin = "Anonymous"; avatarImg.src = "avatar-main.jpg";
 
-    // 4. 🔥 科技發光同心圓 (取代照片)
-    ctx.shadowColor = 'rgba(244, 63, 94, 0.6)'; ctx.shadowBlur = 20;
-    ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 6;
-    for(let r = 60; r <= 240; r += 30) {
-        ctx.beginPath();
-        ctx.arc(540, 480, r, Math.PI * 0.15, Math.PI * 1.85); // 缺口設計增加科技感
-        ctx.stroke();
-    }
-    ctx.shadowColor = 'transparent';
+    avatarImg.onload = () => {
+        ctx.save(); ctx.beginPath(); ctx.arc(540, 480, 280, 0, Math.PI * 2); ctx.clip();
+        ctx.drawImage(avatarImg, 260, 200, 560, 560); ctx.restore();
+        
+        ctx.shadowColor = colorPrim; ctx.shadowBlur = 40;
+        ctx.strokeStyle = colorPrim; ctx.lineWidth = 12; ctx.beginPath(); ctx.arc(540, 480, 280, 0, Math.PI * 2); ctx.stroke();
+        ctx.shadowBlur = 0;
 
-    // 🦌 中心鹿 Icon
-    ctx.fillStyle = '#f43f5e'; ctx.font = '140px "Segoe UI", sans-serif';
-    ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillText('🦌', 540, 480);
-    ctx.textBaseline = "alphabetic"; // 復原基準線，避免影響後續文字
+        ctx.textAlign = "center";
+        ctx.fillStyle = colorPrim; ctx.font = '900 50px "Segoe UI"'; ctx.letterSpacing = "15px"; ctx.fillText('OFFICIAL FAN ID', 540, 920);
+        ctx.fillStyle = '#ffffff'; ctx.font = '900 140px "PingFang TC"'; ctx.letterSpacing = "5px"; ctx.fillText(nameInput, 540, 1120);
 
-    // 5. 文字排版
-    ctx.fillStyle = '#f43f5e'; ctx.font = '900 45px "Segoe UI", sans-serif'; ctx.letterSpacing = "10px";
-    ctx.fillText('OFFICIAL MEMBER', 540, 850);
-    
-    // 名字發光
-    ctx.shadowColor = 'rgba(255,255,255,0.4)'; ctx.shadowBlur = 20;
-    ctx.fillStyle = '#ffffff'; ctx.font = '900 120px "Segoe UI", "PingFang TC", sans-serif'; ctx.letterSpacing = "5px";
-    ctx.fillText(nameInput, 540, 1020);
-    ctx.shadowColor = 'transparent';
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        const startX = 240; for(let i=0; i<600; i+=15) { let w = Math.random()>0.5?5:10; ctx.fillRect(startX+i, 1250, w, 100); }
+        
+        ctx.fillStyle = '#64748b'; ctx.font = 'bold 32px monospace'; 
+        ctx.fillText(`ID: 8${Date.now().toString().slice(-6)} | AUTH: ${new Date().toISOString().split('T')[0]}`, 540, 1450);
+        ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.font = 'bold 24px monospace'; ctx.fillText(WATERMARK_TEXT, 540, 1550);
 
-    // 條碼裝飾
-    ctx.fillStyle = 'rgba(255,255,255,0.2)';
-    for(let i=200; i<880; i+=12) {
-        let w = Math.random() > 0.5 ? 4 : 8;
-        ctx.fillRect(i, 1150, w, 80);
-    }
-
-    const dateStr = new Date().toISOString().split('T')[0];
-    ctx.fillStyle = '#64748b'; ctx.font = 'bold 30px monospace'; 
-    ctx.fillText(`ID: 8${Date.now().toString().slice(-6)} | AUTH: ${dateStr}`, 540, 1320);
-
-    setTimeout(() => {
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-        Swal.fire({
-            title: '💳 認證卡生成成功',
-            text: '請長按下方圖片進行儲存',
-            imageUrl: dataUrl, imageWidth: '100%',
-            background: '#0f0f13', color: '#fff', confirmButtonColor: '#f43f5e', confirmButtonText: '完成',
-            customClass: { popup: 'custom-modal', image: 'swal2-image' }
-        });
-    }, 600);
+        try {
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+            Swal.fire({ title: '🎉 渲染成功', text: '請長按圖片儲存', imageUrl: dataUrl, imageWidth: '100%', background: 'var(--bg-start)', color: '#fff', confirmButtonColor: colorPrim, customClass: { popup: 'custom-modal', image: 'swal2-image' }});
+        } catch(e) {
+            Swal.fire('無法生成', '本地端瀏覽器阻擋，請上傳至 GitHub Pages 後重試。', 'error');
+        }
+    };
+    avatarImg.onerror = () => {
+        // Fallback for local testing without image
+        ctx.fillStyle = colorPrim; ctx.font = '200px sans-serif'; ctx.textAlign="center"; ctx.fillText('🦌', 540, 520);
+        try {
+            Swal.fire({ title: '完成 (本地模式)', text: '您在本地端打開，顯示備用頭像。長按儲存。', imageUrl: canvas.toDataURL('image/jpeg', 0.9), imageWidth: '100%', background: 'var(--bg-start)', color: '#fff', confirmButtonColor: colorPrim, customClass: { popup: 'custom-modal', image: 'swal2-image' }});
+        } catch(e) {
+            Swal.fire('無法生成', '請上傳至 GitHub Pages', 'error');
+        }
+    };
 };
 
-/* ================== 6. 會考系統 ================== */
+/* ================== 7. 會考系統 ================== */
 let currentQuiz = [], currentQIndex = 0, score = 0, quizPlayerName = "";
 
 window.startQuiz = function() {
-    if(appSettings.soundOn) playClickSound();
+    hapticFeedback();
     quizPlayerName = document.getElementById('quiz-player-name').value.trim();
-    if(!quizPlayerName) { Swal.fire('提示', '請輸入名字！', 'warning'); return; }
+    if(!quizPlayerName) { Swal.fire('提示', '請輸入大名！', 'warning'); return; }
     if (quizData.length < 10) { Swal.fire('錯誤', '題庫不足 10 題！', 'error'); return; }
 
     document.getElementById('quiz-intro').classList.add('hidden'); document.getElementById('quiz-area').classList.replace('hidden', 'flex');
@@ -429,83 +516,59 @@ window.startQuiz = function() {
 function renderQuizQuestion() {
     if (currentQIndex >= 10) { endQuiz(); return; }
     const qData = currentQuiz[currentQIndex];
-    document.getElementById('quiz-progress').innerText = `題目 ${currentQIndex + 1}/10`;
-    document.getElementById('quiz-score').innerText = `目前得分: ${score}`;
+    document.getElementById('quiz-progress').innerText = `QUESTION ${currentQIndex + 1} / 10`;
+    document.getElementById('quiz-score').innerText = `SCORE: ${score}`;
     document.getElementById('quiz-question').innerText = `Q: ${qData.q}`;
-
     const optsContainer = document.getElementById('quiz-options'); optsContainer.innerHTML = '';
     [...qData.options].sort(() => 0.5 - Math.random()).forEach(opt => {
-        const isCorrect = (opt === qData.a);
-        optsContainer.innerHTML += `<button onclick="answerQuiz(this, ${isCorrect})" class="w-full text-left bg-white/5 hover:bg-white/10 p-4 rounded-xl border border-white/5 transition font-bold text-[13px] text-slate-200 active:scale-95">${opt}</button>`;
+        optsContainer.innerHTML += `<button onclick="answerQuiz(this, ${isCorrect = (opt === qData.a)})" class="w-full text-left bg-black/50 hover:bg-white/10 p-4 rounded-xl border border-white/5 transition font-bold text-sm text-slate-200 active:scale-95">${opt}</button>`;
     });
 }
 
 window.answerQuiz = function(btn, isCorrect) {
-    if(appSettings.soundOn) playClickSound();
-    document.getElementById('quiz-options').querySelectorAll('button').forEach(b => b.disabled = true);
-    if (isCorrect) {
-        btn.className = "w-full text-left bg-blue-600/30 border border-blue-500 text-blue-400 p-4 rounded-xl font-black text-sm"; score += 10;
-    } else {
-        btn.className = "w-full text-left bg-red-600/30 border border-red-500 text-red-400 p-4 rounded-xl font-bold text-sm";
-        document.getElementById('quiz-options').querySelectorAll('button').forEach(b => {
-            if (b.innerText.trim() === currentQuiz[currentQIndex].a) b.className = "w-full text-left bg-blue-600/30 border border-blue-500 text-blue-400 p-4 rounded-xl font-bold text-sm";
-        });
+    hapticFeedback(); document.getElementById('quiz-options').querySelectorAll('button').forEach(b => b.disabled = true);
+    if (isCorrect) { btn.className = "w-full text-left bg-green-600/30 border border-green-500 text-green-400 p-4 rounded-xl font-black text-sm"; score += 10; hapticFeedback('success'); gainExp(20);} 
+    else {
+        hapticFeedback('heavy'); btn.className = "w-full text-left bg-red-600/30 border border-red-500 text-red-400 p-4 rounded-xl font-bold text-sm";
+        document.getElementById('quiz-options').querySelectorAll('button').forEach(b => { if (b.innerText.trim() === currentQuiz[currentQIndex].a) b.className = "w-full text-left bg-blue-600/30 border border-blue-500 text-blue-400 p-4 rounded-xl font-bold text-sm"; });
     }
-    document.getElementById('quiz-score').innerText = `目前得分: ${score}`;
-    setTimeout(() => { currentQIndex++; renderQuizQuestion(); }, 1000);
+    document.getElementById('quiz-score').innerText = `SCORE: ${score}`;
+    setTimeout(() => { currentQIndex++; renderQuizQuestion(); }, 1200);
 };
 
 function endQuiz() {
     let title = score >= 90 ? "終極守護者" : score >= 60 ? "鐵桿麋鹿" : "新手麋鹿";
+    gainExp(50); 
     document.getElementById('quiz-area').classList.replace('flex','hidden'); document.getElementById('quiz-intro').classList.remove('hidden');
-    Swal.fire({ title: '核算成績中...', background: '#121215', color: '#fff', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
-    setTimeout(() => generateQuizResultImage(title), 800);
+    Swal.fire({ title: '結算中...', background: 'var(--bg-start)', color: '#fff', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+    
+    setTimeout(() => {
+        const canvas = document.getElementById('quiz-canvas'); const ctx = canvas.getContext('2d');
+        const colorSec = getThemeColor('--secondary');
+        
+        ctx.fillStyle = getThemeColor('--bg-end'); ctx.fillRect(0, 0, 1080, 1500);
+        const grad = ctx.createRadialGradient(540, 600, 100, 540, 600, 800); grad.addColorStop(0, colorSec+'66'); grad.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1500);
+        ctx.strokeStyle = colorSec+'99'; ctx.lineWidth = 8; ctx.beginPath(); ctx.roundRect(60, 80, 960, 1340, 50); ctx.stroke();
+        
+        ctx.textAlign = "center"; ctx.fillStyle = '#ffffff'; ctx.font = '900 75px "Segoe UI"'; ctx.fillText('會考戰績核發', 540, 280);
+        ctx.fillStyle = '#94a3b8'; ctx.font = 'bold 36px "Segoe UI"'; ctx.fillText(`挑戰者：${quizPlayerName}`, 540, 380);
+        
+        ctx.shadowColor = colorSec; ctx.shadowBlur = 60; ctx.fillStyle = colorSec; ctx.font = '900 400px "Segoe UI"'; ctx.fillText(`${score}`, 540, 850); ctx.shadowBlur = 0;
+        
+        ctx.fillStyle = '#cbd5e1'; ctx.font = 'bold 45px "Segoe UI"'; ctx.fillText(`獲得稱號`, 540, 1050);
+        ctx.fillStyle = '#fbbf24'; ctx.font = '900 100px "Segoe UI"'; ctx.fillText(`🏆 ${title}`, 540, 1180);
+        ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.font = 'bold 24px monospace'; ctx.fillText(WATERMARK_TEXT, 540, 1460);
+        
+        try {
+            const url = canvas.toDataURL('image/jpeg', 0.9);
+            Swal.fire({ title: '🏆 測驗完成', text: '長按儲存您的戰績圖片', imageUrl: url, imageWidth: '100%', background: 'var(--bg-start)', color: '#fff', confirmButtonColor: colorSec, customClass: { popup: 'custom-modal', image: 'swal2-image' }});
+        } catch(e) {
+            Swal.fire('無法生成', '請上傳至 GitHub Pages 後使用', 'error');
+        }
+    }, 800);
 }
 
-window.generateQuizResultImage = function(title) {
-    const canvas = document.getElementById('quiz-canvas'); const ctx = canvas.getContext('2d');
-    
-    ctx.fillStyle = '#03050a'; ctx.fillRect(0, 0, 1080, 1500);
-    const grad = ctx.createRadialGradient(540, 600, 100, 540, 600, 800);
-    grad.addColorStop(0, 'rgba(59, 130, 246, 0.3)'); grad.addColorStop(1, 'transparent');
-    ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1500);
-    
-    ctx.strokeStyle = 'rgba(59, 130, 246, 0.6)'; ctx.lineWidth = 8; roundRect(ctx, 60, 80, 960, 1340, 50); ctx.stroke();
-
-    ctx.textAlign = "center";
-    ctx.fillStyle = '#ffffff'; ctx.font = '900 75px "Segoe UI", sans-serif'; ctx.fillText('大會考戰績', 540, 250);
-    ctx.fillStyle = '#94a3b8'; ctx.font = 'bold 36px "Segoe UI", sans-serif'; ctx.fillText(`挑戰者：${quizPlayerName}`, 540, 350);
-
-    ctx.shadowColor = 'rgba(59, 130, 246, 0.8)'; ctx.shadowBlur = 60;
-    ctx.fillStyle = '#3b82f6'; ctx.font = '900 400px "Segoe UI", sans-serif'; ctx.fillText(`${score}`, 540, 850);
-    ctx.shadowColor = 'transparent';
-    
-    ctx.fillStyle = '#cbd5e1'; ctx.font = 'bold 40px "Segoe UI", sans-serif'; ctx.fillText(`獲頒稱號`, 540, 1050);
-    
-    const textGrad = ctx.createLinearGradient(0, 1000, 0, 1200);
-    textGrad.addColorStop(0, '#fbbf24'); textGrad.addColorStop(1, '#f59e0b');
-    ctx.fillStyle = textGrad; ctx.font = '900 100px "Segoe UI", sans-serif'; ctx.fillText(`🏆 ${title}`, 540, 1180);
-
-    ctx.fillStyle = '#475569'; ctx.font = 'bold 28px monospace'; ctx.fillText(`ISSUED: ${new Date().toISOString().split('T')[0]}`, 540, 1350);
-    ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = 'bold 24px monospace'; ctx.fillText(WATERMARK_TEXT, 540, 1460);
-
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-    Swal.fire({
-        title: '🏆 測驗完成', text: '長按圖片儲存你的戰績',
-        imageUrl: dataUrl, imageWidth: '100%',
-        background: '#121215', color: '#fff', confirmButtonColor: '#3b82f6', confirmButtonText: '確認',
-        customClass: { popup: 'custom-modal', image: 'swal2-image' }
-    });
-};
-
 function playClickSound() {
-    try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator(); const gain = ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.type = 'sine'; osc.frequency.setValueAtTime(800, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.05);
-        gain.gain.setValueAtTime(0.05, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
-        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.05);
-    } catch(e) {}
+    try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.type = 'sine'; osc.frequency.setValueAtTime(800, ctx.currentTime); gain.gain.setValueAtTime(0.05, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05); osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.05); } catch(e) {}
 }
