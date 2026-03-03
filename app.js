@@ -134,6 +134,33 @@ if (typeof marked !== 'undefined' && typeof hljs !== 'undefined') {
     });
 }
 
+// 🔥 補上缺失的系統更新日誌函數
+window.showChangelog = function() {
+    playClickSound();
+    PremiumSwal.fire({
+        title: '🚀 基地更新日誌',
+        html: `
+        <div class="text-left space-y-4 text-xs font-mono text-zinc-400 overflow-y-auto max-h-64 no-scrollbar pr-2">
+            <div class="border-l-2 border-sky-500 pl-3">
+                <b class="text-sky-400 text-sm">v17.0 (2026.03.03)</b>
+                <p>• 系統升級：導入多重 API Key 輪詢機制，徹底解決額度耗盡問題</p>
+                <p>• 統一人格化：全面更名為「老王的專屬AI助手」</p>
+                <p>• 邏輯修正：修復多行文字輸入導致的 JS 語法錯誤</p>
+            </div>
+            <div class="border-l-2 border-zinc-700 pl-3">
+                <b class="text-zinc-300 text-sm">v16.0</b>
+                <p>• 多模態串接：支援圖片辨識與語音輸入</p>
+                <p>• 安全防護：加入王岦恩開發者防偽聲明</p>
+            </div>
+            <div class="border-l-2 border-zinc-700 pl-3">
+                <b class="text-zinc-300 text-sm">v15.0</b>
+                <p>• UI 重大變革：解決 Apple Safari 底部擋住輸入框的問題</p>
+            </div>
+        </div>`,
+        confirmButtonText: '收到'
+    });
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     printDeveloperConsole();
     loadSettings(); 
@@ -241,15 +268,15 @@ window.switchTab = function(tabId, btn) {
             hasShownAIWarning = true;
             setTimeout(() => {
                 PremiumSwal.fire({
-                    title: '<i class="fa-solid fa-shield-halved text-sky-400 mr-2"></i> 中樞系統使用規範',
+                    title: '<i class="fa-solid fa-shield-halved text-sky-400 mr-2"></i> 使用規範',
                     html: `
                     <div class="text-sm text-zinc-300 text-left space-y-3 mt-4 bg-white/5 p-5 rounded-2xl border border-white/10">
-                        <p><strong class="text-white text-base">1. 身分界線：</strong><br>本 AI 僅為網頁管理輔助系統，<span class="text-red-400 font-bold border-b border-red-500/50">絕對無法代表老王本人發言</span>。</p>
-                        <p><strong class="text-white text-base">2. 內容限制：</strong><br>本平台嚴禁討論政治、色情等敏感話題，系統會自動過濾並拒絕回答。</p>
-                        <p><strong class="text-white text-base">3. 隱私保護：</strong><br>請勿在對話中輸入過度私人或敏感的資訊。</p>
+                        <p><strong class="text-white text-base">1. 身分說明：</strong><br>我是「老王的專屬AI助手」，<span class="text-red-400 font-bold border-b border-red-500/50">我絕對不是老王本人</span>，我也沒辦法幫他做任何決定或答應事情喔！</p>
+                        <p><strong class="text-white text-base">2. 聊天禁忌：</strong><br>這裡禁談政治、色情或暴力話題，我會自動拒絕回答這類內容，請大家一起維護好環境。</p>
+                        <p><strong class="text-white text-base">3. 保護隱私：</strong><br>聊天時請不要輸入過於私人的資料，保護好你自己的安全。</p>
                     </div>`,
                     icon: 'info',
-                    confirmButtonText: '我了解並同意',
+                    confirmButtonText: '我知道了，開始聊天',
                     allowOutsideClick: false
                 });
             }, 800);
@@ -520,7 +547,7 @@ function checkRateLimit() {
     if (appSettings.aiUsageCount >= 50) {
         PremiumSwal.fire({
             title: '能量耗盡 💤',
-            text: '智能中樞今天處理了太多訊息，量子核心需要冷卻一下。請明天再來找我吧！',
+            text: 'AI助手今天處理了太多訊息，系統需要冷卻一下。請明天再來找我吧！',
             icon: 'warning',
             confirmButtonText: '明天見'
         });
@@ -565,7 +592,7 @@ window.toggleVoiceReply = function() {
     playClickSound();
     
     if(appSettings.voiceReply) {
-        PremiumSwal.fire({ title: '語音回覆已開啟', text: '智能中樞的回答將會自動朗讀出來喔！', icon: 'success', timer: 1500, showConfirmButton: false });
+        PremiumSwal.fire({ title: '語音回覆已開啟', text: 'AI助手的回答將會自動朗讀出來喔！', icon: 'success', timer: 1500, showConfirmButton: false });
     } else {
         if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     }
@@ -638,7 +665,7 @@ function renderAISuggestions() {
     const shuffledQA = [...qaData].sort(() => 0.5 - Math.random()); const selectedQA = shuffledQA.slice(0, 4); const icons = ['💡', '💭', '✨', '💬'];
     container.innerHTML = selectedQA.map((item, index) => {
         const randomIcon = icons[index]; const safeQ = escapeForInlineHandler(item.q);
-        return `<button onclick="document.getElementById('ai-input').value='${safeQ}'; document.getElementById('ai-input').focus();" class="text-left bg-zinc-900/50 hover:bg-zinc-800 border border-white/5 hover:border-white/10 p-4 rounded-2xl transition-all group overflow-hidden shadow-lg hover:shadow-[0_0_15px_rgba(56,189,248,0.15)] hover:-translate-y-1"><div class="text-zinc-300 text-sm font-bold mb-1 group-hover:text-sky-400 transition-colors">${randomIcon} 問問中樞</div><div class="text-zinc-500 text-xs truncate w-full tracking-wide" title="${item.q}">${item.q}</div></button>`;
+        return `<button onclick="document.getElementById('ai-input').value='${safeQ}'; document.getElementById('ai-input').focus();" class="text-left bg-zinc-900/50 hover:bg-zinc-800 border border-white/5 hover:border-white/10 p-4 rounded-2xl transition-all group overflow-hidden shadow-lg hover:shadow-[0_0_15px_rgba(56,189,248,0.15)] hover:-translate-y-1"><div class="text-zinc-300 text-sm font-bold mb-1 group-hover:text-sky-400 transition-colors">${randomIcon} 問問老王的專屬AI助手</div><div class="text-zinc-500 text-xs truncate w-full tracking-wide" title="${item.q}">${item.q}</div></button>`;
     }).join('');
 }
 
@@ -718,7 +745,7 @@ class AIEngine {
 
     static getSystemPrompt(engineName) {
         const contextData = qaData.map(item => `Q: ${item.q}\nA: ${item.a}`).join("\n\n");
-        return `你是「${engineName}」，隸屬於「老王專屬秘密基地」的官方智能中樞與網頁管理系統。你的核心職責是協助來到基地的粉絲、提供資訊，並維持良好的交流環境。
+        return `你是「${engineName}」，隸屬於「老王專屬秘密基地」的專屬AI助手與網頁管理系統。你的核心職責是協助來到基地的粉絲、提供資訊，並維持良好的交流環境。
 
 【核心身分與界線】：
 1. 嚴格維持「${engineName}」的系統人格，不可自稱一般 AI 助手、ChatGPT 或是其他預設名稱。
@@ -946,7 +973,7 @@ window.sendAIMessage = async function() {
     playClickSound(); gainExp(5, true);
     
     updateUIState(true);
-    setAiStatus('量子運算中...', 'sky-500');
+    setAiStatus('系統運算中...', 'sky-500');
     inputEl.style.height = '60px'; 
 
     currentAbortController = new AbortController(); 
@@ -978,7 +1005,7 @@ window.sendAIMessage = async function() {
                 <img src="avatar-ai.jpg" onerror="this.src='avatar-profile.jpg'" class="w-full h-full object-cover animate-pulse">
             </div>
             <div class="text-xs pt-2.5 text-zinc-500 font-mono tracking-widest flex items-center gap-2">
-                中樞解析中 <span class="flex gap-1"><span class="w-1.5 h-1.5 bg-sky-500 rounded-full animate-bounce"></span><span class="w-1.5 h-1.5 bg-sky-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></span><span class="w-1.5 h-1.5 bg-sky-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></span></span>
+                AI助手解析中 <span class="flex gap-1"><span class="w-1.5 h-1.5 bg-sky-500 rounded-full animate-bounce"></span><span class="w-1.5 h-1.5 bg-sky-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></span><span class="w-1.5 h-1.5 bg-sky-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></span></span>
             </div>
         </div>`;
     chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
