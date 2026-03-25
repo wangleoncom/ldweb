@@ -1,379 +1,429 @@
 <!DOCTYPE html>
-<html lang="zh-TW" data-theme="dark">
+<html lang="zh-TW" data-theme="sakura">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <title>鹿🦌粉絲網站</title>
-    <meta name="description" content="鹿🦌專屬粉絲的網站">
-    
-    <link rel="icon" type="image/jpeg" href="avatar-main.jpg">
-    <link rel="manifest" href="manifest.json">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: { extend: { colors: { theme: { primary: 'var(--primary)', secondary: 'var(--secondary)' } } } }
-      }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <style>
-        /* 🎨 全域動態主題引擎 */
-        :root {
-            /* 預設粉櫻 */
-            --primary: #f43f5e; 
-            --secondary: #fb7185; 
-            --bg-start: #1a1016; 
-            --bg-end: #050505;
-            --glass-blur: 20px;
-        }
-
-        [data-theme="cyberpunk"] {
-            --primary: #06b6d4; --secondary: #3b82f6; 
-            --bg-start: #08121c; --bg-end: #020205;
-        }
-        [data-theme="purple"] {
-            --primary: #a855f7; --secondary: #d946ef; 
-            --bg-start: #1c0a2b; --bg-end: #090510;
-        }
-        [data-theme="gold"] {
-            --primary: #fbbf24; --secondary: #f59e0b; 
-            --bg-start: #271c08; --bg-end: #0a0802;
-        }
-        [data-theme="forest"] {
-            --primary: #10b981; --secondary: #34d399; 
-            --bg-start: #06271c; --bg-end: #020a07;
-        }
-        [data-liquid="true"] { --glass-blur: 40px; }
-
-        body {
-            background-color: var(--bg-end);
-            background-image: radial-gradient(circle at 50% 0%, var(--bg-start) 0%, var(--bg-end) 100%);
-            color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            min-height: 100dvh; display: flex; justify-content: center; align-items: center;
-            overflow: hidden; margin: 0; -webkit-tap-highlight-color: transparent;
-            transition: background 0.8s ease;
-        }
-
-        #device-mockup {
-            width: 100%; height: 100dvh; position: relative; 
-            display: flex; flex-direction: column; overflow: hidden;
-        }
-
-        @media (min-width: 768px) {
-            #device-mockup {
-                width: 400px; height: 850px; border-radius: 45px; border: 12px solid #18181b;
-                box-shadow: 0 0 0 1px #3f3f46, 0 40px 80px rgba(0,0,0,0.9); background: var(--bg-end);
-            }
-            #device-mockup::before {
-                content: ''; position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-                width: 120px; height: 32px; background: #000; border-radius: 20px; z-index: 999;
-            }
-            .pt-safe { padding-top: 50px !important; }
-        }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .scroll-area { flex: 1; overflow-y: auto; overflow-x: hidden; padding-bottom: 140px; scroll-behavior: smooth; }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 24px; backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
-            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-
-        .page { display: none !important; opacity: 0; }
-        .page.active { display: flex !important; animation: appFadeIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-        @keyframes appFadeIn { 0% { opacity: 0; transform: translateY(15px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-
-        /* AI 佈局重構 */
-        .ai-layout { display: flex; flex-direction: column; height: 100%; }
-        .ai-header { flex-shrink: 0; }
-        .ai-chat-area { flex-grow: 1; overflow-y: auto; padding-bottom: 20px; }
-        .ai-input-area { flex-shrink: 0; padding-bottom: calc(max(100px, env(safe-area-inset-bottom) + 90px)); background: linear-gradient(to top, var(--bg-end) 60%, transparent); }
-
-        /* 搜尋建議懸浮框 */
-        .autocomplete-box { position: absolute; top: 100%; left: 0; right: 0; z-index: 50; background: rgba(15,15,20,0.95); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; margin-top: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); max-height: 200px; overflow-y: auto; display: none; opacity: 0; transform: translateY(-10px); transition: all 0.3s; }
-        .autocomplete-box.show { display: block; opacity: 1; transform: translateY(0); }
-
-        /* 粉絲等級條 */
-        .exp-bar-container { width: 100px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
-        .exp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
-
-        /* 電影級時間軸動畫 */
-        .timeline-scroll-lock { overflow: hidden !important; }
-        .timeline-line { position: absolute; left: 24px; top: 10px; bottom: 0; width: 3px; background: linear-gradient(to bottom, var(--primary), var(--secondary), transparent); transform-origin: top; transform: scaleY(0); transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 0 15px var(--primary); }
-        .timeline-line.draw { transform: scaleY(1); }
-        .timeline-node { opacity: 0; transform: scale(0.5) translateY(40px); transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .timeline-node.animate-pop { opacity: 1; transform: scale(1) translateY(0); }
-        .pulse-dot { animation: pulseGlow 2s infinite; }
-        @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5); } 70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
-
-        /* 底部導航 */
-        .bottom-nav { background: rgba(10, 10, 15, 0.95); backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.1); bottom: calc(max(1.5rem, env(safe-area-inset-bottom))); }
-        .nav-item { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); opacity: 0.3; }
-        .nav-item.active { opacity: 1; color: var(--primary); transform: translateY(-6px) scale(1.1); }
-        .nav-item.active .icon-box { text-shadow: 0 0 20px var(--primary); }
-
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: var(--primary); cursor: pointer; margin-top: -6px; box-shadow: 0 0 15px var(--primary);}
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; background: #27272a; border-radius: 10px; }
-        
-        .swal2-popup.custom-modal { background: #111114; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); }
-        .swal2-image { border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); }
-        
-        #splash { position: absolute; inset: 0; z-index: 999; background: #050505; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+  <title>鹿🦌 粉絲網站</title>
+  <meta name="description" content="鹿🦌 粉絲專屬平台：提供百科問答、實力測驗與個人成就追蹤。" />
+  <link rel="icon" type="image/jpeg" href="avatar-main.jpg" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="styles.css?v=2.2.2" />
 </head>
-<body id="app-body">
+<body>
+  <div class="petals" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span><span></span>
+  </div>
 
-    <div id="device-mockup">
-        
-        <div id="splash">
-            <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-slate-700 shadow-[0_0_50px_var(--primary)] mb-5 animate-pulse">
-                <img src="avatar-main.jpg" class="w-full h-full object-cover" onerror="this.src='https://ui-avatars.com/api/?name=鹿&background=000&color=fff'">
-            </div>
-            <h1 class="text-2xl font-black tracking-widest text-white mb-2">鹿 QA <span class="text-theme-primary text-lg">v20.0</span></h1>
-            <p class="text-slate-500 text-[10px] tracking-[0.4em] font-bold">SYSTEM BOOTING...</p>
+  <div id="app-shell" class="app-shell">
+    <aside id="drawer-backdrop" class="drawer-backdrop hidden"></aside>
+    <aside id="app-drawer" class="app-drawer" aria-label="主選單">
+      <div class="drawer-head">
+        <div class="drawer-profile">
+          <img src="avatar-main.jpg" alt="鹿🦌" class="drawer-avatar" />
+          <div>
+            <p class="drawer-name">鹿🦌 粉絲網站</p>
+            <p class="drawer-sub">Exclusive Fan Club</p>
+          </div>
         </div>
+        <button id="drawer-close-btn" class="icon-btn ghost" type="button" aria-label="關閉選單">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
 
-        <header class="w-full z-40 bg-black/40 backdrop-blur-2xl px-5 py-3 pt-safe flex justify-between items-center border-b border-white/5 shrink-0">
-            <div class="flex items-center gap-3 cursor-pointer active:scale-95 transition-transform" onclick="showLevelInfo()">
-                <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-theme-primary shadow-[0_0_10px_var(--primary)]">
-                    <img src="avatar-main.jpg" class="w-full h-full object-cover" onerror="this.src='https://ui-avatars.com/api/?name=鹿&background=000&color=fff'">
+      <div class="drawer-group">
+        <button class="drawer-link" data-target="page-home" type="button"><i class="fas fa-house"></i><span>首頁</span></button>
+        <button class="drawer-link" data-target="page-qa" type="button"><i class="fas fa-comments"></i><span>百科 QA</span></button>
+        <button class="drawer-link" data-target="page-quiz" type="button"><i class="fas fa-gamepad"></i><span>麋鹿大會考</span></button>
+        <button class="drawer-link" data-target="page-history" type="button"><i class="fas fa-clock-rotate-left"></i><span>數據紀錄</span></button>
+        <button class="drawer-link" data-target="page-profile" type="button"><i class="fas fa-user"></i><span>個人中心</span></button>
+        <button id="drawer-admin-btn" class="drawer-link hidden" data-target="page-admin" type="button"><i class="fas fa-shield-halved"></i><span style="color: var(--primary);">管理員後台</span></button>
+      </div>
+
+      <div class="drawer-group soft">
+        <div class="drawer-label">個人風格設定</div>
+        <div class="theme-grid">
+          <button class="theme-chip active" data-theme="sakura" type="button">櫻花粉</button>
+          <button class="theme-chip" data-theme="cream" type="button">奶油白</button>
+          <button class="theme-chip" data-theme="lavender" type="button">薰衣草</button>
+          <button class="theme-chip" data-theme="mint" type="button">薄荷綠</button>
+        </div>
+      </div>
+    </aside>
+
+    <header class="app-header">
+      <div class="header-left">
+        <button id="drawer-open-btn" class="icon-btn" type="button" aria-label="開啟選單">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="brand-block">
+          <img src="avatar-main.jpg" alt="鹿🦌" class="brand-avatar" />
+          <div>
+            <div class="brand-title-row">
+              <h1 class="brand-title">鹿🦌 粉絲網站</h1>
+              <span class="level-badge" id="level-badge">LV.1</span>
+            </div>
+            <div class="mode-row">
+              <div class="exp-track"><div id="exp-bar" class="exp-fill"></div></div>
+              <span id="mode-label">訪客模式</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <button id="header-share-btn" class="icon-btn" type="button" aria-label="分享"><i class="fas fa-share-nodes"></i></button>
+        <button id="header-login-btn" class="cute-btn small" type="button">會員登入</button>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <section id="page-home" class="page active">
+        <div class="page-scroll">
+          <div class="hero-card glass-card reveal">
+            <div class="hero-glow"></div>
+            <div class="hero-content">
+              <div class="hero-avatar-wrap floaty">
+                <img src="avatar.jpg" alt="鹿🦌" class="hero-avatar" />
+              </div>
+              <div class="hero-text">
+                <div class="hero-name-row">
+                  <h2>鹿🦌</h2>
+                  <span class="version-pill">FAN CLUB</span>
                 </div>
+                <p class="hero-meta">天秤座｜170cm｜42kg</p>
+                <p class="hero-desc">歡迎來到鹿🦌的專屬粉絲站。在這裡你可以探索關於鹿🦌的一切，挑戰各項測驗，並記錄你的粉絲里程碑。</p>
+                <div class="hero-actions">
+                  <a class="social-pill" href="https://www.tiktok.com/" target="_blank" rel="noreferrer"><i class="fab fa-tiktok"></i> TikTok</a>
+                  <a class="social-pill alt" href="https://www.instagram.com/" target="_blank" rel="noreferrer"><i class="fab fa-instagram"></i> Instagram</a>
+                </div>
+              </div>
+            </div>
+            <div class="hero-badges">
+              <span>鐵粉認證</span>
+              <span>數據同步</span>
+              <span>粉絲專區</span>
+            </div>
+          </div>
+
+          <div class="alert-banner reveal delay-1 mt-4" id="open-statement-btn">
+            <div class="alert-icon"><i class="fas fa-triangle-exclamation"></i></div>
+            <div class="alert-text">
+              <strong>【嚴正聲明】防詐騙與盜用提醒</strong>
+              <span>關於 Timo Club 盜片事件，請點擊查看。</span>
+            </div>
+            <i class="fas fa-chevron-right alert-arrow"></i>
+          </div>
+
+          <div class="home-grid reveal delay-1">
+            <button class="feature-card pink" data-target="page-qa" type="button">
+              <i class="fas fa-comments"></i>
+              <strong>百科 QA</strong>
+              <span>了解鹿🦌的大小事</span>
+            </button>
+            <button class="feature-card purple" data-target="page-quiz" type="button">
+              <i class="fas fa-gamepad"></i>
+              <strong>麋鹿大會考</strong>
+              <span>實力檢定挑戰</span>
+            </button>
+            <button class="feature-card peach" data-target="page-history" type="button">
+              <i class="fas fa-clock-rotate-left"></i>
+              <strong>數據紀錄</strong>
+              <span>查閱歷史成就</span>
+            </button>
+            <button class="feature-card mint" data-target="page-profile" type="button">
+              <i class="fas fa-user"></i>
+              <strong>個人中心</strong>
+              <span>帳號與風格設定</span>
+            </button>
+          </div>
+
+          <div class="dashboard-grid reveal delay-2">
+            <div class="glass-card cute-panel">
+              <div class="panel-head">
                 <div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="font-bold text-[14px] leading-tight text-white tracking-wide">鹿🦌 資訊站</h1>
-                        <span id="level-badge" class="bg-theme-primary/20 text-theme-primary text-[9px] px-1.5 py-0.5 rounded font-black border border-theme-primary/30">LV.1</span>
-                    </div>
-                    <div class="exp-bar-container mt-1">
-                        <div id="exp-bar" class="exp-bar-fill"></div>
-                    </div>
+                  <h3>會員數據概覽</h3>
+                  <p id="member-status-text">同步您的挑戰紀錄</p>
                 </div>
+                <span id="member-status-badge" class="status-badge idle">未登入</span>
+              </div>
+              <div class="stat-grid">
+                <div class="stat-box"><label>測驗次數</label><strong id="home-quiz-count">0</strong></div>
+                <div class="stat-box"><label>最高分</label><strong id="home-best-score">0</strong></div>
+                <div class="stat-box"><label>探索題數</label><strong id="home-qa-count">0</strong></div>
+              </div>
+              <div class="panel-actions mt-4">
+                <button id="open-login-btn" class="cute-btn" type="button">進入帳號</button>
+                <button id="open-profile-btn" class="soft-btn" type="button">個人中心</button>
+              </div>
             </div>
-            <div class="flex items-center gap-2">
-                <button onclick="shareApp()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-white/10 active:scale-90 transition">
-                    <i class="fas fa-share-nodes text-xs"></i>
-                </button>
-                <button onclick="toggleSettings()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white active:scale-90 transition">
-                    <i class="fas fa-sliders text-xs"></i>
-                </button>
-            </div>
-        </header>
-
-        <main class="flex-1 relative overflow-hidden" id="main-container">
-            
-            <section id="page-home" class="page active flex-col h-full scroll-area px-4 pt-5 pb-[140px]">
-                
-                <div id="pwa-prompt" class="glass-card p-4 mb-4 flex justify-between items-center bg-blue-500/10 border-blue-500/30" style="display: none; flex-shrink: 0;">
-                    <div class="flex items-center gap-3">
-                        <i class="fas fa-download text-blue-400 text-xl"></i>
-                        <div>
-                            <div class="text-xs font-bold text-white">將 App 加入主畫面</div>
-                            <div class="text-[10px] text-slate-400">獲取全螢幕極致體驗</div>
-                        </div>
-                    </div>
-                    <button onclick="installPWA()" class="bg-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold text-white shadow-lg">安裝</button>
-                </div>
-
-                <div class="glass-card p-5 mb-4 flex items-center gap-4 relative overflow-hidden border-theme-primary/30 shrink-0">
-                    <div class="absolute inset-0 bg-theme-primary opacity-5"></div>
-                    <div class="w-16 h-16 shrink-0 rounded-full overflow-hidden border-2 border-theme-primary shadow-[0_0_15px_var(--primary)] relative z-10">
-                        <img src="avatar-profile.jpg" class="w-full h-full object-cover" onerror="this.src='avatar-main.jpg'">
-                    </div>
-                    <div class="z-10 w-full">
-                        <h2 class="text-lg font-black mb-1 text-white flex items-center justify-between">
-                            鹿 🦌
-                        </h2>
-                        <p class="text-[10px] text-theme-primary mb-2 font-bold tracking-widest">天秤座 | 170cm | 42kg</p>
-                        <div class="flex gap-2 mt-1">
-                            <a href="https://www.tiktok.com/@ld.1003_" target="_blank" class="bg-black text-white px-3 py-1.5 rounded-full text-[10px] font-bold border border-slate-700 flex items-center gap-1.5 hover:bg-slate-800 transition active:scale-95 shadow-md flex-1 justify-center"><i class="fab fa-tiktok text-xs"></i> TikTok</a>
-                            <a href="https://www.instagram.com/ld.1003_" target="_blank" class="bg-gradient-to-r from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white px-3 py-1.5 rounded-full text-[10px] font-bold flex items-center gap-1.5 hover:opacity-90 transition active:scale-95 shadow-md flex-1 justify-center"><i class="fab fa-instagram text-xs"></i> Instagram</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3 mb-4 shrink-0">
-                    <a href="https://www.tiktok.com/@ld_leon0803" target="_blank" class="glass-card p-3 flex items-center justify-center gap-2 active:scale-95 transition-transform border border-white/10 hover:bg-white/5">
-                        <i class="fab fa-tiktok text-lg text-white"></i>
-                        <span class="text-[11px] font-bold text-white tracking-wider">直播相片</span>
-                    </a>
-                    <a href="https://www.instagram.com/ld_leon0803" target="_blank" class="glass-card p-3 flex items-center justify-center gap-2 active:scale-95 transition-transform border border-theme-primary/40 bg-theme-primary/10 hover:bg-theme-primary/20">
-                        <i class="fab fa-instagram text-lg text-theme-primary"></i>
-                        <span class="text-[11px] font-bold text-white tracking-wider">精華紀錄</span>
-                    </a>
-                </div>
-
-                <div class="relative mb-5 shrink-0">
-                    <div class="glass-card px-4 py-3 flex items-center gap-3 bg-black/40 border border-white/5 relative z-20 shadow-inner">
-                        <i class="fas fa-search text-theme-primary text-sm"></i>
-                        <input type="text" id="qa-search" oninput="handleSearchInput()" placeholder="搜尋問答庫 (例: 身高)..." class="w-full bg-transparent border-none outline-none text-sm text-white relative z-20">
-                    </div>
-                    <div id="autocomplete-results" class="autocomplete-box flex flex-col p-2"></div>
-                </div>
-
-                <div id="qa-list" class="flex flex-col gap-3"></div>
-                <div id="pagination-controls" class="flex justify-center items-center gap-3 mt-8 mb-6"></div>
-                
-                <canvas id="qa-canvas" width="1080" height="1080" style="display:none;"></canvas>
-            </section>
-
-            <section id="page-ai" class="page ai-layout bg-[url('pattern.svg')] bg-repeat">
-                <div class="ai-header px-4 pt-4 pb-2">
-                    <div class="glass-card p-1 flex bg-black/50 rounded-2xl relative border-theme-primary/20">
-                        <div id="model-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-theme-primary rounded-xl transition-all duration-300 ease-out shadow-[0_0_15px_var(--primary)] opacity-80"></div>
-                        <button onclick="switchAIModel(1)" class="relative z-10 flex-1 py-2 text-[11px] font-black text-white flex items-center justify-center gap-2">
-                            🧐 精準麋鹿
-                        </button>
-                        <button onclick="switchAIModel(2)" class="relative z-10 flex-1 py-2 text-[11px] font-black text-slate-400 flex items-center justify-center gap-2" id="btn-model-2">
-                            ✨ 元氣麋鹿
-                        </button>
-                    </div>
-                </div>
-
-                <div id="chat-window" class="ai-chat-area no-scrollbar flex flex-col space-y-4 px-4">
-                    <div class="max-w-[85%] self-start glass-card p-4 shadow-lg text-sm leading-relaxed border-l-4 border-l-theme-primary">
-                        系統初始化完畢。<br>我是具備對話記憶的【精準麋鹿】🧐。<br>請問有什麼我可以協助查詢的資訊？
-                    </div>
-                </div>
-
-                <div class="ai-input-area px-4 pt-4">
-                    <div class="glass-card p-1.5 pl-4 flex items-center gap-3 bg-[#121215]/95 border border-theme-primary/50 shadow-[0_20px_40px_rgba(0,0,0,0.9)] rounded-[30px] backdrop-blur-3xl">
-                        <input type="text" id="ai-input" onkeypress="handleAIKeyPress(event)" placeholder="問我問題..." class="flex-1 bg-transparent border-none outline-none text-sm text-white py-2">
-                        <button onclick="sendAIMessage()" class="w-10 h-10 bg-theme-primary rounded-full flex items-center justify-center text-white transition-all active:scale-90" id="ai-send-btn">
-                            <i class="fas fa-paper-plane text-sm"></i>
-                        </button>
-                    </div>
-                </div>
-            </section>
-
-            <section id="page-timeline" class="page flex-col h-full scroll-area px-6 pt-6 pb-[140px] timeline-scroll-lock" id="timeline-scroll-area">
-                <h2 class="text-xl font-black text-center mb-10 text-white tracking-widest"><i class="fas fa-sparkles text-theme-secondary mr-2"></i>成長軌跡</h2>
-                <div class="relative ml-2 pb-8" id="timeline-wrapper">
-                    <div class="timeline-line" id="tl-line"></div>
-                    <div id="timeline-nodes-container"></div>
-                </div>
-            </section>
-
-            <section id="page-id" class="page flex-col h-full scroll-area px-5 pt-8 pb-[140px]">
-                <div class="glass-card p-6 text-center border-t-4 border-t-theme-primary bg-gradient-to-b from-theme-primary/10 to-transparent relative overflow-hidden">
-                    <div class="w-24 h-24 mx-auto rounded-full overflow-hidden border-4 border-theme-primary shadow-[0_0_30px_var(--primary)] mb-6 relative">
-                        <img src="avatar.jpg" class="w-full h-full object-cover" onerror="this.src='https://ui-avatars.com/api/?name=鹿&background=000&color=fff'">
-                        <div class="absolute inset-0 bg-theme-primary/10 animate-pulse"></div>
-                    </div>
-                    <h2 class="text-lg font-bold mb-2 text-white tracking-wide">麋鹿認證</h2>
-                    <p class="text-[11px] text-slate-400 mb-8 leading-relaxed">輸入您的暱稱<br>程式將會為您渲染出一張屬於你個人的認證卡。</p>
-                    
-                    <input type="text" id="id-name" maxlength="10" placeholder="輸入專屬暱稱 (例如: 王岦恩)" class="w-full bg-black/60 border border-slate-700 rounded-2xl py-4 px-4 text-white text-center mb-8 focus:outline-none focus:border-theme-primary text-sm font-bold shadow-inner">
-                    
-                    <button onclick="generateIDCard()" class="w-full bg-theme-primary text-white py-4 rounded-2xl font-black text-sm shadow-[0_0_20px_var(--primary)] transition-all active:scale-95">
-                        <i class="fas fa-magic mr-2"></i> 開始生成認證卡
-                    </button>
-                </div>
-                <canvas id="id-canvas" width="1080" height="1500" style="display:none;"></canvas>
-            </section>
-
-            <section id="page-quiz" class="page flex-col h-full scroll-area px-5 pt-8 pb-[140px]">
-                <div id="quiz-intro" class="glass-card p-8 text-center border-t-4 border-t-theme-secondary bg-gradient-to-b from-theme-secondary/10 to-transparent">
-                    <div class="text-6xl mb-6 drop-shadow-lg">🎓</div>
-                    <h2 class="text-xl font-black mb-3 text-white tracking-widest">麋鹿大會考 2.0</h2>
-                    <p class="text-slate-400 text-[11px] mb-8 leading-relaxed">程式將會隨機抽取 10 題進行鐵粉檢定<br>完成後會生成屬於你的結果卡片。</p>
-                    <input type="text" id="quiz-player-name" placeholder="請輸入挑戰者姓名（例如：王岦恩）" class="w-full bg-black/60 border border-slate-700 rounded-xl py-4 px-4 text-white text-center mb-6 focus:outline-none focus:border-theme-secondary text-sm font-bold">
-                    <button onclick="startQuiz()" class="w-full bg-theme-secondary py-4 rounded-xl font-black text-white text-sm shadow-[0_0_20px_var(--secondary)] transition active:scale-95">
-                        <i class="fas fa-play mr-2"></i> 
-                    </button>
-                </div>
-                <div id="quiz-area" class="hidden flex-col h-full">
-                    <div class="flex justify-between items-center mb-4 px-1">
-                        <span id="quiz-progress" class="bg-slate-800 text-white text-[10px] font-black tracking-widest px-3 py-1.5 rounded-lg">Q 1/10</span>
-                        <span id="quiz-score" class="text-theme-primary text-[10px] font-black tracking-widest bg-theme-primary/20 px-3 py-1.5 rounded-lg border border-theme-primary/30">SCORE: 0</span>
-                    </div>
-                    <div class="glass-card p-6 border-l-4 border-l-theme-secondary mb-4">
-                        <h3 id="quiz-question" class="text-sm font-bold text-white leading-relaxed">載入中...</h3>
-                    </div>
-                    <div id="quiz-options" class="space-y-3 flex-1"></div>
-                </div>
-                <canvas id="quiz-canvas" width="1080" height="1500" style="display:none;"></canvas>
-            </section>
-        </main>
-
-        <nav class="absolute left-1/2 transform -translate-x-1/2 w-[90%] max-w-[380px] bottom-nav rounded-[2rem] px-4 py-2.5 flex justify-between items-center z-50 shadow-[0_20px_50px_rgba(0,0,0,0.9)]">
-            <button onclick="switchTab('page-home', this)" class="nav-item active flex flex-col items-center w-12 py-1">
-                <div class="icon-box text-[22px]"><i class="fas fa-home"></i></div>
-            </button>
-            <button onclick="switchTab('page-ai', this)" class="nav-item flex flex-col items-center w-12 py-1">
-                <div class="icon-box text-[22px]"><i class="fas fa-robot"></i></div>
-            </button>
-            <button onclick="switchTab('page-timeline', this)" class="nav-item flex flex-col items-center w-12 py-1">
-                <div class="icon-box text-[22px]"><i class="fas fa-route"></i></div>
-            </button>
-            <button onclick="switchTab('page-id', this)" class="nav-item flex flex-col items-center w-12 py-1">
-                <div class="icon-box text-[22px]"><i class="fas fa-id-badge"></i></div>
-            </button>
-            <button onclick="switchTab('page-quiz', this)" class="nav-item flex flex-col items-center w-12 py-1">
-                <div class="icon-box text-[22px]"><i class="fas fa-gamepad"></i></div>
-            </button>
-        </nav>
-
-        <div id="settings-modal" class="absolute inset-0 bg-black/80 backdrop-blur-md z-[100] hidden flex items-center justify-center p-6 opacity-0 transition-opacity duration-300">
-            <div class="bg-[#121215] w-full rounded-[30px] border border-slate-800 shadow-2xl transform scale-95 transition-transform duration-300" id="settings-content">
-                <div class="flex justify-between items-center p-5 border-b border-white/5">
-                    <h3 class="text-sm font-black text-white tracking-wide"><i class="fas fa-sliders-h text-theme-primary mr-2"></i> 控制面板</h3>
-                    <button onclick="toggleSettings()" class="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white"><i class="fas fa-times text-sm"></i></button>
-                </div>
-                <div class="p-5 space-y-5">
-                    
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
-                        <button onclick="changeTheme('default')" class="py-2 rounded-xl text-xs font-bold border border-white/10 text-white" style="background: linear-gradient(135deg, #1a1016, #050505)">粉櫻</button>
-                        <button onclick="changeTheme('cyberpunk')" class="py-2 rounded-xl text-xs font-bold border border-cyan-500/30 text-cyan-200" style="background: linear-gradient(135deg, #08121c, #020205)">賽博</button>
-                        <button onclick="changeTheme('purple')" class="py-2 rounded-xl text-xs font-bold border border-purple-500/50 text-purple-200" style="background: linear-gradient(135deg, #1c0a2b, #090510)">紫光</button>
-                        <button onclick="changeTheme('forest')" class="py-2 rounded-xl text-xs font-bold border border-green-500/50 text-green-200" style="background: linear-gradient(135deg, #06271c, #020a07)">森綠</button>
-                        <button onclick="changeTheme('gold')" class="py-2 rounded-xl text-xs font-bold border border-yellow-500/50 text-yellow-200 col-span-2 md:col-span-4" style="background: linear-gradient(135deg, #271c08, #0a0802)">耀金皇室</button>
-                    </div>
-
-                    <div class="bg-black/50 p-4 rounded-2xl border border-white/5">
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="text-slate-300 font-bold text-xs">QA 分頁顯示數量</span>
-                            <span id="qa-count-display" class="bg-theme-primary text-white text-[10px] font-black px-2 py-0.5 rounded">10 題</span>
-                        </div>
-                        <input type="range" id="qa-per-page-slider" min="4" max="20" step="2" value="10" oninput="updateQASetting(this.value)">
-                    </div>
-                    
-                    <div class="bg-black/50 p-4 rounded-2xl border border-white/5 space-y-4">
-                        <div class="flex justify-between items-center">
-                            <span class="text-slate-300 text-xs font-bold"><i class="fas fa-droplet text-blue-400 mr-2"></i> 液態玻璃材質</span>
-                            <input type="checkbox" id="liquid-toggle" class="w-4 h-4 accent-theme-primary" onchange="saveSettings(false)">
-                        </div>
-                        <div class="w-full h-px bg-white/5"></div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-slate-300 text-xs font-bold"><i class="fas fa-vibration text-purple-400 mr-2"></i> 觸覺震動回饋</span>
-                            <input type="checkbox" id="haptic-toggle" checked class="w-4 h-4 accent-theme-primary" onchange="saveSettings(false)">
-                        </div>
-                        <div class="w-full h-px bg-white/5"></div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-slate-300 text-xs font-bold"><i class="fas fa-music text-pink-400 mr-2"></i> 系統操作音效</span>
-                            <input type="checkbox" id="sound-toggle" checked class="w-4 h-4 accent-theme-primary" onchange="saveSettings(false)">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="showChangelog()" class="w-full bg-theme-secondary/20 border border-theme-secondary/30 text-theme-secondary py-3.5 rounded-xl text-xs font-bold flex justify-center items-center gap-2 hover:bg-theme-secondary hover:text-white transition">
-                            <i class="fas fa-file-lines"></i> 更新日誌
-                        </button>
-                        <button onclick="nukeAndReload()" class="w-full bg-red-500/10 border border-red-500/30 text-red-500 py-3.5 rounded-xl text-xs font-bold flex justify-center items-center gap-2 hover:bg-red-500 hover:text-white transition">
-                            <i class="fas fa-trash-can"></i> 重啟 App
-                        </button>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
-    </div>
+      </section>
 
-    <script src="ld_qa.js?v=20.0"></script>
-    <script src="ld_quiz.js?v=20.0"></script>
-    <script src="app.js?v=20.0"></script>
+      <section id="page-qa" class="page">
+        <div class="page-scroll">
+          <div class="section-top reveal">
+            <div>
+              <p class="section-kicker">Knowledge Search</p>
+              <h2>百科 QA 問答</h2>
+              <p class="section-desc">搜尋關於鹿🦌的百科知識與常見問答。</p>
+            </div>
+          </div>
+          <div class="glass-card search-card reveal delay-1">
+            <div class="search-wrap">
+              <i class="fas fa-magnifying-glass"></i>
+              <input id="qa-search-input" type="text" placeholder="輸入關鍵字搜尋..." />
+              <button id="clear-search-btn" class="mini-circle" type="button"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div id="qa-autocomplete-results" class="autocomplete-box hidden"></div>
+            <div class="search-meta">
+              <span>資料來源：<strong>管理員直播紀錄</strong></span>
+              <span>每頁顯示 <strong id="qa-per-page-label">8</strong> 題</span>
+            </div>
+          </div>
+          <div id="qa-list" class="card-list reveal delay-2"></div>
+          <div id="qa-empty-state" class="empty-state hidden">
+            <div class="empty-icon">🫧</div>
+            <p>查無相關內容，請換個關鍵字搜尋。</p>
+          </div>
+          <div id="qa-pagination" class="pagination"></div>
+        </div>
+      </section>
+
+      <section id="page-quiz" class="page">
+        <div class="page-scroll">
+          <div class="section-top reveal">
+            <div>
+              <p class="section-kicker">Quiz Time</p>
+              <h2>麋鹿大會考</h2>
+              <p class="section-desc">挑戰你的熟悉程度，測驗成績將記錄在您的個人檔案中。</p>
+            </div>
+          </div>
+          <div id="quiz-intro" class="glass-card cute-panel reveal delay-1">
+            <div class="quiz-hero">🎓🦌</div>
+            <h3>開始實力挑戰</h3>
+            <p>系統將隨機抽取 10 題，請在限時內完成作答。</p>
+            <input id="quiz-player-name" class="cute-input mt-4" type="text" maxlength="20" placeholder="輸入您的挑戰名稱" />
+            <div class="panel-actions mt-4">
+              <button id="quiz-start-btn" class="cute-btn" type="button">開始挑戰</button>
+              <button id="quiz-open-history-btn" class="soft-btn" type="button">查看紀錄</button>
+            </div>
+          </div>
+          <div id="quiz-area" class="hidden reveal delay-2">
+            <div class="quiz-head">
+              <span class="quiz-pill" id="quiz-progress">第 1 / 10 題</span>
+              <span class="quiz-pill alt" id="quiz-score">目前分數 0</span>
+            </div>
+            <div class="glass-card quiz-question-card">
+              <h3 id="quiz-question">題目載入中...</h3>
+            </div>
+            <div id="quiz-options" class="quiz-options"></div>
+            <div class="panel-actions mt-4">
+              <button id="quiz-next-btn" class="cute-btn hidden" type="button">下一題</button>
+              <button id="quiz-exit-btn" class="soft-btn" type="button">結束挑戰</button>
+            </div>
+          </div>
+          <div id="quiz-result-panel" class="glass-card cute-panel hidden">
+            <div class="quiz-hero">🏆</div>
+            <h3>測驗挑戰完成</h3>
+            <p>您的優秀表現已記錄至雲端中心。</p>
+            <div class="stat-grid two">
+              <div class="stat-box"><label>最終得分</label><strong id="quiz-final-score">0</strong></div>
+              <div class="stat-box"><label>獲得稱號</label><strong id="quiz-final-title">-</strong></div>
+            </div>
+            <div class="panel-actions mt-4">
+              <button id="quiz-restart-btn" class="cute-btn" type="button">再次挑戰</button>
+              <button id="quiz-go-history-btn" class="soft-btn" type="button">歷史數據</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-history" class="page">
+        <div class="page-scroll">
+          <div class="section-top reveal">
+            <div>
+              <p class="section-kicker">Performance</p>
+              <h2>數據紀錄中心</h2>
+              <p class="section-desc">查閱您在此平台的所有活動歷程與成績表現。</p>
+            </div>
+            <button id="history-refresh-btn" class="soft-btn small" type="button">更新紀錄</button>
+          </div>
+          <div class="glass-card cute-panel reveal delay-1 mt-4">
+            <div class="panel-head compact">
+              <div>
+                <h3>測驗歷程</h3>
+                <p>近期 10 筆數據</p>
+              </div>
+            </div>
+            <div id="history-quiz-list" class="card-list small"></div>
+            <div id="history-quiz-empty" class="empty-state hidden"><p>目前尚未有挑戰紀錄。</p></div>
+          </div>
+          <div class="glass-card cute-panel reveal delay-2 mt-4">
+            <div class="panel-head compact">
+              <div>
+                <h3>探索歷程</h3>
+                <p>您的最近 QA 搜尋紀錄</p>
+              </div>
+            </div>
+            <div id="history-qa-list" class="card-list small"></div>
+            <div id="history-qa-empty" class="empty-state hidden"><p>目前尚未有搜尋紀錄。</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-profile" class="page">
+        <div class="page-scroll">
+          <div class="section-top reveal">
+            <div>
+              <p class="section-kicker">Account</p>
+              <h2>個人中心</h2>
+              <p class="section-desc">管理您的會員資訊與網站偏好設定。</p>
+            </div>
+          </div>
+          <div class="glass-card profile-card reveal delay-1">
+            <div class="profile-main">
+              <img src="avatar-main.jpg" alt="鹿🦌" class="profile-photo" />
+              <div>
+                <h3 id="profile-display-name">訪客</h3>
+                <p id="profile-email">尚未登入</p>
+                <span id="profile-role" class="profile-role">GUEST</span>
+              </div>
+            </div>
+            <div class="profile-meta">
+              <div class="db-row"><span>會員 UID</span><strong id="profile-uid">-</strong></div>
+              <div class="db-row"><span>註冊日期</span><strong id="profile-created-at">-</strong></div>
+              <div class="db-row"><span>最後登入</span><strong id="profile-last-login-at">-</strong></div>
+            </div>
+            <div class="profile-form">
+              <label>變更顯示名稱</label>
+              <input id="profile-name-input" class="cute-input" type="text" placeholder="輸入新稱呼" />
+              <div class="toggle-row">
+                <span>公開挑戰紀錄</span>
+                <label class="switch"><input id="profile-history-toggle" type="checkbox" checked /><span class="slider"></span></label>
+              </div>
+            </div>
+            <div class="panel-actions mt-4">
+              <button id="profile-save-btn" class="cute-btn" type="button">儲存設定</button>
+              <button id="profile-login-btn" class="soft-btn" type="button">會員登入</button>
+            </div>
+            <button id="profile-admin-btn" class="soft-btn hidden mt-3 w-full" style="border-color: var(--primary); color: var(--primary);" type="button">進入管理員後台</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-admin" class="page">
+        <div class="page-scroll">
+          <div class="section-top reveal">
+            <div>
+              <p class="section-kicker">Admin Panel</p>
+              <h2>管理員後台</h2>
+              <p class="section-desc">管理粉絲帳號、題庫與系統設定 (僅管理員可見)。</p>
+            </div>
+          </div>
+          <div class="glass-card cute-panel reveal delay-1 mt-4">
+            <p class="text-center text-muted my-10 font-bold">權限驗證中 / 後台模組載入中...</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <nav class="bottom-dock">
+      <button class="dock-btn active" data-target="page-home" type="button"><i class="fas fa-house"></i><span>首頁</span></button>
+      <button class="dock-btn" data-target="page-qa" type="button"><i class="fas fa-comments"></i><span>問答</span></button>
+      <button class="dock-btn" data-target="page-quiz" type="button"><i class="fas fa-gamepad"></i><span>測驗</span></button>
+      <button class="dock-btn" data-target="page-history" type="button"><i class="fas fa-clock-rotate-left"></i><span>紀錄</span></button>
+      <button class="dock-btn" data-target="page-profile" type="button"><i class="fas fa-user"></i><span>會員</span></button>
+    </nav>
+  </div>
+
+  <div id="auth-modal" class="modal hidden">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <p class="section-kicker">Member Service</p>
+          <h3 id="auth-title">會員登入 / 註冊</h3>
+        </div>
+        <button class="icon-btn ghost" data-close-modal type="button"><i class="fas fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-note">登入後即可同步您的所有測驗成績與勳章紀錄。</p>
+        <div class="form-stack">
+          <input id="auth-name" class="cute-input" type="text" placeholder="您的稱呼 (註冊時使用)" />
+          <input id="auth-email" class="cute-input" type="email" placeholder="電子郵件" />
+          <input id="auth-password" class="cute-input" type="password" placeholder="密碼" />
+          
+          <label class="flex items-start gap-2 text-xs text-muted mt-2 cursor-pointer">
+            <input type="checkbox" id="auth-privacy-check" class="mt-0.5" style="accent-color: var(--primary);" />
+            <span>我已閱讀並同意 <a href="#" id="open-privacy-link" style="color: var(--primary); text-decoration: underline;">隱私權聲明稿</a>，並授權管理員代為處理異常數據。</span>
+          </label>
+        </div>
+        <div class="panel-actions mt-4">
+          <button id="auth-register-btn" class="cute-btn" type="button">註冊成員</button>
+          <button id="auth-login-submit-btn" class="soft-btn" type="button">登入帳號</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="privacy-modal" class="modal hidden">
+    <div class="modal-backdrop" data-close-privacy></div>
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <p class="section-kicker">Legal & Privacy</p>
+          <h3>隱私權與授權聲明</h3>
+        </div>
+        <button class="icon-btn ghost" data-close-privacy type="button"><i class="fas fa-xmark"></i></button>
+      </div>
+      <div class="modal-body text-sm leading-relaxed max-h-[55vh] overflow-y-auto pr-2 mt-4" style="color: var(--text);">
+        <h4 class="font-bold mb-1" style="color: var(--primary);">一、隱私的聲明稿</h4>
+        <p class="mb-4">本網站為鹿🦌粉絲互動平台。當您註冊時，我們會收集您的電子郵件與顯示名稱等資訊，僅用於測驗成績紀錄與粉絲身分驗證。您的資料皆透過最高規格加密儲存，絕不外流至第三方商業用途。</p>
+        
+        <h4 class="font-bold mb-1" style="color: var(--primary);">二、授權管理員代為處理</h4>
+        <p class="mb-4">為維護平台秩序與資料正確性，完成註冊即代表您同意並授權本站管理員（如：王岦恩 等系統管理員），在必要時（包含但不限於：帳號異常、系統重置、違規行為等狀況）得登入後台代為處理、修改或刪除您的帳號與相關測驗數據。</p>
+        
+        <h4 class="font-bold mb-1" style="color: var(--primary);">三、您的權益保障</h4>
+        <p>您隨時可於「個人中心」選擇隱藏您的測驗歷史。若需完全撤銷授權或刪除帳號，請直接私訊系統管理員為您手動處理。</p>
+      </div>
+      <div class="panel-actions mt-4">
+        <button id="privacy-agree-btn" class="cute-btn w-full" data-close-privacy type="button">我瞭解了</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="statement-modal" class="modal hidden">
+    <div class="modal-backdrop" data-close-statement></div>
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <p class="section-kicker" style="color: #ff4d4d;">Official Statement</p>
+          <h3 style="font-size: 20px;">反詐騙與版權嚴正聲明</h3>
+        </div>
+        <button class="icon-btn ghost" data-close-statement type="button"><i class="fas fa-xmark"></i></button>
+      </div>
+      <div class="modal-body text-sm leading-relaxed max-h-[55vh] overflow-y-auto pr-2 mt-4" style="color: var(--text);">
+        <p class="mb-4">近期我們發現，有不明交友軟體<strong>「Timo Club」</strong>未經授權，惡意盜用 鹿🦌 的影片與肖像進行商業廣告投放。</p>
+        
+        <h4 class="font-bold mb-1" style="color: #ff4d4d;">一、絕無合作關係</h4>
+        <p class="mb-4">鹿🦌 本人<strong>從未與該軟體代言、合作，也從未使用</strong>該交友軟體。該廣告純屬移花接木的欺騙行為。</p>
+        
+        <h4 class="font-bold mb-1" style="color: #ff4d4d;">二、保留法律追訴權</h4>
+        <p class="mb-4">針對此類嚴重侵犯肖像權、著作權及損害名譽之不法行為，我們已全面截圖蒐證，以及與Apple高階主管取得聯繫，並著手處理。</p>
+        
+        <h4 class="font-bold mb-1" style="color: #ff4d4d;">三、呼籲粉絲防詐</h4>
+        <p>請各位粉絲提高警覺！若在 TikTok、IG 或其他平台看見此類不實廣告，<strong>請截圖回報給管理員或是主播，並協助點擊「檢舉」</strong>，切勿下載該軟體或輕信不實訊息，以免自身權益受損。</p>
+      </div>
+      <div class="panel-actions mt-4">
+        <button class="cute-btn w-full" style="background: linear-gradient(135deg, #ff4d4d, #ff8c8c);" data-close-statement type="button">我瞭解了</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-root" class="toast-root"></div>
+
+  <script type="module" src="app.js?v=2.2.2"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-window.QUIZ_DB = [
+export const QUIZ_DB = [
   {
     "q": "鹿🦌的官方社群帳號有哪些？",
     "options": ["TikTok、IG、快手", "TikTok、IG、Threads", "IG、快手、小紅書", "TikTok、IG、FB"],
